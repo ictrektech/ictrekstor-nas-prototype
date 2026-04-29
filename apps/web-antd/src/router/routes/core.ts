@@ -1,7 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { preferences } from '@vben/preferences';
-
 const BasicLayout = () => import('#/layouts/basic.vue');
 /** 全局404页面 */
 const fallbackNotFoundRoute: RouteRecordRaw = {
@@ -31,7 +29,7 @@ const coreRoutes: RouteRecordRaw[] = [
     },
     name: 'Root',
     path: '/',
-    redirect: preferences.app.defaultHomePath,
+    redirect: '/dashboard',
     children: [],
   },
 ];
