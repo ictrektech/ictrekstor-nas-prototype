@@ -50,3 +50,14 @@ npm install -g chrome-devtools-mcp@latest
 }
 
 ```
+
+## TIPS
+
+- vscode 在 windows 下使用 cline 时，务必确保在 cline 的 Terminal 设置中：
+  - 将 Default Terminal Profile 设置为 Git Bash；
+  - 将 Terminal Execution Mode 设置为 VS Code Terminal；
+  否则会出现中文乱码。
+
+- vscode 中建议安装官方的 Vue 插件，其中集成的 LSP 可以实时通知 AI 语法错误等问题，提高
+  AI 编码效率；
+
