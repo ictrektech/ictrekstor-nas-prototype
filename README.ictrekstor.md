@@ -4,14 +4,14 @@
 
 参考 ./README.md
 
-安装足够新的版本（推荐最新版本的 LTS ）的 nodejs，随后安装 corepack：
-```
-npm install -g corepack
-```
-
 设置 npm 的国内镜像：
 ```
 npm config set registry https://registry.npmmirror.com/
+```
+
+安装足够新的版本（推荐最新版本的 LTS ）的 nodejs，随后安装 corepack：
+```
+npm install -g corepack
 ```
 
 然后安装依赖：
