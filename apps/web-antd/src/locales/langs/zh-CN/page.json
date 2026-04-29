@@ -8,8 +8,28 @@
     "profile": "个人中心"
   },
   "dashboard": {
-    "title": "概览",
-    "analytics": "分析页",
+    "title": "首页",
+    "analytics": "首页",
     "workspace": "工作台"
+  },
+  "file": {
+    "title": "文件管理",
+    "library": "存储空间",
+    "recycle": "回收站",
+    "external": "外部设备",
+    "shareLinks": "外链管理"
+  },
+  "storage": {
+    "title": "存储管理",
+    "disks": "硬盘管理",
+    "pools": "存储池管理",
+    "volumes": "存储空间管理",
+    "publicDirs": "公共目录管理"
+  },
+  "system": {
+    "title": "系统设置",
+    "device": "设备信息",
+    "network": "网络管理",
+    "users": "用户管理"
   }
 }

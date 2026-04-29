@@ -1,9 +1,12 @@
-## 1. 清理现有冗余代码
+## 1. 清理现有冗余代码并去除登录认证
 
 - [ ] 1.1 删除现有路由模块文件：`router/routes/modules/dashboard.ts`、`demos.ts`、`vben.ts`
 - [ ] 1.2 删除现有冗余页面目录：`views/dashboard/`、`views/demos/`、`views/_core/about/`
-- [ ] 1.3 清理 `views/_core/profile/index.vue` 中的 Vben 演示内容，简化为占位页面或保留基础结构
-- [ ] 1.4 验证清理后项目仍可正常编译运行（`pnpm run dev:antd`）
+- [ ] 1.3 删除登录相关页面目录：`views/_core/authentication/`（login.vue、code-login.vue、qrcode-login.vue、forget-password.vue、register.vue）
+- [ ] 1.4 修改 `router/guard.ts`，移除 `authGuard` 登录认证跳转逻辑，所有路由直接放行
+- [ ] 1.5 修改 `store/auth.ts`，设置默认已登录状态，默认用户名为 `admin`
+- [ ] 1.6 清理 `views/_core/profile/index.vue` 中的 Vben 演示内容，简化为占位页面
+- [ ] 1.7 验证清理后项目仍可正常编译运行（`pnpm run dev:antd`），且无需登录即可直接访问首页
 
 ## 2. 国际化文案更新
 

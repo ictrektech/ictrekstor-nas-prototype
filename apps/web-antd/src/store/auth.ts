@@ -1,7 +1,6 @@
 import type { Recordable, UserInfo } from '@vben/types';
 
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { LOGIN_PATH } from '@vben/constants';
 import { preferences } from '@vben/preferences';
@@ -16,7 +15,6 @@ import { $t } from '#/locales';
 export const useAuthStore = defineStore('auth', () => {
   const accessStore = useAccessStore();
   const userStore = useUserStore();
-  const router = useRouter();
 
   const loginLoading = ref(false);
 
@@ -55,9 +53,7 @@ export const useAuthStore = defineStore('auth', () => {
         } else {
           onSuccess
             ? await onSuccess?.()
-            : await router.push(
-                userInfo.homePath || preferences.app.defaultHomePath,
-              );
+            : await (preferences.app.defaultHomePath);
         }
 
         if (userInfo?.realName) {
@@ -77,7 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     };
   }
 
-  async function logout(redirect: boolean = true) {
+  async function logout(_redirect: boolean = true) {
     try {
       await logoutApi();
     } catch {
@@ -85,16 +81,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
     resetAllStores();
     accessStore.setLoginExpired(false);
-
-    // 回登录页带上当前路由地址
-    await router.replace({
-      path: LOGIN_PATH,
-      query: redirect
-        ? {
-            redirect: encodeURIComponent(router.currentRoute.value.fullPath),
-          }
-        : {},
-    });
+    // 原型环境：登出后直接刷新页面，自动重新以默认用户登录
+    window.location.reload();
   }
 
   async function fetchUserInfo() {

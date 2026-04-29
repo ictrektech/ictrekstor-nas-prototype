@@ -1,6 +1,5 @@
 import type { Router } from 'vue-router';
 
-import { LOGIN_PATH } from '@vben/constants';
 import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
@@ -50,39 +49,23 @@ function setupAccessGuard(router: Router) {
     const userStore = useUserStore();
     const authStore = useAuthStore();
 
-    // 基本路由，这些路由不需要进入权限拦截
-    if (coreRouteNames.includes(to.name as string)) {
-      if (to.path === LOGIN_PATH && accessStore.accessToken) {
-        return decodeURIComponent(
-          (to.query?.redirect as string) ||
-            userStore.userInfo?.homePath ||
-            preferences.app.defaultHomePath,
-        );
-      }
-      return true;
+    // 原型环境：自动设置默认登录状态，无需登录即可访问
+    if (!accessStore.accessToken) {
+      accessStore.setAccessToken('mock-token-for-prototype');
+      userStore.setUserInfo({
+        userId: '1',
+        username: 'admin',
+        realName: 'admin',
+        avatar: '',
+        homePath: '/dashboard',
+        roles: ['admin'],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
     }
 
-    // accessToken 检查
-    if (!accessStore.accessToken) {
-      // 明确声明忽略权限访问权限，则可以访问
-      if (to.meta.ignoreAccess) {
-        return true;
-      }
-
-      // 没有访问权限，跳转登录页面
-      if (to.fullPath !== LOGIN_PATH) {
-        return {
-          path: LOGIN_PATH,
-          // 如不需要，直接删除 query
-          query:
-            to.fullPath === preferences.app.defaultHomePath
-              ? {}
-              : { redirect: encodeURIComponent(to.fullPath) },
-          // 携带当前跳转的页面，登录后重新跳转该页面
-          replace: true,
-        };
-      }
-      return to;
+    // 基本路由，这些路由不需要进入权限拦截
+    if (coreRouteNames.includes(to.name as string)) {
+      return true;
     }
 
     // 是否已经生成过动态路由
@@ -121,7 +104,6 @@ function setupAccessGuard(router: Router) {
 
 /**
  * 项目守卫配置
- * @param router
  */
 function createRouterGuard(router: Router) {
   /** 通用 */

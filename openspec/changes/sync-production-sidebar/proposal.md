@@ -5,6 +5,7 @@
 ## What Changes
 
 - **移除现有演示路由和页面**：清理 `dashboard`（分析页/工作台）、`demos`（Ant Design Vue 演示）、`vben`（项目链接、关于）等冗余路由和页面组件
+- **去除登录认证拦截**：修改路由守卫，移除登录跳转逻辑，用户可直接访问所有页面（默认用户为 admin）
 - **新增首页路由和页面**：创建与生产环境一致的首页，包含 AI 智能助手入口、快捷入口等
 - **新增文件管理路由和页面**：创建文件管理模块，包含存储空间、回收站、外部设备、外链管理四个子页面
 - **新增存储管理路由和页面**：创建存储管理模块，包含硬盘管理、存储池管理、存储空间管理、公共目录管理四个子页面
@@ -32,4 +33,6 @@
 - **Mock API**：`apps/web-antd/src/api/` 下新增 Mock 接口定义和数据
 - **国际化**：`apps/web-antd/src/locales/langs/zh-CN/` 下更新 page.json
 - **布局**：`apps/web-antd/src/layouts/basic.vue` 中更新 Logo 和通知等占位内容
-- **清理范围**：移除 `views/dashboard/`、`views/demos/`、`views/_core/about/` 等冗余目录（保留 `_core` 中登录相关和 fallback 页面）
+- **路由守卫**：`router/guard.ts` 中移除登录认证跳转，允许免登录直接访问
+- **用户 Store**：`store/auth.ts` 中设置默认登录状态，默认用户名为 `admin`
+- **清理范围**：移除 `views/dashboard/`、`views/demos/`、`views/_core/about/` 等冗余目录（保留 `_core` 中 fallback 页面，移除登录相关页面）

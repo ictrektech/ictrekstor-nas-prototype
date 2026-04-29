@@ -8,8 +8,28 @@
     "profile": "Profile"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "analytics": "Analytics",
+    "title": "Home",
+    "analytics": "Home",
     "workspace": "Workspace"
+  },
+  "file": {
+    "title": "File Management",
+    "library": "Library",
+    "recycle": "Recycle Bin",
+    "external": "External Devices",
+    "shareLinks": "Share Links"
+  },
+  "storage": {
+    "title": "Storage Management",
+    "disks": "Disk Management",
+    "pools": "Storage Pool",
+    "volumes": "Storage Volumes",
+    "publicDirs": "Public Directories"
+  },
+  "system": {
+    "title": "System Settings",
+    "device": "Device Info",
+    "network": "Network",
+    "users": "User Management"
   }
 }
