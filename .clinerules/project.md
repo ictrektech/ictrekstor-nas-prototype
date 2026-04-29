@@ -436,6 +436,25 @@ ls -la apps/web-antd/dist/assets/
 
 #### 5. 与 OpenSpec 的集成
 
-- OpenSpec 变更实施（apply-change）过程中，`current-task.md` 的"关联变更"字段自动关联对应的 OpenSpec change 目录
+- OpenSpec 变更实施（apply-change）过程中，`current-task.md`的"关联变更"字段自动关联对应的 OpenSpec change 目录
 - 变更中的每个 task 完成后，同步更新 `current-task.md` 的进度清单
 - 变更归档（archive-change）时，自动将决策记录写入 `decisions.md`
+
+## 工具使用规范
+
+### Git 命令分页处理
+
+使用 `git log`、`git status`、`git diff` 等命令时，可能会由于分页（pager）导致命令阻塞，等待用户交互。为避免此问题，需遵循以下规范：
+
+- **禁用分页**：通过 `--no-pager` 参数直接禁用分页，例如 `git --no-pager log --oneline`
+- **或使用管道输出**：将输出通过管道传递给 `cat`、`head`、`tail`、`grep` 等命令，可自动绕过 pager，例如 `git log --oneline | cat`
+- **禁止使用 `--decorate`**：该选项在某些 Git 版本下可能触发 pager，避免使用
+- 推荐在脚本和自动化流程中始终使用 `--no-pager`，确保命令不会阻塞
+
+### Chrome DevTools MCP 截图路径规范
+
+Chrome DevTools MCP 的 `take_screenshot` 工具的 `filePath` 参数默认解析路径相对于 MCP server 的启动路径，而非当前项目路径。如果不指定绝对路径，截图将被保存到项目外部的不可预期位置。
+
+- **必须提供绝对路径**：`filePath` 应使用项目绝对路径，例如 `d:/Projects/ictrekstor-nas-prototype/screenshots/page.png`
+- **或不指定 filePath**：如果不传 `filePath`，MCP 会直接在响应中返回图片数据（base64），由调用方处理保存
+- **禁止传递相对路径**：如 `./screenshots/page.png` 或 `screenshots/page.png` 等相对路径会导致截图保存在项目外
