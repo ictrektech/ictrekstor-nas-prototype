@@ -8,7 +8,10 @@ import {
   Progress,
   Tag,
   message,
+  Empty,
+  Tooltip,
 } from 'ant-design-vue';
+import { IconifyIcon } from '@vben/icons';
 import {
   getStorageSpacesApi,
   type StorageSpace,
@@ -42,6 +45,19 @@ function getUsagePercent(used: string, total: string): number {
   return Math.round((u / t) * 100);
 }
 
+function getCapacityColor(percent: number): string {
+  if (percent >= 90) return '#ff4d4f';
+  if (percent >= 70) return '#faad14';
+  return '#1677ff';
+}
+
+function getFsIcon(fs: string): string {
+  if (fs === 'ext4') return 'lucide:folder-tree';
+  if (fs === 'btrfs') return 'lucide:layers';
+  if (fs === 'xfs') return 'lucide:database';
+  return 'lucide:folder';
+}
+
 async function loadData() {
   loading.value = true;
   try {
@@ -64,7 +80,9 @@ onMounted(loadData);
     <div class="toolbar">
       <div class="toolbar-left">
         <div class="breadcrumb-bar">
-          <span class="breadcrumb-icon">📁</span>
+          <div class="breadcrumb-icon-box">
+            <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #1677ff;" />
+          </div>
           <span class="breadcrumb-text">设备全部文件</span>
         </div>
       </div>
@@ -74,70 +92,117 @@ onMounted(loadData);
           placeholder="搜索存储空间"
           class="search-input"
           allow-clear
-        />
-        <Button size="small" class="refresh-btn" @click="loadData">
-          ⟳
-        </Button>
+        >
+          <template #prefix>
+            <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+          </template>
+        </Input>
+        <Tooltip title="刷新">
+          <Button class="refresh-btn" @click="loadData">
+            <IconifyIcon icon="lucide:refresh-cw" style="font-size: 14px;" />
+          </Button>
+        </Tooltip>
       </div>
     </div>
 
     <!-- 存储空间网格 -->
-    <div class="space-grid">
+    <div v-if="filteredSpaces.length > 0" class="space-grid">
       <Card
         v-for="space in filteredSpaces"
         :key="space.id"
         class="space-card"
         :bordered="true"
-        hoverable
+        :body-style="{ padding: '0' }"
         @click="goToSpaceDetail(space.id)"
       >
-        <div class="space-card-body">
-          <div class="space-header">
-            <div class="space-icon-wrapper">
-              <span class="space-icon">🖴</span>
-            </div>
-            <div class="space-info">
-              <div class="space-name">{{ space.name }}</div>
-              <Tag size="small" class="space-fs-tag">
+        <!-- 卡片头部 -->
+        <div class="space-header">
+          <div
+            class="space-icon-wrapper"
+            :style="{ background: `${getCapacityColor(getUsagePercent(space.usedCapacity, space.totalCapacity))}12` }"
+          >
+            <IconifyIcon
+              :icon="getFsIcon(space.filesystem)"
+              style="font-size: 24px;"
+              :style="{ color: getCapacityColor(getUsagePercent(space.usedCapacity, space.totalCapacity)) }"
+            />
+          </div>
+          <div class="space-info">
+            <div class="space-name">{{ space.name }}</div>
+            <div class="space-meta">
+              <Tag size="small" color="blue" class="fs-tag">
+                <IconifyIcon icon="lucide:layers" style="font-size: 10px; margin-right: 2px;" />
                 {{ space.filesystem }}
               </Tag>
+              <span class="raid-badge">
+                <IconifyIcon icon="lucide:shield" style="font-size: 10px;" />
+                {{ space.raidType }}
+              </span>
             </div>
           </div>
+        </div>
 
-          <div class="space-usage">
+        <!-- 容量区域 -->
+        <div class="space-capacity-section">
+          <div class="capacity-top">
+            <div class="capacity-labels">
+              <span class="capacity-used">{{ space.usedCapacity }}</span>
+              <span class="capacity-divider">/</span>
+              <span class="capacity-total">{{ space.totalCapacity }}</span>
+            </div>
+            <Tooltip :title="`使用率 ${getUsagePercent(space.usedCapacity, space.totalCapacity)}%`">
+              <span
+                class="capacity-percent"
+                :style="{ color: getCapacityColor(getUsagePercent(space.usedCapacity, space.totalCapacity)) }"
+              >
+                {{ getUsagePercent(space.usedCapacity, space.totalCapacity) }}%
+              </span>
+            </Tooltip>
+          </div>
+          <div class="space-progress">
             <Progress
               :percent="getUsagePercent(space.usedCapacity, space.totalCapacity)"
-              :stroke-color="
-                getUsagePercent(space.usedCapacity, space.totalCapacity) > 90
-                  ? '#ff4d4f'
-                  : getUsagePercent(space.usedCapacity, space.totalCapacity) > 70
-                    ? '#faad14'
-                    : '#1890ff'
-              "
+              :stroke-color="getCapacityColor(getUsagePercent(space.usedCapacity, space.totalCapacity))"
               :show-info="false"
+              :stroke-width="8"
               size="small"
             />
           </div>
+        </div>
 
-          <div class="space-footer">
-            <span class="space-raid">{{ space.raidType }}</span>
-            <span class="space-capacity">
-              {{ space.usedCapacity }} / {{ space.totalCapacity }}
-            </span>
+        <!-- 底部信息 -->
+        <div class="space-footer">
+          <div class="footer-left">
+            <IconifyIcon icon="lucide:link" style="font-size: 11px; color: #8c8c8c;" />
+            <span class="footer-path">{{ space.path }}</span>
+          </div>
+          <div class="footer-right">
+            <span class="footer-hint">点击查看文件</span>
+            <IconifyIcon icon="lucide:arrow-right" style="font-size: 11px; color: #bfbfbf;" />
           </div>
         </div>
       </Card>
-
-      <div v-if="filteredSpaces.length === 0" class="space-empty">
-        <div class="empty-text">暂无存储空间</div>
-      </div>
     </div>
+
+    <!-- 空状态 -->
+    <Empty v-else description="暂无存储空间" class="empty-state">
+      <template #image>
+        <div class="empty-image">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 56px; color: #d9d9d9;" />
+        </div>
+      </template>
+      <Button type="primary" size="small" @click="loadData">
+        <IconifyIcon icon="lucide:refresh-cw" style="font-size: 12px;" />
+        重新加载
+      </Button>
+    </Empty>
   </div>
 </template>
 
 <style scoped>
 .all-files-page {
-  padding: 24px;
+  padding: 0 24px 24px;
+  width: 100%;
 }
 
 /* 工具栏 */
@@ -157,19 +222,26 @@ onMounted(loadData);
 .breadcrumb-bar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 4px 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 6px 14px;
 }
 
-.breadcrumb-icon {
-  font-size: 14px;
+.breadcrumb-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #e6f7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .breadcrumb-text {
   font-size: 14px;
+  font-weight: 500;
   color: #262626;
 }
 
@@ -180,59 +252,58 @@ onMounted(loadData);
 }
 
 .search-input {
-  width: 220px;
+  width: 240px;
 }
 
 .refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0 10px;
 }
 
 /* 存储空间网格 */
 .space-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
 }
 
 .space-card {
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  overflow: hidden;
 }
 
 .space-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: #1677ff;
 }
 
-.space-card :deep(.ant-card-body) {
-  padding: 20px;
-}
-
-.space-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+/* 卡片头部 */
 .space-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f5f5f5;
 }
 
 .space-icon-wrapper {
   width: 48px;
   height: 48px;
-  background: #f0f5ff;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
-.space-icon {
-  font-size: 24px;
+.space-card:hover .space-icon-wrapper {
+  transform: scale(1.05);
 }
 
 .space-info {
@@ -242,43 +313,148 @@ onMounted(loadData);
 
 .space-name {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: #262626;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.space-fs-tag {
+.space-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fs-tag {
+  display: inline-flex;
+  align-items: center;
   font-size: 11px;
-  line-height: 1.4;
 }
 
-.space-usage {
-  padding: 0 4px;
+.raid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #8c8c8c;
+  background: #f5f5f5;
+  padding: 1px 8px;
+  border-radius: 4px;
 }
 
+/* 容量区域 */
+.space-capacity-section {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.capacity-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.capacity-labels {
+  font-size: 13px;
+}
+
+.capacity-used {
+  font-weight: 700;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.capacity-divider {
+  color: #bfbfbf;
+  margin: 0 4px;
+}
+
+.capacity-total {
+  color: #8c8c8c;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.capacity-percent {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.space-progress :deep(.ant-progress) {
+  margin-bottom: 0;
+}
+
+/* 底部 */
 .space-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  padding: 10px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f5f5f5;
+  font-size: 12px;
+}
+
+.footer-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8c8c8c;
+}
+
+.footer-path {
+  font-family: 'SF Mono', 'Fira Code', monospace;
   color: #595959;
 }
 
-.space-raid {
-  font-weight: 500;
+.footer-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #bfbfbf;
+  transition: color 0.2s;
 }
 
-.space-capacity {
-  font-family: 'SF Mono', monospace;
+.space-card:hover .footer-right {
+  color: #1677ff;
 }
 
-.space-empty {
-  grid-column: 1 / -1;
+.footer-hint {
+  font-size: 11px;
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 48px 0;
+}
+
+.empty-image {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 60px 0;
-  color: #bfbfbf;
-  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* 响应式 */
+@media (max-width: 576px) {
+  .all-files-page {
+    padding: 0 12px 12px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .space-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
