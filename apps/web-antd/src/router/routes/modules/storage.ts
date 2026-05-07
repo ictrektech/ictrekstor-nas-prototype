@@ -32,6 +32,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'StoragePoolDetail',
+        path: '/storage/pools/detail/:id',
+        component: () => import('#/views/storage/pools/detail.vue'),
+        meta: {
+          hideInMenu: true,
+          title: '存储池详情',
+        },
+      },
+      {
         name: 'StorageVolumes',
         path: '/storage/volumes',
         component: () => import('#/views/storage/volumes/index.vue'),
@@ -41,12 +50,39 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'StoragePublicDirs',
-        path: '/storage/public-dirs',
-        component: () => import('#/views/storage/public-dirs/index.vue'),
+        name: 'StorageTeamFiles',
+        path: '/storage/team-files',
+        component: () => import('#/views/storage/team-files/index.vue'),
         meta: {
-          icon: 'lucide:folder-tree',
-          title: $t('page.storage.publicDirs'),
+          icon: 'lucide:users',
+          title: '团队文件管理',
+        },
+      },
+      {
+        name: 'StorageTeamFileDetail',
+        path: '/storage/team-files/detail/:id',
+        component: () => import('#/views/storage/team-files/detail.vue'),
+        meta: {
+          hideInMenu: true,
+          title: '团队文件夹详情',
+        },
+      },
+      {
+        name: 'StorageAllFiles',
+        path: '/storage/all-files',
+        component: () => import('#/views/storage/all-files/index.vue'),
+        meta: {
+          icon: 'lucide:folder-open',
+          title: '设备全部文件',
+        },
+      },
+      {
+        name: 'StorageAllFilesDetail',
+        path: '/storage/all-files/detail/:id',
+        component: () => import('#/views/storage/all-files/detail.vue'),
+        meta: {
+          hideInMenu: true,
+          title: '存储空间文件',
         },
       },
     ],

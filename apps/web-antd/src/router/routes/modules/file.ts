@@ -1,25 +1,50 @@
 import type { RouteRecordRaw } from 'vue-router';
 
-import { $t } from '#/locales';
-
 const routes: RouteRecordRaw[] = [
   {
     meta: {
       icon: 'lucide:folder-open',
       order: 100,
-      title: $t('page.file.title'),
+      title: '文件管理',
     },
     name: 'FileManagement',
     path: '/file',
-    redirect: '/file/library',
+    redirect: '/file/my-files',
     children: [
       {
-        name: 'FileLibrary',
-        path: '/file/library',
-        component: () => import('#/views/file/library/index.vue'),
+        name: 'FileMyFiles',
+        path: '/file/my-files',
+        component: () => import('#/views/file/my-files/index.vue'),
         meta: {
-          icon: 'lucide:hard-drive',
-          title: $t('page.file.library'),
+          icon: 'lucide:folder-open',
+          title: '我的文件',
+        },
+      },
+      {
+        name: 'FileShared',
+        path: '/file/shared',
+        component: () => import('#/views/file/shared-files/index.vue'),
+        meta: {
+          icon: 'lucide:link',
+          title: '我的共享',
+        },
+      },
+      {
+        name: 'FileNetwork',
+        path: '/file/network',
+        component: () => import('#/views/file/network/index.vue'),
+        meta: {
+          icon: 'lucide:globe',
+          title: '网络访问',
+        },
+      },
+      {
+        name: 'FileExternalDevice',
+        path: '/file/external-device',
+        component: () => import('#/views/file/external-device/index.vue'),
+        meta: {
+          icon: 'lucide:usb',
+          title: '外接设备',
         },
       },
       {
@@ -28,25 +53,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/file/recycle/index.vue'),
         meta: {
           icon: 'lucide:trash-2',
-          title: $t('page.file.recycle'),
-        },
-      },
-      {
-        name: 'FileExternal',
-        path: '/file/external',
-        component: () => import('#/views/file/external/index.vue'),
-        meta: {
-          icon: 'lucide:usb',
-          title: $t('page.file.external'),
-        },
-      },
-      {
-        name: 'FileShareLinks',
-        path: '/file/share-links',
-        component: () => import('#/views/file/share-links/index.vue'),
-        meta: {
-          icon: 'lucide:link',
-          title: $t('page.file.shareLinks'),
+          title: '回收站',
         },
       },
     ],
