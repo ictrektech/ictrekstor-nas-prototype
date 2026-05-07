@@ -43,8 +43,10 @@
     "@vueuse/core": "catalog:",
     "ant-design-vue": "catalog:",
     "dayjs": "catalog:",
+    "echarts": "^5.5.1",
     "pinia": "catalog:",
     "vue": "catalog:",
+    "vue-echarts": "^7.0.0",
     "vue-router": "catalog:"
   }
 }
