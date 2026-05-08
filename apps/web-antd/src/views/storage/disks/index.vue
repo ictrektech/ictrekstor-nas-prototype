@@ -18,11 +18,39 @@ import {
   type DiskInfo,
   type StoragePool,
 } from '#/api/storage';
+import NasDiagram from './components/NasDiagram.vue';
 
 const router = useRouter();
 const disks = ref<DiskInfo[]>([]);
 const pools = ref<StoragePool[]>([]);
 const loading = ref(false);
+
+// Canvas 示意图中当前高亮的磁盘
+const selectedDiagramDisk = ref<string>('');
+const diagramRef = ref<InstanceType<typeof NasDiagram> | null>(null);
+
+// 处理示意图中点击磁盘
+function handleDiagramSelectDisk(disk: DiskInfo | null) {
+  if (disk) {
+    selectedDiagramDisk.value = disk.deviceName;
+  } else {
+    selectedDiagramDisk.value = '';
+  }
+}
+
+// 处理示意图中定位磁盘
+function handleDiagramLocateDisk(deviceName: string) {
+  selectedDiagramDisk.value = deviceName;
+}
+
+// 在卡片上点击定位按钮
+function locateDiskInDiagram(disk: DiskInfo) {
+  selectedDiagramDisk.value = disk.deviceName;
+  if (diagramRef.value) {
+    diagramRef.value.highlightBay(disk.deviceName);
+  }
+  message.success(`已在示意图中定位磁盘 ${disk.deviceName}`);
+}
 
 // 过滤条件
 const filterModel = ref('');
@@ -169,25 +197,6 @@ function getDeviceIconColor(deviceType?: string): string {
   return '#1677ff';
 }
 
-function formatHours(hours?: number): string {
-  if (!hours) return '--';
-  const days = Math.floor(hours / 24);
-  if (days > 365) {
-    const years = (days / 365).toFixed(1);
-    return `${years}年`;
-  }
-  return `${days}天`;
-}
-
-// 提取分区总大小（去掉已用/可用部分）
-function getPartitionTotalSize(size?: string): string {
-  if (!size) return '';
-  if (size.includes('/')) {
-    return size.split('/').pop()?.trim() || size;
-  }
-  return size;
-}
-
 function sleepDisk(disk: DiskInfo) {
   message.success(`硬盘 ${disk.deviceName} (${disk.model}) 已休眠`);
   disk.status = '休眠';
@@ -227,6 +236,137 @@ onMounted(loadData);
 
 <template>
   <div class="disk-manager">
+    <!-- NAS 设备 Canvas 示意图 + 右侧概览 -->
+    <div class="nas-diagram-real">
+      <div class="nas-diagram-header">
+        <div class="nas-diagram-title-row">
+          <IconifyIcon icon="lucide:server" class="nas-header-icon" />
+          <span class="nas-header-title">NAS 设备示意图</span>
+        </div>
+      </div>
+      <div class="nas-diagram-body">
+        <!-- 左侧 Canvas 居中 -->
+        <div class="nas-diagram-canvas-wrap">
+          <NasDiagram
+            ref="diagramRef"
+            :disks="filteredDisks"
+            :selected-disk-name="selectedDiagramDisk"
+            @select-disk="handleDiagramSelectDisk"
+            @locate-disk="handleDiagramLocateDisk"
+          />
+        </div>
+        <!-- 右侧概览面板 -->
+        <div class="nas-overview-panel">
+          <!-- 总容量 -->
+          <div class="overview-section">
+            <div class="overview-section-title">
+              <IconifyIcon icon="lucide:database" style="font-size: 13px; color: #1677ff;" />
+              总容量
+            </div>
+            <div class="overview-big-num">
+              {{ (filteredDisks.reduce((sum, d) => sum + (parseCapacity(d.size) / (1024 ** 4)), 0)).toFixed(2) }}
+              <span class="overview-unit">TB</span>
+            </div>
+          </div>
+
+          <!-- 磁盘类型分布 -->
+          <div class="overview-section">
+            <div class="overview-section-title">
+              <IconifyIcon icon="lucide:pie-chart" style="font-size: 13px; color: #722ed1;" />
+              类型分布
+            </div>
+            <div class="overview-type-list">
+              <div class="overview-type-item">
+                <span class="type-dot" style="background: #1677ff;" />
+                <span class="type-label">HDD</span>
+                <span class="type-num">{{ filteredDisks.filter(d => !d.deviceType || d.deviceType === 'HDD').length }}</span>
+              </div>
+              <div class="overview-type-item">
+                <span class="type-dot" style="background: #722ed1;" />
+                <span class="type-label">SSD</span>
+                <span class="type-num">{{ filteredDisks.filter(d => d.deviceType?.includes('SSD')).length }}</span>
+              </div>
+              <div class="overview-type-item">
+                <span class="type-dot" style="background: #eb2f96;" />
+                <span class="type-label">NVMe</span>
+                <span class="type-num">{{ filteredDisks.filter(d => d.deviceType?.includes('NVMe')).length }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 健康状态 -->
+          <div class="overview-section">
+            <div class="overview-section-title">
+              <IconifyIcon icon="lucide:heart-pulse" style="font-size: 13px; color: #52c41a;" />
+              健康状态
+            </div>
+            <div class="overview-health-list">
+              <div class="overview-health-item">
+                <span class="health-dot" style="background: #52c41a;" />
+                <span class="health-label">正常</span>
+                <span class="health-num">{{ filteredDisks.filter(d => d.healthStatus === '正常').length }}</span>
+              </div>
+              <div class="overview-health-item">
+                <span class="health-dot" style="background: #faad14;" />
+                <span class="health-label">警告</span>
+                <span class="health-num">{{ filteredDisks.filter(d => d.healthStatus === '警告').length }}</span>
+              </div>
+              <div class="overview-health-item">
+                <span class="health-dot" style="background: #ff4d4f;" />
+                <span class="health-label">异常</span>
+                <span class="health-num">{{ filteredDisks.filter(d => d.healthStatus === '异常').length }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 运行状态 -->
+          <div class="overview-section">
+            <div class="overview-section-title">
+              <IconifyIcon icon="lucide:activity" style="font-size: 13px; color: #faad14;" />
+              运行状态
+            </div>
+            <div class="overview-status-bar">
+              <div
+                class="status-bar-segment"
+                :style="{
+                  width: filteredDisks.length ? (filteredDisks.filter(d => d.status === '运行中').length / filteredDisks.length * 100) + '%' : '0%',
+                  background: '#52c41a',
+                }"
+              />
+              <div
+                class="status-bar-segment"
+                :style="{
+                  width: filteredDisks.length ? (filteredDisks.filter(d => d.status === '休眠').length / filteredDisks.length * 100) + '%' : '0%',
+                  background: '#faad14',
+                }"
+              />
+              <div
+                class="status-bar-segment"
+                :style="{
+                  width: filteredDisks.length ? (filteredDisks.filter(d => (d.usageStatus || d.status) === '未使用').length / filteredDisks.length * 100) + '%' : '0%',
+                  background: '#bfbfbf',
+                }"
+              />
+            </div>
+            <div class="overview-status-legend">
+              <span class="legend-item">
+                <span class="legend-dot" style="background: #52c41a;" />
+                运行 {{ filteredDisks.filter(d => d.status === '运行中').length }}
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot" style="background: #faad14;" />
+                休眠 {{ filteredDisks.filter(d => d.status === '休眠').length }}
+              </span>
+              <span class="legend-item">
+                <span class="legend-dot" style="background: #bfbfbf;" />
+                未用 {{ filteredDisks.filter(d => (d.usageStatus || d.status) === '未使用').length }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 过滤栏 -->
     <div class="filter-bar">
       <div class="filter-item filter-search">
@@ -283,176 +423,145 @@ onMounted(loadData);
         :key="disk.deviceName"
         class="disk-card"
         :bordered="true"
-        :body-style="{ padding: '0', height: '100%' }"
+        :body-style="{ padding: '0' }"
       >
         <div class="disk-card-inner">
-          <!-- 第一行：图标 + 设备名 + 容量 + 操作按钮 -->
-          <div class="card-header-row">
-            <div class="header-main">
-              <div
-                class="disk-icon-box"
-                :style="{
-                  background: `${getDeviceIconColor(disk.deviceType)}15`,
-                  borderColor: `${getDeviceIconColor(disk.deviceType)}30`,
-                }"
-              >
-                <IconifyIcon
-                  :icon="getDeviceIcon(disk.deviceType)"
-                  class="disk-icon"
-                  :style="{ color: getDeviceIconColor(disk.deviceType) }"
-                />
-              </div>
-              <div class="header-title">
+          <!-- 左侧：大图标区域 -->
+          <div
+            class="disk-visual"
+            :style="{
+              background: `${getDeviceIconColor(disk.deviceType)}12`,
+            }"
+          >
+            <div
+              class="disk-icon-box"
+              :style="{
+                background: `${getDeviceIconColor(disk.deviceType)}18`,
+                borderColor: `${getDeviceIconColor(disk.deviceType)}35`,
+              }"
+            >
+              <IconifyIcon
+                :icon="getDeviceIcon(disk.deviceType)"
+                class="disk-icon"
+                :style="{ color: getDeviceIconColor(disk.deviceType) }"
+              />
+            </div>
+            <div
+              class="disk-status-indicator"
+              :style="{ background: getStatusDot(disk.status) }"
+            />
+          </div>
+
+          <!-- 右侧：信息区域 -->
+          <div class="disk-info">
+            <!-- 第一行：设备名 + 容量 + 操作按钮 -->
+            <div class="info-header">
+              <div class="info-header-left">
                 <span class="disk-device-name">{{ disk.deviceName }}</span>
                 <span class="disk-capacity">{{ disk.size }}</span>
+                <Tag
+                  v-if="disk.healthStatus"
+                  class="health-tag-mini"
+                  size="small"
+                  :style="{
+                    color: getHealthBadgeColor(disk.healthStatus),
+                    borderColor: `${getHealthBadgeColor(disk.healthStatus)}50`,
+                    background: `${getHealthBadgeColor(disk.healthStatus)}10`,
+                  }"
+                >
+                  <span
+                    class="health-dot-mini"
+                    :style="{ background: getHealthBadgeColor(disk.healthStatus) }"
+                  />
+                  {{ disk.healthStatus }}
+                </Tag>
+              </div>
+              <div class="header-actions">
+                <Tooltip title="定位">
+                  <Button
+                    size="small"
+                    class="action-btn"
+                    :class="{ 'locate-active': selectedDiagramDisk === disk.deviceName }"
+                    @click="locateDiskInDiagram(disk)"
+                  >
+                    <IconifyIcon icon="lucide:crosshair" class="action-icon" />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="休眠硬盘">
+                  <Button
+                    size="small"
+                    class="action-btn"
+                    @click="sleepDisk(disk)"
+                  >
+                    <IconifyIcon icon="lucide:moon" class="action-icon" />
+                  </Button>
+                </Tooltip>
+                <Tooltip :title="isBlinking(disk) ? '关闭指示灯' : '开启指示灯'">
+                  <Button
+                    size="small"
+                    :class="['action-btn', isBlinking(disk) ? 'blink-active' : '']"
+                    @click="blinkDisk(disk)"
+                  >
+                    <IconifyIcon
+                      :icon="isBlinking(disk) ? 'lucide:lightbulb-off' : 'lucide:lightbulb'"
+                      :class="['action-icon', isBlinking(disk) ? 'blink-pulse' : '']"
+                    />
+                  </Button>
+                </Tooltip>
+                <Button
+                  size="small"
+                  type="primary"
+                  class="detail-btn"
+                  @click="goToDiskDetail(disk)"
+                >
+                  <IconifyIcon icon="lucide:file-text" style="font-size: 11px;" />
+                  详细信息
+                </Button>
               </div>
             </div>
 
-            <!-- 操作按钮 -->
-            <div class="header-actions">
-              <Button
-                size="small"
-                type="primary"
-                class="detail-btn"
-                @click="goToDiskDetail(disk)"
-              >
-                <IconifyIcon icon="lucide:file-text" style="font-size: 12px;" />
-                详情
-              </Button>
-              <Tooltip title="休眠硬盘">
-                <Button
-                  size="small"
-                  class="action-btn"
-                  @click="sleepDisk(disk)"
-                >
-                  <IconifyIcon icon="lucide:moon" class="action-icon" />
-                </Button>
-              </Tooltip>
-              <Tooltip :title="isBlinking(disk) ? '关闭指示灯' : '开启指示灯'">
-                <Button
-                  size="small"
-                  :class="['action-btn', isBlinking(disk) ? 'blink-active' : '']"
-                  @click="blinkDisk(disk)"
-                >
-                  <IconifyIcon
-                    :icon="isBlinking(disk) ? 'lucide:lightbulb-off' : 'lucide:lightbulb'"
-                    :class="['action-icon', isBlinking(disk) ? 'blink-pulse' : '']"
-                  />
-                </Button>
-              </Tooltip>
-              <Tooltip title="查看 SMART 信息">
-                <Button
-                  size="small"
-                  class="action-btn"
-                  @click="showDiskDetail(disk)"
-                >
-                  <IconifyIcon icon="lucide:activity" class="action-icon" />
-                </Button>
-              </Tooltip>
+            <!-- 第二行：核心属性（型号 / 类型 / 序列号） -->
+            <div class="info-attrs">
+              <div class="attr-pair">
+                <span class="attr-label">型号</span>
+                <span class="attr-value" :title="disk.model || 'QEMU_HARDDISK'">{{ disk.model || 'QEMU_HARDDISK' }}</span>
+              </div>
+              <div class="attr-pair">
+                <span class="attr-label">类型</span>
+                <span class="attr-value">{{ disk.deviceType || 'HDD' }}</span>
+              </div>
+              <div class="attr-pair">
+                <span class="attr-label">序列号</span>
+                <span class="attr-value serial-value">
+                  {{ disk.serial }}
+                  <Tooltip title="复制序列号">
+                    <span class="copy-icon" @click="copySerial(disk.serial)">
+                      <IconifyIcon icon="lucide:copy" style="font-size: 10px;" />
+                    </span>
+                  </Tooltip>
+                </span>
+              </div>
             </div>
-          </div>
 
-          <!-- 第二行：状态标签组 -->
-          <div class="card-meta-row">
-            <Tag
-              :color="getStatusColor(disk.status)"
-              class="status-tag"
-              size="small"
-            >
-              <span
-                class="status-dot"
-                :style="{ background: getStatusDot(disk.status) }"
-              />
-              {{ disk.usageStatus || disk.status }}
-            </Tag>
-            <span
-              v-if="disk.healthStatus"
-              class="health-badge"
-              :style="{ color: getHealthBadgeColor(disk.healthStatus), borderColor: getHealthBadgeColor(disk.healthStatus) }"
-            >
-              <span
-                class="health-dot"
-                :style="{ background: getHealthBadgeColor(disk.healthStatus) }"
-              />
-              {{ disk.healthStatus }}
-            </span>
-            <span v-if="disk.temperature !== undefined" class="meta-badge temp-badge">
-              <IconifyIcon icon="lucide:thermometer" class="meta-icon" />
-              {{ disk.temperature }}°C
-            </span>
-            <span v-if="disk.usedHours" class="meta-badge hours-badge">
-              <IconifyIcon icon="lucide:clock" class="meta-icon" />
-              {{ formatHours(disk.usedHours) }}
-            </span>
-          </div>
-
-          <!-- 分隔线 -->
-          <div class="disk-divider" />
-
-          <!-- 第三行：型号 / 接口 / 类型 / 序列号 -->
-          <div class="card-attrs">
-            <div class="attr-item">
-              <span class="attr-label">型号</span>
-              <span class="attr-value" :title="disk.model || 'QEMU_HARDDISK'">{{ disk.model || 'QEMU_HARDDISK' }}</span>
-            </div>
-            <div class="attr-item">
-              <span class="attr-label">接口</span>
-              <span class="attr-value">{{ disk.interfaceType || 'SATA' }}</span>
-            </div>
-            <div class="attr-item">
-              <span class="attr-label">类型</span>
-              <span class="attr-value">{{ disk.deviceType || 'HDD' }}</span>
-            </div>
-            <div class="attr-item">
-              <span class="attr-label">序列号</span>
-              <span class="attr-value serial-value">
-                {{ disk.serial }}
-                <Tooltip title="复制序列号">
-                  <span class="copy-icon" @click="copySerial(disk.serial)">
-                    <IconifyIcon icon="lucide:copy" style="font-size: 11px;" />
-                  </span>
-                </Tooltip>
+            <!-- 第三行：所属存储池 -->
+            <div v-if="disk.poolIds && disk.poolIds.length > 0" class="info-pools">
+              <span class="pools-list">
+                <Tag
+                  v-for="pid in disk.poolIds"
+                  :key="pid"
+                  color="blue"
+                  class="pool-tag"
+                  size="small"
+                  @click="goToPool(pid)"
+                >
+                  <IconifyIcon icon="lucide:database" style="font-size: 10px; margin-right: 2px;" />
+                  {{ pools.find((p) => p.id === pid)?.name || pid }}
+                </Tag>
               </span>
             </div>
-          </div>
-
-          <!-- 第四行：所属存储池 -->
-          <div v-if="disk.poolIds && disk.poolIds.length > 0" class="card-pools">
-            <span class="row-label">
-              <IconifyIcon icon="lucide:database" style="font-size: 11px;" />
-              所属存储池
-            </span>
-            <span class="pools-list">
-              <Tag
-                v-for="pid in disk.poolIds"
-                :key="pid"
-                color="blue"
-                class="pool-tag"
-                size="small"
-                @click="goToPool(pid)"
-              >
-                <IconifyIcon icon="lucide:layers" style="font-size: 10px; margin-right: 2px;" />
-                {{ pools.find((p) => p.id === pid)?.name || pid }}
-              </Tag>
-            </span>
-          </div>
-
-          <!-- 第五行：分区信息 -->
-          <div v-if="disk.partitions && disk.partitions.length > 0" class="card-partitions">
-            <span class="row-label">
-              <IconifyIcon icon="lucide:folder-open" style="font-size: 11px;" />
-              分区
-            </span>
-            <span class="partitions-list">
-              <span
-                v-for="part in disk.partitions"
-                :key="part.name"
-                class="partition-chip"
-              >
-                <span class="chip-name">{{ part.name }}</span>
-                <span class="chip-size">{{ getPartitionTotalSize(part.size) }}</span>
-              </span>
-            </span>
+            <div v-else class="info-pools-empty">
+              <span class="pool-empty-text">未分配存储池</span>
+            </div>
           </div>
         </div>
       </Card>
@@ -487,12 +596,299 @@ onMounted(loadData);
   width: 100%;
 }
 
+/* ===== NAS 设备真实 Canvas 示意图 ===== */
+.nas-diagram-real {
+  margin-bottom: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.nas-diagram-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.nas-diagram-body {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 20px 20px;
+}
+
+/* 左侧 Canvas 居中包裹 */
+.nas-diagram-canvas-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* 右侧概览面板 */
+.nas-overview-panel {
+  width: 220px;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.overview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overview-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.overview-big-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: #141414;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  line-height: 1;
+}
+
+.overview-unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: #8c8c8c;
+  margin-left: 4px;
+}
+
+.overview-type-list,
+.overview-health-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 三列网格对齐：圆点 | 标签 | 数字 */
+.overview-type-item,
+.overview-health-item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.type-dot,
+.health-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  justify-self: center;
+}
+
+.type-label,
+.health-label {
+  color: #595959;
+}
+
+.type-num,
+.health-num {
+  font-weight: 600;
+  color: #141414;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  text-align: right;
+}
+
+.overview-status-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.status-bar-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.overview-status-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #595959;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.nas-diagram-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nas-header-icon {
+  font-size: 20px;
+  color: #1677ff;
+}
+
+.nas-header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.nas-diagram-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nas-stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+}
+
+.nas-stat-chip-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.nas-stat-chip-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+/* ===== NAS 设备示意图占位区域 ===== */
+.nas-diagram-placeholder {
+
+  margin-bottom: 12px;
+  border-radius: 12px;
+  border: 1px dashed #d9d9d9;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  padding: 20px 24px;
+}
+
+.nas-diagram-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nas-diagram-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nas-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #e6f4ff;
+  border: 1px solid #bae0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nas-icon {
+  font-size: 24px;
+  color: #1677ff;
+}
+
+.nas-diagram-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.nas-diagram-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.nas-diagram-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  line-height: 1.5;
+}
+
+.nas-diagram-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.nas-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.nas-stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  line-height: 1;
+}
+
+.nas-stat-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.nas-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: #e8e8e8;
+}
+
 /* ===== 过滤栏 ===== */
 .filter-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
+  padding: 10px 0;
   margin-bottom: 4px;
   flex-wrap: wrap;
 }
@@ -554,19 +950,17 @@ onMounted(loadData);
   font-weight: 600;
 }
 
-/* ===== 硬盘网格布局：等宽等高 ===== */
+/* ===== 硬盘网格布局 ===== */
 .disk-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 10px;
 }
 
 .disk-card {
   border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .disk-card:hover {
@@ -575,129 +969,157 @@ onMounted(loadData);
   border-color: #1677ff;
 }
 
-.disk-card :deep(.ant-card-body) {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ===== 卡片内部：左右布局 ===== */
 .disk-card-inner {
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   height: 100%;
-  padding: 14px;
-  gap: 10px;
 }
 
-/* ===== 卡片头部行 ===== */
-.card-header-row {
+/* 左侧视觉区 */
+.disk-visual {
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+  margin-right: 12px;
+}
+
+.disk-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid;
+}
+
+.disk-icon {
+  font-size: 26px;
+}
+
+.disk-status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+/* 右侧信息区 */
+.disk-info {
+  flex: 1;
+  padding: 14px 16px 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  justify-content: center;
+}
+
+/* 信息头部 */
+.info-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.header-main {
+.info-header-left {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
   flex: 1;
-}
-
-.disk-icon-box {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid;
-}
-
-.disk-icon {
-  font-size: 18px;
 }
 
 .disk-device-name {
   font-size: 17px;
-  font-weight: 700;
-  color: #262626;
+  font-weight: 800;
+  color: #141414;
   font-family: 'SF Mono', 'Fira Code', monospace;
   line-height: 1;
   flex-shrink: 0;
-}
-
-.header-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  flex: 1;
-}
-
-.header-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.detail-arrow {
-  font-size: 14px;
-  color: #bfbfbf;
-  margin-left: auto;
-  transition: color 0.2s, transform 0.2s;
+  letter-spacing: 0.3px;
 }
 
 .disk-capacity {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #1677ff;
   font-family: 'SF Mono', 'Fira Code', monospace;
   background: #e6f4ff;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: 4px;
   flex-shrink: 0;
+}
+
+.health-tag-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  margin-right: 0;
+  padding: 0 6px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.health-dot-mini {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 /* 操作按钮 */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .detail-btn {
-  font-size: 12px;
+  font-size: 11px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  padding: 0 8px;
+  height: 28px;
   gap: 4px;
-  border-radius: 7px;
-  padding: 0 10px;
-  height: 30px;
 }
 
 .action-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
+  border-radius: 6px;
 }
 
 .action-icon {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .blink-active {
   background: #fff7e6;
   border-color: #ffd591;
   color: #d46b08;
+}
+
+.locate-active {
+  background: #e6f4ff;
+  border-color: #1677ff;
+  color: #1677ff;
 }
 
 .blink-pulse {
@@ -713,102 +1135,24 @@ onMounted(loadData);
   }
 }
 
-/* ===== Meta 标签行 ===== */
-.card-meta-row {
+/* 核心属性行 */
+.info-attrs {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  margin-right: 0;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.health-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 7px;
-  border-radius: 10px;
-  border: 1px solid;
-  font-size: 12px;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.health-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.meta-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  padding: 1px 7px;
-  border-radius: 10px;
-}
-
-.meta-icon {
-  font-size: 11px;
-}
-
-.temp-badge {
-  color: #595959;
-  background: #fff7e6;
-}
-
-.temp-badge .meta-icon {
-  color: #faad14;
-}
-
-.hours-badge {
-  color: #595959;
-  background: #f6ffed;
-}
-
-.hours-badge .meta-icon {
-  color: #52c41a;
-}
-
-/* 分隔线 */
-.disk-divider {
-  height: 1px;
-  background: #f0f0f0;
-}
-
-/* ===== 属性行 ===== */
-.card-attrs {
+.attr-pair {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 5px;
-}
-
-.attr-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .attr-label {
   font-size: 11px;
   color: #8c8c8c;
   flex-shrink: 0;
-  width: 40px;
 }
 
 .attr-value {
@@ -823,7 +1167,7 @@ onMounted(loadData);
 .serial-value {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
@@ -839,21 +1183,10 @@ onMounted(loadData);
   color: #1677ff;
 }
 
-/* ===== 存储池行 ===== */
-.card-pools {
+/* 存储池 */
+.info-pools {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.row-label {
-  font-size: 11px;
-  color: #8c8c8c;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
 }
 
 .pools-list {
@@ -867,52 +1200,22 @@ onMounted(loadData);
   display: inline-flex;
   align-items: center;
   font-size: 11px;
+  margin-right: 0;
 }
 
 .pool-tag:hover {
   opacity: 0.85;
 }
 
-/* ===== 分区信息行 ===== */
-.card-partitions {
+.info-pools-empty {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
-.partitions-list {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.partition-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
-  border-radius: 6px;
-  padding: 2px 7px;
+.pool-empty-text {
   font-size: 11px;
-  transition: all 0.2s ease;
-}
-
-.partition-chip:hover {
-  background: #e6f4ff;
-  border-color: #bae0ff;
-}
-
-.chip-name {
-  font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.chip-size {
-  color: #595959;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: #bfbfbf;
+  font-style: italic;
 }
 
 /* ===== 空状态 ===== */
@@ -955,7 +1258,7 @@ onMounted(loadData);
 /* 响应式 */
 @media (max-width: 1200px) {
   .disk-grid {
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   }
 }
 
@@ -976,6 +1279,16 @@ onMounted(loadData);
   .filter-count {
     margin-left: 0;
   }
+
+  .nas-diagram-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nas-diagram-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 576px) {
@@ -983,8 +1296,22 @@ onMounted(loadData);
     padding: 0 12px 12px;
   }
 
-  .disk-card-inner {
-    padding: 12px;
+  .disk-visual {
+    width: 60px;
+    padding: 10px 6px;
+  }
+
+  .disk-icon-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  .disk-icon {
+    font-size: 20px;
+  }
+
+  .info-attrs {
+    gap: 10px;
   }
 }
 </style>
