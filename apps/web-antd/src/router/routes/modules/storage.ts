@@ -23,6 +23,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'StorageDiskDetail',
+        path: '/storage/disks/detail/:deviceName',
+        component: () => import('#/views/storage/disks/detail.vue'),
+        meta: {
+          hideInMenu: true,
+          title: '磁盘详情',
+        },
+      },
+      {
         name: 'StoragePools',
         path: '/storage/pools',
         component: () => import('#/views/storage/pools/index.vue'),
