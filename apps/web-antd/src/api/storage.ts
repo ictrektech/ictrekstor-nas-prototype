@@ -98,21 +98,29 @@ export interface StoragePool {
   usedCapacity: string;
   diskCount: number;
   createTime: string;
+  /** 该存储池所使用的磁盘列表（简略信息） */
+  disks?: { deviceName: string; model: string; size: string }[];
 }
 
 export interface StorageVolume {
   id: string;
   name: string;
-  poolName: string;
+  /** 关联存储池ID，空字符串表示基于目录 */
+  poolId: string;
+  poolName?: string;
+  /** 来源类型: pool = 来自存储池, directory = 基于现有目录bind mount */
+  sourceType: 'pool' | 'directory';
   totalCapacity: string;
   usedCapacity: string;
   status: string;
   mountPath: string;
   filesystem: string;
-  raidType: string;
-  diskType: string;
-  interfaceProtocol: string;
-  disks: { deviceName: string; size: string }[];
+  /** bind mount的源目录路径（仅sourceType=directory时有效） */
+  bindSource?: string;
+  raidType?: string;
+  diskType?: string;
+  interfaceProtocol?: string;
+  disks?: { deviceName: string; size: string }[];
 }
 
 export interface PublicDir {
@@ -360,6 +368,11 @@ export async function getStoragePoolsApi(): Promise<StoragePool[]> {
       usedCapacity: '2.50 TB',
       diskCount: 3,
       createTime: '2024-01-15 10:30:00',
+      disks: [
+        { deviceName: 'sda', model: 'ST2000VN004-2E41', size: '1.81 TB' },
+        { deviceName: 'sdb', model: 'ST2000VN004-2E41', size: '1.81 TB' },
+        { deviceName: 'sdc', model: 'ST2000DM005-2CW1', size: '1.81 TB' },
+      ],
     },
   ];
 }
@@ -368,10 +381,12 @@ export async function getStorageVolumesApi(): Promise<StorageVolume[]> {
   return [
     {
       id: 'vol-1',
-      name: '存储空间1',
+      name: '共享资料空间',
+      poolId: 'pool-1',
       poolName: '存储池-1',
-      totalCapacity: '5.00 TB',
-      usedCapacity: '2.50 TB',
+      sourceType: 'pool',
+      totalCapacity: '3.00 TB',
+      usedCapacity: '1.80 TB',
       status: '正常',
       mountPath: '/share/space1',
       filesystem: 'ext4',
@@ -386,19 +401,47 @@ export async function getStorageVolumesApi(): Promise<StorageVolume[]> {
     },
     {
       id: 'vol-2',
-      name: '存储空间2',
+      name: '备份空间',
+      poolId: 'pool-1',
       poolName: '存储池-1',
-      totalCapacity: '2.00 TB',
-      usedCapacity: '800 GB',
+      sourceType: 'pool',
+      totalCapacity: '1.50 TB',
+      usedCapacity: '400 GB',
       status: '正常',
-      mountPath: '/share/space2',
+      mountPath: '/share/backup',
       filesystem: 'btrfs',
-      raidType: 'RAID1',
+      raidType: 'RAID5',
       diskType: 'HDD',
       interfaceProtocol: 'SATA',
       disks: [
-        { deviceName: 'sdd', size: '1.81 TB' },
+        { deviceName: 'sda', size: '1.81 TB' },
+        { deviceName: 'sdb', size: '1.81 TB' },
+        { deviceName: 'sdc', size: '1.81 TB' },
       ],
+    },
+    {
+      id: 'vol-3',
+      name: '系统数据目录',
+      poolId: '',
+      sourceType: 'directory',
+      totalCapacity: '500 GB',
+      usedCapacity: '120 GB',
+      status: '正常',
+      mountPath: '/mnt/data',
+      filesystem: 'ext4',
+      bindSource: '/opt/old-data',
+    },
+    {
+      id: 'vol-4',
+      name: '历史档案库',
+      poolId: '',
+      sourceType: 'directory',
+      totalCapacity: '2.00 TB',
+      usedCapacity: '850 GB',
+      status: '正常',
+      mountPath: '/mnt/archive',
+      filesystem: 'xfs',
+      bindSource: '/var/lib/archive-data',
     },
   ];
 }

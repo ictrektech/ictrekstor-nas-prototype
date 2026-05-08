@@ -38,6 +38,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           icon: 'lucide:layers',
           title: $t('page.storage.pools'),
+          hideInMenu: true,
         },
       },
       {

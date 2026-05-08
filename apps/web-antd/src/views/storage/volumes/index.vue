@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   Card,
   Button,
@@ -10,6 +11,7 @@ import {
   Input,
   Select,
   Radio,
+  Dropdown,
   message,
   Tooltip,
   Empty,
@@ -22,6 +24,7 @@ import {
   type StoragePool,
 } from '#/api/storage';
 
+const router = useRouter();
 const items = ref<StorageVolume[]>([]);
 const pools = ref<StoragePool[]>([]);
 const loading = ref(false);
@@ -31,8 +34,9 @@ const createModalVisible = ref(false);
 const createFormRef = ref();
 const createForm = ref({
   name: '',
-  locationType: 'pool',
+  sourceType: 'pool' as 'pool' | 'directory',
   poolId: '',
+  bindSource: '',
   size: undefined as number | undefined,
   sizeUnit: 'GB',
   filesystem: 'ext4',
@@ -64,30 +68,59 @@ async function loadData() {
   }
 }
 
-function openCreateModal() {
-  createForm.value = {
-    name: '',
-    locationType: 'pool',
-    poolId: pools.value[0]?.id || '',
-    size: undefined,
-    sizeUnit: 'GB',
-    filesystem: 'ext4',
-    description: '',
+/** 按存储池分组的卷 */
+const poolVolumes = computed(() => {
+  const map = new Map<string, StorageVolume[]>();
+  items.value
+    .filter((v) => v.sourceType === 'pool')
+    .forEach((v) => {
+      const pid = v.poolId || 'unknown';
+      if (!map.has(pid)) map.set(pid, []);
+      map.get(pid)!.push(v);
+    });
+  return map;
+});
+
+/** 基于目录的卷 */
+const directoryVolumes = computed(() =>
+  items.value.filter((v) => v.sourceType === 'directory'),
+);
+
+function getVolumesByPool(poolId: string): StorageVolume[] {
+  return poolVolumes.value.get(poolId) || [];
+}
+
+// === 统计计算 ===
+const overviewStats = computed(() => {
+  const total = items.value.length;
+  const poolVolCount = items.value.filter((v) => v.sourceType === 'pool').length;
+  const dirCount = directoryVolumes.value.length;
+
+  const totalCap = items.value.reduce((sum, v) => {
+    const num = parseFloat(v.totalCapacity);
+    return sum + (v.totalCapacity.includes('TB') ? num * 1024 : num);
+  }, 0);
+  const totalUsed = items.value.reduce((sum, v) => {
+    const num = parseFloat(v.usedCapacity);
+    return sum + (v.usedCapacity.includes('TB') ? num * 1024 : num);
+  }, 0);
+
+  return {
+    total,
+    poolVolCount,
+    dirCount,
+    totalCap:
+      totalCap >= 1024
+        ? (totalCap / 1024).toFixed(2) + ' TB'
+        : totalCap.toFixed(0) + ' GB',
+    totalUsed:
+      totalUsed >= 1024
+        ? (totalUsed / 1024).toFixed(2) + ' TB'
+        : totalUsed.toFixed(0) + ' GB',
   };
-  createModalVisible.value = true;
-}
+});
 
-function handleCreate() {
-  createFormRef.value
-    .validate()
-    .then(() => {
-      message.success(`存储空间 "${createForm.value.name}" 创建成功`);
-      createModalVisible.value = false;
-      loadData();
-    })
-    .catch(() => {});
-}
-
+// === 容量工具函数 ===
 function getUsagePercent(used: string, total: string): number {
   const parseSize = (s: string): number => {
     const num = parseFloat(s);
@@ -98,7 +131,7 @@ function getUsagePercent(used: string, total: string): number {
   };
   const u = parseSize(used);
   const t = parseSize(total);
-  return Math.round((u / t) * 100);
+  return t > 0 ? Math.round((u / t) * 100) : 0;
 }
 
 function getFreeCapacity(used: string, total: string): string {
@@ -117,23 +150,10 @@ function getFreeCapacity(used: string, total: string): string {
   return `${used} / ${total}`;
 }
 
-// 容量进度条颜色
 function getCapacityColor(percent: number): string {
   if (percent >= 90) return '#ff4d4f';
   if (percent >= 70) return '#faad14';
   return '#1677ff';
-}
-
-// 卡片头部渐变背景
-function getVolumeHeaderBg(vol: StorageVolume): string {
-  const percent = getUsagePercent(vol.usedCapacity, vol.totalCapacity);
-  if (percent >= 90) {
-    return 'linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%)';
-  }
-  if (percent >= 70) {
-    return 'linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%)';
-  }
-  return 'linear-gradient(135deg, #e6f7ff 0%, #bae0ff 100%)';
 }
 
 function getStatusColor(status: string): string {
@@ -147,217 +167,438 @@ function getFsIcon(fs: string): string {
   return 'lucide:folder';
 }
 
-// 统计概览
-const overviewStats = computed(() => {
-  const total = items.value.length;
-  const totalCap = items.value.reduce((sum, v) => {
-    const num = parseFloat(v.totalCapacity);
-    return sum + (v.totalCapacity.includes('TB') ? num * 1024 : num);
-  }, 0);
-  const totalUsed = items.value.reduce((sum, v) => {
-    const num = parseFloat(v.usedCapacity);
-    return sum + (v.usedCapacity.includes('TB') ? num * 1024 : num);
-  }, 0);
-  return { total, totalCap: totalCap >= 1024 ? (totalCap / 1024).toFixed(2) + ' TB' : totalCap.toFixed(0) + ' GB', totalUsed: totalUsed >= 1024 ? (totalUsed / 1024).toFixed(2) + ' TB' : totalUsed.toFixed(0) + ' GB' };
-});
+function getPoolStatusDotColor(status: string): string {
+  return status === '正常' ? '#52c41a' : '#ff4d4f';
+}
+
+function goToPoolDetail(poolId: string) {
+  router.push(`/storage/pools/detail/${poolId}`);
+}
+
+function goToDiskDetail(deviceName: string) {
+  router.push(`/storage/disks/detail/${deviceName}`);
+}
+
+function openCreateModal() {
+  createForm.value = {
+    name: '',
+    sourceType: 'pool',
+    poolId: pools.value[0]?.id || '',
+    bindSource: '',
+    size: undefined,
+    sizeUnit: 'GB',
+    filesystem: 'ext4',
+    description: '',
+  };
+  createModalVisible.value = true;
+}
+
+function openCreateModalForPool(poolId: string) {
+  createForm.value = {
+    name: '',
+    sourceType: 'pool',
+    poolId: poolId,
+    bindSource: '',
+    size: undefined,
+    sizeUnit: 'GB',
+    filesystem: 'ext4',
+    description: '',
+  };
+  createModalVisible.value = true;
+}
+
+function openCreatePoolModal() {
+  message.info('创建存储池功能待实现');
+}
+
+function handleCreate() {
+  createFormRef.value
+    .validate()
+    .then(() => {
+      message.success(`存储空间 "${createForm.value.name}" 创建成功`);
+      createModalVisible.value = false;
+      loadData();
+    })
+    .catch(() => {});
+}
+
+// === 存储池高级动作 ===
+function handleReplaceDisk(pool: StoragePool) {
+  message.info(`换盘操作：${pool.name}`);
+}
+
+function handleRebuildPool(pool: StoragePool) {
+  message.info(`重构存储池：${pool.name}`);
+}
+
+function handleDeletePool(pool: StoragePool) {
+  message.success(`存储池 "${pool.name}" 已删除`);
+}
+
+// === 存储空间操作 ===
+function handleVolumeUsers(vol: StorageVolume) {
+  message.info(`用户管理：${vol.name}`);
+}
+
+function handleExpandVolume(vol: StorageVolume) {
+  message.info(`扩容存储空间：${vol.name}`);
+}
+
+function handleDeleteVolume(vol: StorageVolume) {
+  message.success(`存储空间 "${vol.name}" 已删除`);
+}
 
 onMounted(loadData);
 </script>
 
 <template>
   <div class="volume-manager">
-    <!-- 统计概览 -->
-    <div class="overview-cards">
-      <div class="overview-card">
-        <div class="overview-icon-box" style="background: #e6f7ff;">
-          <IconifyIcon icon="lucide:box" style="font-size: 22px; color: #1677ff;" />
-        </div>
-        <div class="overview-info">
-          <div class="overview-value">{{ overviewStats.total }}</div>
-          <div class="overview-label">存储空间总数</div>
-        </div>
-      </div>
-      <div class="overview-card">
-        <div class="overview-icon-box" style="background: #f6ffed;">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 22px; color: #52c41a;" />
-        </div>
-        <div class="overview-info">
-          <div class="overview-value">{{ overviewStats.totalCap }}</div>
-          <div class="overview-label">总容量</div>
-        </div>
-      </div>
-      <div class="overview-card">
-        <div class="overview-icon-box" style="background: #fff7e6;">
-          <IconifyIcon icon="lucide:database" style="font-size: 22px; color: #faad14;" />
-        </div>
-        <div class="overview-info">
-          <div class="overview-value">{{ overviewStats.totalUsed }}</div>
-          <div class="overview-label">已用容量</div>
-        </div>
-      </div>
-    </div>
-
     <!-- 操作栏 -->
     <div class="action-bar">
-      <Button type="primary" @click="openCreateModal">
+      <Button type="primary" @click="openCreatePoolModal">
         <IconifyIcon icon="lucide:plus" style="font-size: 14px;" />
-        创建存储空间
+        创建存储池
       </Button>
     </div>
 
     <!-- 存储空间列表 -->
-    <div v-if="items.length > 0" class="volume-list">
-      <Card
-        v-for="vol in items"
-        :key="vol.id"
-        class="volume-card"
-        :bordered="true"
-        :body-style="{ padding: '0' }"
+    <div v-if="items.length > 0" class="volumes-list">
+      <!-- 基于存储池的存储空间 -->
+      <div
+        v-for="pool in pools"
+        :key="pool.id"
+        class="pool-wrapper-card"
       >
-        <!-- 卡片头部 -->
-        <div
-          class="volume-header"
-          :style="{ background: getVolumeHeaderBg(vol) }"
-        >
-          <div class="volume-header-main">
-            <div class="volume-icon-box" style="background: #fff;">
-              <IconifyIcon icon="lucide:box" style="font-size: 20px; color: #1677ff;" />
+        <!-- 存储池头部信息 -->
+        <div class="pool-header">
+          <!-- 左侧主信息 -->
+          <div class="pool-header-main">
+            <div class="pool-icon-box">
+              <IconifyIcon icon="lucide:database" style="font-size: 22px; color: #1677ff;" />
             </div>
-            <div class="volume-title-info">
-              <div class="volume-name-row">
-                <span class="volume-name">{{ vol.name }}</span>
-                <Tag :color="getStatusColor(vol.status)" size="small">
+            <div class="pool-header-body">
+              <div class="ph-row ph-row-name">
+                <span class="pool-name">{{ pool.name }}</span>
+                <Tag :color="pool.status === '正常' ? 'success' : 'error'" size="small">
                   <span
                     class="status-dot"
-                    :style="{ background: vol.status === '正常' ? '#52c41a' : '#8c8c8c' }"
+                    :style="{ background: getPoolStatusDotColor(pool.status) }"
                   />
-                  {{ vol.status }}
+                  {{ pool.status }}
                 </Tag>
               </div>
-              <div class="volume-subtitle">
-                <span class="raid-badge">
+              <div class="ph-row ph-row-meta">
+                <span class="meta-chip">
                   <IconifyIcon icon="lucide:layers" style="font-size: 11px;" />
-                  {{ vol.raidType }}
+                  {{ pool.raidType }}
                 </span>
-                <span class="pool-name">
-                  <IconifyIcon icon="lucide:database" style="font-size: 11px;" />
-                  {{ vol.poolName }}
+                <span class="meta-chip">
+                  <IconifyIcon icon="lucide:hard-drive" style="font-size: 11px;" />
+                  {{ pool.diskCount }} 块硬盘
+                </span>
+                <span class="meta-chip">
+                  <IconifyIcon icon="lucide:box" style="font-size: 11px;" />
+                  {{ getVolumesByPool(pool.id).length }} 个存储空间
+                </span>
+              </div>
+              <div v-if="pool.disks && pool.disks.length" class="ph-row ph-row-disks">
+                <span
+                  v-for="disk in pool.disks"
+                  :key="disk.deviceName"
+                  class="disk-tag"
+                  @click.stop="goToDiskDetail(disk.deviceName)"
+                >
+                  {{ disk.deviceName }}
                 </span>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 卡片主体 -->
-        <div class="volume-body">
-          <!-- 容量可视化 -->
-          <div class="capacity-section">
-            <div class="capacity-header">
-              <div class="capacity-info">
-                <span class="capacity-label">容量使用</span>
-                <span class="capacity-detail">
-                  <span class="capacity-used">{{ vol.usedCapacity }}</span>
-                  <span class="capacity-divider">/</span>
-                  <span class="capacity-total">{{ vol.totalCapacity }}</span>
-                </span>
-              </div>
-              <Tooltip :title="`剩余 ${getFreeCapacity(vol.usedCapacity, vol.totalCapacity)}`">
-                <span
-                  class="capacity-percent-badge"
-                  :style="{
-                    color: getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity)),
-                    borderColor: getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity)),
-                    background: `${getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity))}10`,
-                  }"
-                >
-                  {{ getUsagePercent(vol.usedCapacity, vol.totalCapacity) }}%
-                </span>
-              </Tooltip>
+          <!-- 右侧容量与操作面板 -->
+          <div class="pool-header-panel">
+            <div class="ph-panel-capacity">
+              <span class="cap-used">{{ pool.usedCapacity }}</span>
+              <span class="cap-div">/</span>
+              <span class="cap-total">{{ pool.totalCapacity }}</span>
+              <span
+                class="cap-percent"
+                :style="{ color: getCapacityColor(getUsagePercent(pool.usedCapacity, pool.totalCapacity)) }"
+              >
+                {{ getUsagePercent(pool.usedCapacity, pool.totalCapacity) }}%
+              </span>
             </div>
-            <div class="capacity-progress-bar">
+            <div class="ph-panel-progress">
               <Progress
-                :percent="getUsagePercent(vol.usedCapacity, vol.totalCapacity)"
-                :stroke-color="getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity))"
+                :percent="getUsagePercent(pool.usedCapacity, pool.totalCapacity)"
+                :stroke-color="getCapacityColor(getUsagePercent(pool.usedCapacity, pool.totalCapacity))"
                 :show-info="false"
-                :stroke-width="8"
+                :stroke-width="5"
                 size="small"
               />
             </div>
-            <div class="capacity-footer">
-              <span class="capacity-free">
-                <IconifyIcon icon="lucide:circle-check" style="font-size: 11px;" />
-                剩余 {{ getFreeCapacity(vol.usedCapacity, vol.totalCapacity) }}
-              </span>
-            </div>
-          </div>
-
-          <!-- 元信息 -->
-          <div class="meta-section">
-            <div class="meta-item">
-              <div class="meta-icon-box" style="background: #f6ffed;">
-                <IconifyIcon icon="lucide:hard-drive" style="font-size: 13px; color: #52c41a;" />
-              </div>
-              <div class="meta-text">
-                <span class="meta-label">硬盘类型</span>
-                <span class="meta-value">{{ vol.diskType }}</span>
-              </div>
-            </div>
-            <div class="meta-item">
-              <div class="meta-icon-box" style="background: #e6f7ff;">
-                <IconifyIcon icon="lucide:plug" style="font-size: 13px; color: #1677ff;" />
-              </div>
-              <div class="meta-text">
-                <span class="meta-label">接口协议</span>
-                <span class="meta-value">{{ vol.interfaceProtocol }}</span>
-              </div>
-            </div>
-            <div class="meta-item">
-              <div class="meta-icon-box" style="background: #fff7e6;">
-                <IconifyIcon :icon="getFsIcon(vol.filesystem)" style="font-size: 13px; color: #faad14;" />
-              </div>
-              <div class="meta-text">
-                <span class="meta-label">文件系统</span>
-                <span class="meta-value">{{ vol.filesystem }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 挂载路径 -->
-          <div v-if="vol.mountPath" class="mount-section">
-            <Tag color="blue" size="small">
-              <IconifyIcon icon="lucide:link" style="font-size: 10px; margin-right: 2px;" />
-              {{ vol.mountPath }}
-            </Tag>
-          </div>
-
-          <!-- 使用硬盘 -->
-          <div class="disks-section">
-            <div class="disks-title">
-              <IconifyIcon icon="lucide:disc-3" style="font-size: 12px;" />
-              使用硬盘 ({{ vol.disks.length }})
-            </div>
-            <div class="disks-list">
-              <div
-                v-for="disk in vol.disks"
-                :key="disk.deviceName"
-                class="disk-chip"
+            <div class="ph-panel-actions">
+              <Button
+                size="small"
+                class="detail-btn"
+                @click.stop="goToPoolDetail(pool.id)"
               >
-                <div class="disk-chip-icon-box">
-                  <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
+                <IconifyIcon icon="lucide:file-text" style="font-size: 12px;" />
+                详细信息
+              </Button>
+              <Dropdown>
+                <Button size="small" class="action-dropdown-btn">
+                  <IconifyIcon icon="lucide:settings" style="font-size: 12px;" />
+                  高级动作
+                  <IconifyIcon icon="lucide:chevron-down" style="font-size: 10px;" />
+                </Button>
+                <template #overlay>
+                  <div class="pool-action-menu">
+                    <div class="menu-item" @click.stop="handleReplaceDisk(pool)">
+                      <IconifyIcon icon="lucide:refresh-cw" style="font-size: 13px; color: #faad14;" />
+                      <span>换盘</span>
+                    </div>
+                    <div class="menu-item" @click.stop="handleRebuildPool(pool)">
+                      <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 13px; color: #1677ff;" />
+                      <span>重构</span>
+                    </div>
+                    <div class="menu-divider" />
+                    <div class="menu-item danger" @click.stop="handleDeletePool(pool)">
+                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px; color: #ff4d4f;" />
+                      <span>删除</span>
+                    </div>
+                  </div>
+                </template>
+              </Dropdown>
+            </div>
+          </div>
+        </div>
+
+        <!-- 存储空间表头 -->
+        <div class="volumes-section-header">
+          <div class="volumes-section-title">
+            <IconifyIcon icon="lucide:box" style="font-size: 14px; color: #1677ff;" />
+            <span>存储空间</span>
+            <span class="volumes-count">{{ getVolumesByPool(pool.id).length }}</span>
+          </div>
+          <Button
+            size="small"
+            class="create-volume-inline-btn"
+            @click="openCreateModalForPool(pool.id)"
+          >
+            <IconifyIcon icon="lucide:plus" style="font-size: 12px;" />
+            创建存储空间
+          </Button>
+        </div>
+
+        <!-- 该池下的存储空间卡片 -->
+        <div class="pool-volumes-container">
+          <div
+            v-for="vol in getVolumesByPool(pool.id)"
+            :key="vol.id"
+            class="volume-nest-card"
+          >
+            <div class="nest-card-header">
+              <div class="nest-icon-box">
+                <IconifyIcon icon="lucide:box" style="font-size: 16px; color: #1677ff;" />
+              </div>
+              <div class="nest-title-info">
+                <div class="nest-name-row">
+                  <span class="nest-name">{{ vol.name }}</span>
+                  <Tag :color="getStatusColor(vol.status)" size="small">
+                    <span
+                      class="status-dot"
+                      :style="{ background: vol.status === '正常' ? '#52c41a' : '#8c8c8c' }"
+                    />
+                    {{ vol.status }}
+                  </Tag>
                 </div>
-                <div class="disk-chip-info">
-                  <span class="disk-chip-name">{{ disk.deviceName }}</span>
-                  <span class="disk-chip-size">{{ disk.size }}</span>
+              </div>
+            </div>
+            <div class="nest-card-body">
+              <div class="nest-capacity">
+                <div class="nest-capacity-top">
+                  <span class="nest-capacity-text">
+                    <span class="nest-used">{{ vol.usedCapacity }}</span>
+                    <span class="nest-divider">/</span>
+                    <span class="nest-total">{{ vol.totalCapacity }}</span>
+                  </span>
+                  <span
+                    class="nest-percent"
+                    :style="{ color: getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity)) }"
+                  >
+                    {{ getUsagePercent(vol.usedCapacity, vol.totalCapacity) }}%
+                  </span>
+                </div>
+                <Progress
+                  :percent="getUsagePercent(vol.usedCapacity, vol.totalCapacity)"
+                  :stroke-color="getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity))"
+                  :show-info="false"
+                  :stroke-width="5"
+                  size="small"
+                />
+              </div>
+              <div class="nest-card-footer">
+                <span class="fs-tag">
+                  <IconifyIcon :icon="getFsIcon(vol.filesystem)" style="font-size: 10px; color: #8c8c8c;" />
+                  {{ vol.filesystem }}
+                </span>
+                <div class="nest-actions">
+                  <Button
+                    size="small"
+                    class="user-btn"
+                    @click="handleVolumeUsers(vol)"
+                  >
+                    <IconifyIcon icon="lucide:users" style="font-size: 11px;" />
+                    用户管理
+                  </Button>
+                  <Dropdown>
+                    <Button size="small" class="vol-action-btn">
+                      <IconifyIcon icon="lucide:settings" style="font-size: 11px;" />
+                      高级动作
+                      <IconifyIcon icon="lucide:chevron-down" style="font-size: 10px;" />
+                    </Button>
+                    <template #overlay>
+                      <div class="vol-action-menu">
+                        <div class="menu-item" @click="handleExpandVolume(vol)">
+                          <IconifyIcon icon="lucide:maximize" style="font-size: 13px; color: #1677ff;" />
+                          <span>扩容</span>
+                        </div>
+                        <div class="menu-divider" />
+                        <div class="menu-item danger" @click="handleDeleteVolume(vol)">
+                          <IconifyIcon icon="lucide:trash-2" style="font-size: 13px; color: #ff4d4f;" />
+                          <span>删除</span>
+                        </div>
+                      </div>
+                    </template>
+                  </Dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 空状态 -->
+          <div v-if="getVolumesByPool(pool.id).length === 0" class="pool-empty">
+            <IconifyIcon icon="lucide:inbox" style="font-size: 20px; color: #d9d9d9;" />
+            <span>该存储池下暂无存储空间</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 基于目录的存储空间 -->
+      <div v-if="directoryVolumes.length > 0" class="pool-wrapper-card directory-wrapper">
+        <!-- 目录头部信息 -->
+        <div class="pool-header directory-header">
+          <div class="pool-header-main">
+            <div class="pool-icon-box" style="background: #f6ffed;">
+              <IconifyIcon icon="lucide:folder-open" style="font-size: 22px; color: #52c41a;" />
+            </div>
+            <div class="pool-header-body">
+              <div class="ph-row ph-row-name">
+                <span class="pool-name">基于目录的存储空间</span>
+                <Tag color="green" size="small">
+                  <span class="status-dot" style="background: #52c41a;" />
+                  {{ directoryVolumes.length }} 个
+                </Tag>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 目录下的存储空间卡片 -->
+        <div class="pool-volumes-container">
+          <div
+            v-for="vol in directoryVolumes"
+            :key="vol.id"
+            class="volume-nest-card"
+          >
+            <div class="nest-card-header">
+              <div class="nest-icon-box" style="background: #f6ffed;">
+                <IconifyIcon icon="lucide:folder" style="font-size: 16px; color: #52c41a;" />
+              </div>
+              <div class="nest-title-info">
+                <div class="nest-name-row">
+                  <span class="nest-name">{{ vol.name }}</span>
+                  <Tag :color="getStatusColor(vol.status)" size="small">
+                    <span
+                      class="status-dot"
+                      :style="{ background: vol.status === '正常' ? '#52c41a' : '#8c8c8c' }"
+                    />
+                    {{ vol.status }}
+                  </Tag>
+                </div>
+              </div>
+            </div>
+            <div class="nest-card-body">
+              <div class="nest-capacity">
+                <div class="nest-capacity-top">
+                  <span class="nest-capacity-text">
+                    <span class="nest-used">{{ vol.usedCapacity }}</span>
+                    <span class="nest-divider">/</span>
+                    <span class="nest-total">{{ vol.totalCapacity }}</span>
+                  </span>
+                  <span
+                    class="nest-percent"
+                    :style="{ color: getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity)) }"
+                  >
+                    {{ getUsagePercent(vol.usedCapacity, vol.totalCapacity) }}%
+                  </span>
+                </div>
+                <Progress
+                  :percent="getUsagePercent(vol.usedCapacity, vol.totalCapacity)"
+                  :stroke-color="getCapacityColor(getUsagePercent(vol.usedCapacity, vol.totalCapacity))"
+                  :show-info="false"
+                  :stroke-width="5"
+                  size="small"
+                />
+              </div>
+              <div class="nest-card-footer">
+                <span class="fs-tag">
+                  <IconifyIcon :icon="getFsIcon(vol.filesystem)" style="font-size: 10px; color: #8c8c8c;" />
+                  {{ vol.filesystem }}
+                </span>
+                <div class="nest-actions">
+                  <Button
+                    size="small"
+                    class="user-btn"
+                    @click="handleVolumeUsers(vol)"
+                  >
+                    <IconifyIcon icon="lucide:users" style="font-size: 11px;" />
+                    用户管理
+                  </Button>
+                  <Dropdown>
+                    <Button size="small" class="vol-action-btn">
+                      <IconifyIcon icon="lucide:settings" style="font-size: 11px;" />
+                      高级动作
+                      <IconifyIcon icon="lucide:chevron-down" style="font-size: 10px;" />
+                    </Button>
+                    <template #overlay>
+                      <div class="vol-action-menu">
+                        <div class="menu-item" @click="handleExpandVolume(vol)">
+                          <IconifyIcon icon="lucide:maximize" style="font-size: 13px; color: #1677ff;" />
+                          <span>扩容</span>
+                        </div>
+                        <div class="menu-divider" />
+                        <div class="menu-item danger" @click="handleDeleteVolume(vol)">
+                          <IconifyIcon icon="lucide:trash-2" style="font-size: 13px; color: #ff4d4f;" />
+                          <span>删除</span>
+                        </div>
+                      </div>
+                    </template>
+                  </Dropdown>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
 
-    <!-- 空状态 -->
-    <Empty v-else description="暂无存储空间" class="empty-state">
+    <!-- 全部为空 -->
+    <Empty
+      v-else-if="!loading"
+      description="暂无存储空间"
+      class="empty-state"
+    >
       <template #image>
         <div class="empty-image">
           <IconifyIcon icon="lucide:box" style="font-size: 56px; color: #d9d9d9;" />
@@ -372,7 +613,7 @@ onMounted(loadData);
     <!-- 创建存储空间弹窗 -->
     <Modal
       v-model:open="createModalVisible"
-      title="添加存储空间"
+      title="创建存储空间"
       width="560px"
       ok-text="确认"
       cancel-text="取消"
@@ -389,6 +630,9 @@ onMounted(loadData);
           ],
           poolId: [
             { required: true, message: '请选择存储池', trigger: 'change' },
+          ],
+          bindSource: [
+            { required: true, message: '请输入源目录路径', trigger: 'blur' },
           ],
           size: [
             { required: true, message: '请输入存储空间大小', trigger: 'blur' },
@@ -409,26 +653,26 @@ onMounted(loadData);
           </Input>
         </Form.Item>
 
-        <Form.Item label="存储位置">
-          <Radio.Group v-model:value="createForm.locationType">
+        <Form.Item label="存储来源" required>
+          <Radio.Group v-model:value="createForm.sourceType">
             <Radio value="pool">
               <span class="radio-label">
                 <IconifyIcon icon="lucide:database" style="font-size: 12px;" />
-                存储池
+                存储池 (RAID + LVM)
               </span>
             </Radio>
-            <Radio value="local">
+            <Radio value="directory">
               <span class="radio-label">
-                <IconifyIcon icon="lucide:folder" style="font-size: 12px;" />
-                本地目录
+                <IconifyIcon icon="lucide:folder-symlink" style="font-size: 12px;" />
+                现有目录 (bind mount)
               </span>
             </Radio>
           </Radio.Group>
         </Form.Item>
 
         <Form.Item
-          v-if="createForm.locationType === 'pool'"
-          label="存储池"
+          v-if="createForm.sourceType === 'pool'"
+          label="选择存储池"
           name="poolId"
         >
           <Select
@@ -443,9 +687,25 @@ onMounted(loadData);
               <span style="display: inline-flex; align-items: center; gap: 6px;">
                 <IconifyIcon icon="lucide:database" style="font-size: 12px; color: #1677ff;" />
                 {{ pool.name }}
+                <span style="color: #8c8c8c; font-size: 12px;">({{ pool.raidType }})</span>
               </span>
             </Select.Option>
           </Select>
+        </Form.Item>
+
+        <Form.Item
+          v-if="createForm.sourceType === 'directory'"
+          label="源目录路径"
+          name="bindSource"
+        >
+          <Input
+            v-model:value="createForm.bindSource"
+            placeholder="如 /opt/old-data"
+          >
+            <template #prefix>
+              <IconifyIcon icon="lucide:folder-symlink" style="font-size: 14px; color: #bfbfbf;" />
+            </template>
+          </Input>
         </Form.Item>
 
         <Form.Item label="存储空间大小" name="size">
@@ -498,99 +758,76 @@ onMounted(loadData);
   width: 100%;
 }
 
-/* 统计概览 */
-.overview-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.overview-card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 10px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.overview-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #1677ff;
-}
-
-.overview-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: #262626;
-  line-height: 1.2;
-}
-
-.overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
 /* 操作栏 */
 .action-bar {
   margin-bottom: 10px;
 }
 
 /* 存储空间列表 */
-.volume-list {
+.volumes-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.volume-card {
-  border-radius: 10px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* 外层大卡片：存储池包裹 */
+.pool-wrapper-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.volume-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #1677ff;
+.pool-wrapper-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border-color: #d9d9d9;
 }
 
-/* 卡片头部 */
-.volume-header {
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+.directory-wrapper {
+  border-color: #d9f7be;
 }
 
-.volume-header-main {
+.directory-wrapper:hover {
+  border-color: #95de64;
+  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.08);
+}
+
+/* 存储池头部 */
+.pool-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%);
+  border-bottom: 1px solid #e6e6e6;
+  transition: all 0.2s ease;
+  gap: 24px;
 }
 
-.volume-icon-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.directory-header {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  cursor: default;
+}
+
+.directory-header:hover {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+}
+
+/* 左侧主信息 */
+.pool-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pool-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -598,251 +835,418 @@ onMounted(loadData);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.volume-title-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.volume-name-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.volume-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #262626;
-}
-
-.status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.volume-subtitle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.raid-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: #595959;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 1px 6px;
-  border-radius: 3px;
-}
-
-.pool-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
-/* 卡片主体 */
-.volume-body {
-  padding: 12px 16px;
+.pool-header-body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  padding-top: 2px;
+  min-width: 0;
 }
 
-/* 容量区域 */
-.capacity-section {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.capacity-header {
+.ph-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.capacity-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.capacity-label {
-  font-size: 12px;
-  color: #8c8c8c;
-  font-weight: 500;
-}
-
-.capacity-detail {
-  font-size: 13px;
-  color: #262626;
-}
-
-.capacity-used {
-  font-weight: 700;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.capacity-divider {
-  color: #bfbfbf;
-  margin: 0 3px;
-}
-
-.capacity-total {
-  color: #8c8c8c;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.capacity-percent-badge {
-  padding: 2px 8px;
-  border-radius: 8px;
-  border: 1px solid;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.capacity-progress-bar :deep(.ant-progress) {
-  margin-bottom: 0;
-}
-
-.capacity-footer {
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
-.capacity-free {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-/* 元信息区域 */
-.meta-section {
-  display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.meta-item {
+.ph-row-name {
+  gap: 10px;
+}
+
+.pool-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.ph-row-meta {
+  gap: 6px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #595959;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dir-chip {
+  color: #389e0d;
+  background: rgba(82, 196, 26, 0.12);
+}
+
+.ph-row-disks {
+  gap: 6px;
+}
+
+.disk-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(22, 119, 255, 0.15);
+}
+
+.disk-tag:hover {
+  background: rgba(22, 119, 255, 0.15);
+  border-color: rgba(22, 119, 255, 0.3);
+}
+
+/* 右侧容量与操作面板 */
+.pool-header-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 170px;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.ph-panel-capacity {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.cap-used {
+  font-weight: 700;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.cap-div {
+  color: #bfbfbf;
+}
+
+.cap-total {
+  color: #8c8c8c;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.cap-percent {
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  margin-left: 6px;
+}
+
+.ph-panel-progress {
+  width: 140px;
+}
+
+.ph-panel-progress :deep(.ant-progress) {
+  margin-bottom: 0;
+}
+
+.ph-panel-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  background: #fafafa;
-  border-radius: 6px;
-  border: 1px solid #f0f0f0;
-  flex: 1;
-  min-width: 100px;
+  margin-top: 2px;
 }
 
-.meta-icon-box {
-  width: 26px;
-  height: 26px;
+.detail-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
   border-radius: 6px;
+}
+
+.action-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* 下拉菜单 */
+.pool-action-menu {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f0f0f0;
+  padding: 4px;
+  min-width: 120px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #262626;
+  transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+  background: #f5f5f5;
+}
+
+.menu-item.danger:hover {
+  background: #fff1f0;
+}
+
+.menu-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+/* 存储空间表头 */
+.volumes-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.volumes-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.volumes-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #1677ff;
+  border-radius: 9px;
+}
+
+.create-volume-inline-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* 存储空间容器 */
+.pool-volumes-container {
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  background: #fafafa;
+}
+
+.pool-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  color: #bfbfbf;
+  font-size: 13px;
+}
+
+/* 内层存储空间卡片 */
+.volume-nest-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.volume-nest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-color: #1677ff;
+}
+
+.nest-card-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nest-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e6f7ff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.meta-text {
+.nest-title-info {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 3px;
 }
 
-.meta-label {
-  font-size: 10px;
-  color: #8c8c8c;
+.nest-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.meta-value {
-  font-size: 12px;
-  font-weight: 600;
+.nest-name {
+  font-size: 13px;
+  font-weight: 700;
   color: #262626;
 }
 
-/* 挂载路径 */
-.mount-section {
-  display: flex;
-}
-
-/* 硬盘区域 */
-.disks-section {
-  border-top: 1px dashed #f0f0f0;
-  padding-top: 8px;
-}
-
-.disks-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: #595959;
-  margin-bottom: 6px;
-  display: flex;
+.nest-source-tag {
+  display: inline-flex;
   align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.pool-source {
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.1);
+}
+
+.dir-source {
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+}
+
+.nest-card-body {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 容量 */
+.nest-capacity {
+  display: flex;
+  flex-direction: column;
   gap: 4px;
 }
 
-.disks-list {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.disk-chip {
+.nest-capacity-top {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #f0f5ff;
-  border: 1px solid #bae0ff;
-  border-radius: 6px;
-  padding: 5px 10px;
+  justify-content: space-between;
+}
+
+.nest-capacity-text {
   font-size: 12px;
-  transition: all 0.2s ease;
+  color: #262626;
 }
 
-.disk-chip:hover {
-  background: #e6f7ff;
-  border-color: #1677ff;
+.nest-used {
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-.disk-chip-icon-box {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  background: #fff;
+.nest-divider {
+  color: #bfbfbf;
+  margin: 0 2px;
+}
+
+.nest-total {
+  color: #8c8c8c;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.nest-percent {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.nest-capacity-bottom {
+  font-size: 11px;
+  color: #8c8c8c;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 3px;
 }
 
-.disk-chip-info {
+/* 卡片底部操作区 */
+.nest-card-footer {
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.disk-chip-name {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-weight: 600;
-  color: #262626;
+.fs-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 11px;
+  color: #595959;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
-.disk-chip-size {
-  color: #8c8c8c;
-  font-size: 10px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+.nest-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.vol-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.vol-action-menu {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f0f0f0;
+  padding: 4px;
+  min-width: 120px;
 }
 
 /* 空状态 */
@@ -885,12 +1289,47 @@ onMounted(loadData);
 
 /* 响应式 */
 @media (max-width: 992px) {
-  .overview-cards {
-    grid-template-columns: repeat(2, 1fr);
+  .pool-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
 
-  .meta-section {
-    flex-direction: column;
+  .pool-header-main {
+    width: 100%;
+  }
+
+  .pool-header-panel {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding-top: 0;
+    padding-left: 58px;
+  }
+
+  .ph-panel-capacity {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ph-panel-progress {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .ph-panel-actions {
+    flex-shrink: 0;
+    margin-top: 0;
+  }
+
+  .volumes-section-header {
+    padding: 10px 12px;
+  }
+
+  .pool-volumes-container {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -899,13 +1338,12 @@ onMounted(loadData);
     padding: 0 12px 12px;
   }
 
-  .overview-cards {
-    grid-template-columns: 1fr;
+  .pool-header {
+    padding: 10px 12px;
   }
 
-  .volume-header-main {
-    flex-direction: column;
-    align-items: flex-start;
+  .pool-volumes-container {
+    padding: 10px 12px;
   }
 }
 </style>
