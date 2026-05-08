@@ -201,7 +201,7 @@ onMounted(loadData);
 
 <style scoped>
 .all-files-page {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
@@ -210,8 +210,8 @@ onMounted(loadData);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 12px;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .toolbar-left {
@@ -265,12 +265,12 @@ onMounted(loadData);
 /* 存储空间网格 */
 .space-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
 }
 
 .space-card {
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: hidden;
@@ -286,15 +286,15 @@ onMounted(loadData);
 .space-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 20px 20px 16px;
+  gap: 10px;
+  padding: 14px 14px 10px;
   border-bottom: 1px solid #f5f5f5;
 }
 
 .space-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -312,42 +312,42 @@ onMounted(loadData);
 }
 
 .space-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #262626;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .space-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .fs-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .raid-badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  font-size: 11px;
+  gap: 2px;
+  font-size: 10px;
   color: #8c8c8c;
   background: #f5f5f5;
-  padding: 1px 8px;
-  border-radius: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
 }
 
 /* 容量区域 */
 .space-capacity-section {
-  padding: 16px 20px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .capacity-top {
@@ -357,7 +357,7 @@ onMounted(loadData);
 }
 
 .capacity-labels {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .capacity-used {
@@ -368,7 +368,7 @@ onMounted(loadData);
 
 .capacity-divider {
   color: #bfbfbf;
-  margin: 0 4px;
+  margin: 0 3px;
 }
 
 .capacity-total {
@@ -377,7 +377,7 @@ onMounted(loadData);
 }
 
 .capacity-percent {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
@@ -391,10 +391,10 @@ onMounted(loadData);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 14px;
   background: #fafafa;
   border-top: 1px solid #f5f5f5;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .footer-left {

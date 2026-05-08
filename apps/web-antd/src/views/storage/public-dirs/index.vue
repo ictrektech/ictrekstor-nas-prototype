@@ -152,7 +152,7 @@ onMounted(loadData);
 
 <style scoped>
 .public-dirs-page {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
@@ -161,8 +161,8 @@ onMounted(loadData);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 12px;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .toolbar-left {
@@ -216,12 +216,12 @@ onMounted(loadData);
 /* 目录网格 */
 .dir-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
 }
 
 .dir-card {
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
@@ -236,15 +236,15 @@ onMounted(loadData);
 .dir-header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 20px;
+  gap: 10px;
+  padding: 14px;
   border-bottom: 1px solid #f5f5f5;
 }
 
 .dir-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #1677ff, #4096ff);
   display: flex;
   align-items: center;
@@ -273,7 +273,7 @@ onMounted(loadData);
 
 /* 主体 */
 .dir-body {
-  padding: 16px 20px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -308,7 +308,7 @@ onMounted(loadData);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 14px;
   background: #fafafa;
   border-top: 1px solid #f5f5f5;
 }

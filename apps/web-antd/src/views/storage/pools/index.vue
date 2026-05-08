@@ -470,7 +470,7 @@ onMounted(loadData);
 
 <style scoped>
 .pool-manager {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
@@ -478,17 +478,17 @@ onMounted(loadData);
 .overview-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .overview-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 16px 20px;
+  border-radius: 10px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   border: 1px solid #f0f0f0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -500,9 +500,9 @@ onMounted(loadData);
 }
 
 .overview-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -512,32 +512,32 @@ onMounted(loadData);
 .overview-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .overview-value {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #262626;
   line-height: 1.2;
 }
 
 .overview-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #8c8c8c;
 }
 
 /* 表格卡片 */
 .pool-table-card {
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .table-title {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 6px;
+  font-size: 14px;
   font-weight: 600;
 }
 

@@ -494,7 +494,7 @@ onMounted(loadData);
 
 <style scoped>
 .volume-manager {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
@@ -502,17 +502,17 @@ onMounted(loadData);
 .overview-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .overview-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 16px 20px;
+  border-radius: 10px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   border: 1px solid #f0f0f0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -524,9 +524,9 @@ onMounted(loadData);
 }
 
 .overview-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,35 +536,35 @@ onMounted(loadData);
 .overview-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .overview-value {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #262626;
   line-height: 1.2;
 }
 
 .overview-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #8c8c8c;
 }
 
 /* 操作栏 */
 .action-bar {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 /* 存储空间列表 */
 .volume-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
 .volume-card {
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
@@ -577,20 +577,20 @@ onMounted(loadData);
 
 /* 卡片头部 */
 .volume-header {
-  padding: 16px 24px;
+  padding: 10px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .volume-header-main {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .volume-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -601,24 +601,24 @@ onMounted(loadData);
 .volume-title-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .volume-name-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .volume-name {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #262626;
 }
 
 .status-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   display: inline-block;
 }
@@ -626,41 +626,41 @@ onMounted(loadData);
 .volume-subtitle {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .raid-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11px;
   color: #595959;
   background: rgba(255, 255, 255, 0.7);
-  padding: 2px 8px;
-  border-radius: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
 }
 
 .pool-name {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11px;
   color: #8c8c8c;
 }
 
 /* 卡片主体 */
 .volume-body {
-  padding: 20px 24px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
 }
 
 /* 容量区域 */
 .capacity-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
 }
 
 .capacity-header {
@@ -672,17 +672,17 @@ onMounted(loadData);
 .capacity-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .capacity-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #8c8c8c;
   font-weight: 500;
 }
 
 .capacity-detail {
-  font-size: 14px;
+  font-size: 13px;
   color: #262626;
 }
 
@@ -694,7 +694,7 @@ onMounted(loadData);
 
 .capacity-divider {
   color: #bfbfbf;
-  margin: 0 4px;
+  margin: 0 3px;
 }
 
 .capacity-total {
@@ -703,10 +703,10 @@ onMounted(loadData);
 }
 
 .capacity-percent-badge {
-  padding: 3px 10px;
-  border-radius: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
   border: 1px solid;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
@@ -716,39 +716,39 @@ onMounted(loadData);
 }
 
 .capacity-footer {
-  font-size: 12px;
+  font-size: 11px;
   color: #8c8c8c;
 }
 
 .capacity-free {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 /* 元信息区域 */
 .meta-section {
   display: flex;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 6px 10px;
   background: #fafafa;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid #f0f0f0;
   flex: 1;
-  min-width: 140px;
+  min-width: 100px;
 }
 
 .meta-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -758,16 +758,16 @@ onMounted(loadData);
 .meta-text {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
 }
 
 .meta-label {
-  font-size: 11px;
+  font-size: 10px;
   color: #8c8c8c;
 }
 
 .meta-value {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: #262626;
 }
@@ -780,34 +780,34 @@ onMounted(loadData);
 /* 硬盘区域 */
 .disks-section {
   border-top: 1px dashed #f0f0f0;
-  padding-top: 14px;
+  padding-top: 8px;
 }
 
 .disks-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #595959;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .disks-list {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .disk-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: #f0f5ff;
   border: 1px solid #bae0ff;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 13px;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
   transition: all 0.2s ease;
 }
 
@@ -817,9 +817,9 @@ onMounted(loadData);
 }
 
 .disk-chip-icon-box {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   background: #fff;
   display: flex;
   align-items: center;
@@ -829,32 +829,32 @@ onMounted(loadData);
 .disk-chip-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
 }
 
 .disk-chip-name {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-weight: 600;
   color: #262626;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .disk-chip-size {
   color: #8c8c8c;
-  font-size: 11px;
+  font-size: 10px;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* 空状态 */
 .empty-state {
-  padding: 48px 0;
+  padding: 32px 0;
 }
 
 .empty-image {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 /* 创建弹窗 */

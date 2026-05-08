@@ -706,7 +706,7 @@ onMounted(loadData);
 
 <style scoped>
 .team-files-page {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
@@ -715,8 +715,8 @@ onMounted(loadData);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  gap: 12px;
+  margin-bottom: 10px;
+  gap: 10px;
 }
 
 .toolbar-left {
@@ -805,18 +805,18 @@ onMounted(loadData);
 
 /* 操作栏 */
 .action-bar {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 /* 文件夹网格 */
 .folder-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
 }
 
 .folder-card {
-  border-radius: 12px;
+  border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   overflow: hidden;
@@ -831,8 +831,8 @@ onMounted(loadData);
 .folder-card-body {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   position: relative;
 }
 
@@ -845,10 +845,10 @@ onMounted(loadData);
 }
 
 .folder-icon-wrapper {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: linear-gradient(135deg, #1677ff, #4096ff);
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,4 +1,4 @@
-# 当前任务：存储页面视觉优化
+# 当前任务：存储页面视觉优化（密度调整完成，等待用户确认）
 
 ## 任务来源
 - 触发方式：用户指令
@@ -9,40 +9,41 @@
 - [x] 查看浏览器中当前页面的实际效果
 - [x] 读取现有 OpenSpec 模板和代码
 - [x] 创建 OpenSpec 变更文档
-- [ ] 等待用户检查确认
-- [ ] 按 OpenSpec 任务逐步实施优化
+- [x] 根据用户反馈优化 tasks.md（每个阶段末尾增加截图验证）
+- [x] 提交代码到仓库
+- [x] 按 OpenSpec 任务逐步实施优化
+- [x] 阶段1-9 全部完成并提交
 
-## 关键上下文
-- **技术栈**：Vue 3 + Vite + TypeScript + Ant Design Vue + Vben Admin 5.x + Tailwind CSS
-- **存储页面位置**：`apps/web-antd/src/views/storage/`
-- **OpenSpec 变更目录**：`openspec/changes/storage-ui-optimization/`
+## 当前进度（密度调整阶段 - 全部完成）
+- [x] 硬盘管理页 (`/storage/disks`) 密度调整
+- [x] 存储空间管理页 (`/storage/volumes`) 密度调整
+- [x] 存储池列表页 (`/storage/pools`) 密度调整
+- [x] 设备全部文件页 (`/storage/all-files`) 密度调整
+- [x] 团队文件管理页 (`/storage/team-files`) 密度调整
+- [x] 公共目录页 (`/storage/public-dirs`) 密度调整
+- [x] 存储池详情页 (`/storage/pools/:id/detail`) 密度调整
+- [ ] 用户确认效果
 
-## OpenSpec 文档结构
+## 密度调整要点（全页面统一）
+- 页面 padding: 24px → 16px
+- 卡片间距: 16px → 8-10px
+- 卡片圆角: 12px → 10px
+- 概览卡片 padding: 16px → 10px
+- 概览图标: 44px → 36px
+- 卡片内部 padding: 16-20px → 10-14px
+- 字体整体缩小 1-2px
+- 按钮高度缩小
 
-| 文件 | 说明 |
-|------|------|
-| `.openspec.yaml` | 变更元数据（schema: spec-driven, created: 2026-05-07） |
-| `proposal.md` | 变更提案：Why / What Changes / Capabilities / Impact |
-| `design.md` | 设计文档：Context / Goals&Non-Goals / 7项设计决策 / Risks / Open Questions |
-| `tasks.md` | 任务清单：9大阶段、40+具体任务 |
+## 截图文件
+- `screenshots/dense-disks.png` - 硬盘管理页（调整后）
+- `screenshots/dense-volumes.png` - 存储空间管理页（调整后）
+- `screenshots/dense-pool-detail.png` - 存储池详情页（调整后）
 
-## 变更核心内容概要
+## 待处理
+- 用户确认最终效果
+- 如满意则提交代码
 
-### 4个已有页面视觉升级
-1. **硬盘管理页**：emoji图标→Iconify专业图标、卡片头部渐变背景、复合卡片布局、分区信息卡片化、悬浮动效
-2. **存储池列表页**：顶部统计概览卡片、表格行悬浮高亮、状态彩色徽章、容量迷你进度条
-3. **存储空间管理页**：标题栏渐变底色、分段颜色进度条、硬盘芯片标签组美化
-4. **设备全部文件页**：渐变圆形图标背景、悬浮放大效果、统一进度条
-
-### 3个404页面补全
-5. **存储池详情页**：修复路由、监控图表、容量/硬盘/日志Tab、Mock数据
-6. **团队文件管理页**：基础列表框架、Mock数据
-7. **公共目录页**：基础卡片框架、Mock数据
-
-### 统一风格
-- 状态色彩语义化（正常=蓝/绿、警告=橙、危险=红、未使用=灰）
-- 卡片悬浮动效统一（translateY抬升+阴影加深+边框高亮）
-- Iconify图标统一替换emoji
-
-## 后续规划
-等待用户检查 OpenSpec 文档后，按 tasks.md 任务清单逐步实施优化。
+## 上下文恢复检查点
+- 最后修改的文件：disks, volumes, pools, all-files, team-files, public-dirs, pools/detail
+- 最后执行的命令：截图验证
+- 最后确认的状态：全部7个页面密度调整完成，等待用户确认

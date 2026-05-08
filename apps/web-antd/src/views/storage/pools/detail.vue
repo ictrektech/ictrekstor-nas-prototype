@@ -528,13 +528,13 @@ onMounted(loadData);
 
 <style scoped>
 .pool-detail {
-  padding: 0 24px 24px;
+  padding: 0 16px 16px;
   width: 100%;
 }
 
 /* 返回栏 */
 .back-bar {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .back-btn {
@@ -546,26 +546,26 @@ onMounted(loadData);
 
 /* 头部卡片 */
 .pool-header-card {
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .pool-header-bg {
-  padding: 20px 24px;
+  padding: 12px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .pool-header-main {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .pool-icon-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -576,18 +576,18 @@ onMounted(loadData);
 .pool-title-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .pool-name-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .pool-name {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #262626;
 }
@@ -602,18 +602,18 @@ onMounted(loadData);
 .pool-meta-row {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
 }
 
 .meta-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 3px;
+  font-size: 11px;
   color: #595959;
   background: rgba(255, 255, 255, 0.7);
-  padding: 2px 10px;
-  border-radius: 4px;
+  padding: 1px 8px;
+  border-radius: 3px;
 }
 
 /* 容量概览栏 */
@@ -621,14 +621,14 @@ onMounted(loadData);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
-  padding: 16px 24px;
+  padding: 10px 16px;
 }
 
 .capacity-stat-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 16px;
+  gap: 8px;
+  padding: 0 10px;
   border-right: 1px solid #f0f0f0;
 }
 
@@ -639,13 +639,13 @@ onMounted(loadData);
 .usage-stat {
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 4px;
 }
 
 .stat-icon-box {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -655,16 +655,16 @@ onMounted(loadData);
 .stat-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #8c8c8c;
 }
 
 .stat-value {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #262626;
   font-family: 'SF Mono', 'Fira Code', monospace;
@@ -680,12 +680,12 @@ onMounted(loadData);
 
 /* Tab 卡片 */
 .pool-tabs-card {
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .pool-tabs :deep(.ant-tabs-nav) {
-  padding: 0 20px;
+  padding: 0 16px;
   margin-bottom: 0;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -698,19 +698,19 @@ onMounted(loadData);
 }
 
 .tab-content {
-  padding: 24px;
+  padding: 16px;
 }
 
 /* 区块标题 */
 .section-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .section-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: #262626;
   margin: 0;
@@ -718,19 +718,19 @@ onMounted(loadData);
 
 /* 监控页 */
 .monitor-section {
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .chart-wrapper {
   background: #fafafa;
-  border-radius: 10px;
-  padding: 16px 16px 36px;
+  border-radius: 8px;
+  padding: 12px 12px 32px;
   border: 1px solid #f0f0f0;
 }
 
 /* 硬盘页 */
 .disk-tab-content {
-  padding: 20px 24px 32px;
+  padding: 12px 16px 20px;
 }
 
 .disk-table :deep(.ant-table) {
@@ -758,7 +758,7 @@ onMounted(loadData);
 
 /* 容量页 */
 .capacity-detail {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 /* 操作按钮 */
@@ -774,7 +774,7 @@ onMounted(loadData);
 @media (max-width: 1200px) {
   .pool-capacity-bar {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 10px;
   }
 
   .capacity-stat-item {
