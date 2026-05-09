@@ -233,26 +233,28 @@ function onDelete(file: FileItem) {
             <span class="file-manager-panel__time">{{ record.modifyTime }}</span>
           </template>
           <template v-if="column.key === 'action'">
-            <div class="file-manager-panel__actions-cell">
-              <Tooltip title="重命名">
-                <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record)">
-                  <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
-                </Button>
-              </Tooltip>
-              <Tooltip title="删除">
-                <Popconfirm
-                  title="确认删除"
-                  description="确定要删除该文件吗？"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @confirm="onDelete(record)"
-                >
-                  <Button size="small" type="text" danger class="file-manager-panel__action-btn">
-                    <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+            <slot name="action-cell" :file="record">
+              <div class="file-manager-panel__actions-cell">
+                <Tooltip title="重命名">
+                  <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record)">
+                    <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
                   </Button>
-                </Popconfirm>
-              </Tooltip>
-            </div>
+                </Tooltip>
+                <Tooltip title="删除">
+                  <Popconfirm
+                    title="确认删除"
+                    description="确定要删除该文件吗？"
+                    ok-text="确认"
+                    cancel-text="取消"
+                    @confirm="onDelete(record)"
+                  >
+                    <Button size="small" type="text" danger class="file-manager-panel__action-btn">
+                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                    </Button>
+                  </Popconfirm>
+                </Tooltip>
+              </div>
+            </slot>
           </template>
         </template>
         <template #emptyText>

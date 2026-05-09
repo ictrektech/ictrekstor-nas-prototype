@@ -1,189 +1,261 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
 import {
-  Tree,
-  Table,
-  Input,
-  Breadcrumb,
-  Radio,
   Button,
   Modal,
   Form,
+  Input,
   message,
-  Popconfirm,
   Dropdown,
-  Tag,
+  Menu,
   Checkbox,
+  Radio as AntRadio,
 } from 'ant-design-vue';
+import { IconifyIcon } from '@vben/icons';
+import {
+  FileTreePanel,
+  FileManagerPanel,
+} from '#/components/FileExplorer';
+import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
+import { findParentKeys, findNodeInTree } from '#/components/FileExplorer';
 
-const router = useRouter();
-const searchText = ref('');
-const viewMode = ref<'list' | 'grid'>('list');
-const currentKey = ref('root');
-const expandedKeys = ref<(string | number)[]>(['root']);
-const selectedKeys = ref<(string | number)[]>(['root']);
-const selectedFile = ref<any>(null);
-
-interface FileItem {
-  id: string;
-  name: string;
-  type: 'folder' | 'file';
-  size: string;
-  modifyTime: string;
-  extension?: string;
+// ─── 页面级扩展类型 ───
+interface MyFileItem extends FileItem {
   isShared?: boolean;
 }
 
-const fileDataMap: Record<string, FileItem[]> = {
-  root: [
-    { id: 'spaces', name: '存储空间', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00' },
-    { id: 'team', name: '团队文件', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00' },
-    { id: 'shared', name: '共享文件', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00' },
-  ],
-  spaces: [
-    { id: 'space-1', name: '存储空间1', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00' },
-    { id: 'space-2', name: '存储空间2', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00' },
-  ],
-  'space-1': [
-    { id: 's1-doc', name: '文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
-    { id: 's1-img', name: '图片', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
-    { id: 's1-video', name: '视频', type: 'folder', size: '--', modifyTime: '2024-05-04 09:15:00' },
-    { id: 's1-readme', name: 'README.md', type: 'file', size: '12 KB', modifyTime: '2024-05-03 16:45:00', extension: 'md' },
-  ],
-  'space-2': [
-    { id: 's2-backup', name: '备份', type: 'folder', size: '--', modifyTime: '2024-05-06 08:00:00' },
-    { id: 's2-download', name: '下载', type: 'folder', size: '--', modifyTime: '2024-05-05 11:00:00' },
-  ],
-  team: [
-    { id: 'tf-1', name: '文档', type: 'folder', size: '--', modifyTime: '2024-05-06 14:00:00' },
-    { id: 'tf-2', name: '设计资源', type: 'folder', size: '--', modifyTime: '2024-05-01 10:00:00' },
-    { id: 'tf-3', name: '财务资料', type: 'folder', size: '--', modifyTime: '2024-04-20 16:00:00' },
-  ],
-  shared: [
-    { id: 'shared-docs', name: '共享文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:00:00', isShared: true },
-    { id: 'shared-design', name: '共享设计', type: 'folder', size: '--', modifyTime: '2024-05-05 14:00:00', isShared: true },
-    { id: 'shared-media', name: '共享媒体', type: 'folder', size: '--', modifyTime: '2024-05-04 09:00:00', isShared: true },
-  ],
-  'shared-docs': [
-    { id: 'sf-1', name: '项目计划书.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-05-06 10:30:00', extension: 'pdf', isShared: true },
-    { id: 'sf-2', name: '设计规范.docx', type: 'file', size: '856 KB', modifyTime: '2024-05-05 14:20:00', extension: 'docx', isShared: true },
-    { id: 'sf-3', name: 'Q1报表.xlsx', type: 'file', size: '340 KB', modifyTime: '2024-05-03 09:15:00', extension: 'xlsx', isShared: true },
-    { id: 'sf-7', name: '接口文档.md', type: 'file', size: '28 KB', modifyTime: '2024-04-15 14:00:00', extension: 'md', isShared: true },
-  ],
-  'shared-design': [
-    { id: 'sf-4', name: '产品原型.rp', type: 'file', size: '12 MB', modifyTime: '2024-04-28 16:00:00', extension: 'rp', isShared: true },
-    { id: 'sf-6', name: '架构图.png', type: 'file', size: '3.2 MB', modifyTime: '2024-04-20 09:00:00', extension: 'png', isShared: true },
-    { id: 't2-f1', name: 'logo.svg', type: 'file', size: '15 KB', modifyTime: '2024-05-01 14:00:00', extension: 'svg', isShared: true },
-  ],
-  'shared-media': [
-    { id: 'sf-5', name: '会议录音.mp3', type: 'file', size: '45 MB', modifyTime: '2024-04-25 10:30:00', extension: 'mp3', isShared: true },
-    { id: 'v1-f1', name: '演示视频.mp4', type: 'file', size: '256 MB', modifyTime: '2024-03-20 10:00:00', extension: 'mp4', isShared: true },
-  ],
-  's1-doc': [
-    { id: 'd1-f1', name: '项目计划.docx', type: 'file', size: '856 KB', modifyTime: '2024-05-06 10:30:00', extension: 'docx' },
-    { id: 'd1-f2', name: '需求分析.xlsx', type: 'file', size: '340 KB', modifyTime: '2024-05-05 09:00:00', extension: 'xlsx' },
-  ],
-  's1-img': [
-    { id: 'i1-f1', name: 'logo.png', type: 'file', size: '2.3 MB', modifyTime: '2024-04-15 09:30:00', extension: 'png' },
-    { id: 'i1-f2', name: 'banner.jpg', type: 'file', size: '1.5 MB', modifyTime: '2024-04-10 14:00:00', extension: 'jpg' },
-  ],
-  's1-video': [
-    { id: 'v1-f1', name: '演示视频.mp4', type: 'file', size: '256 MB', modifyTime: '2024-03-20 10:00:00', extension: 'mp4' },
-  ],
-  's2-backup': [
-    { id: 'b1-f1', name: '数据库备份.sql', type: 'file', size: '1.2 GB', modifyTime: '2024-05-01 02:00:00', extension: 'sql' },
-  ],
-  's2-download': [
-    { id: 'dl-f1', name: '安装包.exe', type: 'file', size: '45 MB', modifyTime: '2024-04-28 16:30:00', extension: 'exe' },
-  ],
-  'tf-1': [
-    { id: 't1-d1', name: '项目文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
-    { id: 't1-d2', name: '会议纪要', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
-    { id: 't1-f1', name: 'README.md', type: 'file', size: '12 KB', modifyTime: '2024-05-03 16:45:00', extension: 'md' },
-  ],
-  'tf-2': [
-    { id: 't2-d1', name: 'UI 设计', type: 'folder', size: '--', modifyTime: '2024-05-06 08:00:00' },
-    { id: 't2-f1', name: 'logo.svg', type: 'file', size: '15 KB', modifyTime: '2024-05-01 14:00:00', extension: 'svg' },
-  ],
-  'tf-3': [
-    { id: 't3-f1', name: '资产负债表.pdf', type: 'file', size: '1.2 MB', modifyTime: '2024-04-30 11:00:00', extension: 'pdf' },
-  ],
-  trash: [
-    { id: 'tr-1', name: '旧项目资料', type: 'folder', size: '--', modifyTime: '2024-05-01 10:00:00', extension: 'folder' },
-    { id: 'tr-2', name: 'temp_backup.sql', type: 'file', size: '500 MB', modifyTime: '2024-04-20 09:00:00', extension: 'sql' },
-    { id: 'tr-3', name: '废弃文档.docx', type: 'file', size: '120 KB', modifyTime: '2024-04-15 14:30:00', extension: 'docx' },
-    { id: 'tr-4', name: '截图_20240410.png', type: 'file', size: '2.1 MB', modifyTime: '2024-04-10 08:00:00', extension: 'png' },
-  ],
-};
-
-const treeData = [
+// ─── Mock 树数据 ───
+// 结构：我的文件（根概念）→ [存储空间 / 团队文件 / 他人共享文件 / 回收站]
+const mockTree: FileTreeNode[] = [
   {
-    title: '我的文件',
-    key: 'root',
-    icon: '📁',
+    key: 'spaces',
+    title: '存储空间',
+    type: 'category',
+    path: '/spaces',
     children: [
       {
-        title: '存储空间',
-        key: 'spaces',
-        icon: '🖴',
+        key: 'space-1',
+        title: '存储空间1',
+        type: 'space',
+        path: '/spaces/space-1',
         children: [
-          {
-            title: '存储空间1',
-            key: 'space-1',
-            icon: '🖴',
-            children: [
-              { title: '文档', key: 's1-doc', icon: '📁', isLeaf: true },
-              { title: '图片', key: 's1-img', icon: '📁', isLeaf: true },
-              { title: '视频', key: 's1-video', icon: '📁', isLeaf: true },
-            ],
-          },
-          {
-            title: '存储空间2',
-            key: 'space-2',
-            icon: '🖴',
-            children: [
-              { title: '备份', key: 's2-backup', icon: '📁', isLeaf: true },
-              { title: '下载', key: 's2-download', icon: '📁', isLeaf: true },
-            ],
-          },
+          { key: 'space-1/docs', title: '文档', type: 'folder', path: '/spaces/space-1/文档', isLeaf: true },
+          { key: 'space-1/images', title: '图片', type: 'folder', path: '/spaces/space-1/图片', isLeaf: true },
+          { key: 'space-1/videos', title: '视频', type: 'folder', path: '/spaces/space-1/视频', isLeaf: true },
         ],
       },
       {
-        title: '团队文件',
-        key: 'team',
-        icon: '👥',
+        key: 'space-2',
+        title: '存储空间2',
+        type: 'space',
+        path: '/spaces/space-2',
         children: [
-          { title: '文档', key: 'tf-1', icon: '👥', isLeaf: true },
-          { title: '设计资源', key: 'tf-2', icon: '👥', isLeaf: true },
-          { title: '财务资料', key: 'tf-3', icon: '👥', isLeaf: true },
+          { key: 'space-2/backup', title: '备份', type: 'folder', path: '/spaces/space-2/备份', isLeaf: true },
+          { key: 'space-2/download', title: '下载', type: 'folder', path: '/spaces/space-2/下载', isLeaf: true },
+        ],
+      },
+    ],
+  },
+  {
+    key: 'team',
+    title: '团队文件',
+    type: 'category',
+    path: '/team',
+    children: [
+      {
+        key: 'tf-1',
+        title: '文档',
+        type: 'team-folder',
+        path: '/team/文档',
+        children: [
+          { key: 'tf-1/project', title: '项目文档', type: 'subfolder', path: '/team/文档/项目文档', isLeaf: true },
+          { key: 'tf-1/meeting', title: '会议纪要', type: 'subfolder', path: '/team/文档/会议纪要', isLeaf: true },
         ],
       },
       {
-        title: '共享文件',
-        key: 'shared',
-        icon: '🔗',
+        key: 'tf-2',
+        title: '设计资源',
+        type: 'team-folder',
+        path: '/team/设计资源',
         children: [
-          { title: '共享文档', key: 'shared-docs', icon: '🔗', isLeaf: true },
-          { title: '共享设计', key: 'shared-design', icon: '🔗', isLeaf: true },
-          { title: '共享媒体', key: 'shared-media', icon: '🔗', isLeaf: true },
+          { key: 'tf-2/ui', title: 'UI 设计', type: 'subfolder', path: '/team/设计资源/UI', isLeaf: true },
+          { key: 'tf-2/brand', title: '品牌素材', type: 'subfolder', path: '/team/设计资源/品牌', isLeaf: true },
         ],
       },
       {
-        title: '回收站',
-        key: 'trash',
-        icon: '🗑️',
-        isLeaf: true,
+        key: 'tf-3',
+        title: '财务资料',
+        type: 'team-folder',
+        path: '/team/财务资料',
+        children: [
+          { key: 'tf-3/2024', title: '2024 年报', type: 'subfolder', path: '/team/财务资料/2024', isLeaf: true },
+          { key: 'tf-3/tax', title: '税务资料', type: 'subfolder', path: '/team/财务资料/税务', isLeaf: true },
+        ],
+      },
+    ],
+  },
+  {
+    key: 'shared-from-others',
+    title: '他人共享文件',
+    type: 'category',
+    path: '/shared-from-others',
+    children: [
+      {
+        key: 'shared-from-zhangsan',
+        title: '来自 张三',
+        type: 'shared-user',
+        path: '/shared-from-others/张三',
+        children: [
+          { key: 'zs-share1', title: '共享文档', type: 'shared-folder', path: '/shared-from-others/张三/共享文档', isLeaf: true },
+          { key: 'zs-share2', title: '共享设计', type: 'shared-folder', path: '/shared-from-others/张三/共享设计', isLeaf: true },
+        ],
+      },
+      {
+        key: 'shared-from-lisi',
+        title: '来自 李四',
+        type: 'shared-user',
+        path: '/shared-from-others/李四',
+        children: [
+          { key: 'ls-share1', title: '项目资料', type: 'shared-folder', path: '/shared-from-others/李四/项目资料', isLeaf: true },
+          { key: 'ls-share2', title: '培训视频', type: 'shared-folder', path: '/shared-from-others/李四/培训视频', isLeaf: true },
+        ],
+      },
+      {
+        key: 'shared-from-wangwu',
+        title: '来自 王五',
+        type: 'shared-user',
+        path: '/shared-from-others/王五',
+        children: [
+          { key: 'ww-share1', title: '会议录音', type: 'shared-folder', path: '/shared-from-others/王五/会议录音', isLeaf: true },
+        ],
       },
     ],
   },
 ];
 
-// 弹窗状态
+// ─── Mock 文件数据 ───
+const mockFiles: Record<string, MyFileItem[]> = {
+  // 存储空间
+  'space-1': [
+    { id: 'f-1', name: '文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
+    { id: 'f-2', name: '图片', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
+    { id: 'f-3', name: '视频', type: 'folder', size: '--', modifyTime: '2024-05-04 09:15:00' },
+    { id: 'f-4', name: 'README.md', type: 'file', size: '12 KB', modifyTime: '2024-05-01 14:30:00', extension: 'md' },
+    { id: 'f-5', name: 'config.json', type: 'file', size: '3 KB', modifyTime: '2024-04-28 08:30:00', extension: 'json' },
+  ],
+  'space-1/docs': [
+    { id: 'd1', name: '公司制度.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-05-03 16:45:00', extension: 'pdf' },
+    { id: 'd2', name: '流程规范.docx', type: 'file', size: '856 KB', modifyTime: '2024-04-20 10:10:00', extension: 'docx' },
+    { id: 'd3', name: 'Q1报告.xlsx', type: 'file', size: '340 KB', modifyTime: '2024-03-31 09:00:00', extension: 'xlsx' },
+  ],
+  'space-1/images': [
+    { id: 'i1', name: 'banner.png', type: 'file', size: '2.3 MB', modifyTime: '2024-05-01 14:00:00', extension: 'png' },
+    { id: 'i2', name: 'logo.svg', type: 'file', size: '15 KB', modifyTime: '2024-04-28 16:30:00', extension: 'svg' },
+    { id: 'i3', name: '年会.jpg', type: 'file', size: '5.6 MB', modifyTime: '2024-01-20 14:00:00', extension: 'jpg' },
+  ],
+  'space-1/videos': [
+    { id: 'v1', name: '产品介绍.mp4', type: 'file', size: '256 MB', modifyTime: '2024-04-20 14:00:00', extension: 'mp4' },
+  ],
+  'space-2': [
+    { id: 'g-1', name: '备份', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
+    { id: 'g-2', name: '下载', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
+    { id: 'g-3', name: 'backup-2024.tar.gz', type: 'file', size: '12.5 GB', modifyTime: '2024-12-31 23:59:00', extension: 'tar.gz' },
+  ],
+  'space-2/backup': [
+    { id: 'b1', name: 'db-backup.sql', type: 'file', size: '2.3 GB', modifyTime: '2024-05-06 02:00:00', extension: 'sql' },
+  ],
+  'space-2/download': [
+    { id: 'dl1', name: 'setup.exe', type: 'file', size: '45 MB', modifyTime: '2024-01-15 09:00:00', extension: 'exe' },
+  ],
+
+  // 团队文件
+  'tf-1': [
+    { id: 'tf1-d1', name: '项目文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
+    { id: 'tf1-d2', name: '会议纪要', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
+    { id: 'tf1-f1', name: 'README.md', type: 'file', size: '12 KB', modifyTime: '2024-05-03 16:45:00', extension: 'md' },
+    { id: 'tf1-f2', name: '需求文档.docx', type: 'file', size: '856 KB', modifyTime: '2024-04-20 10:10:00', extension: 'docx' },
+  ],
+  'tf-1/project': [
+    { id: 'tp1', name: 'PRD_v1.0.docx', type: 'file', size: '1.2 MB', modifyTime: '2024-05-01 10:00:00', extension: 'docx' },
+    { id: 'tp2', name: 'API设计.json', type: 'file', size: '45 KB', modifyTime: '2024-04-28 14:00:00', extension: 'json' },
+  ],
+  'tf-1/meeting': [
+    { id: 'tm1', name: '周会-20240506.md', type: 'file', size: '8 KB', modifyTime: '2024-05-06 17:00:00', extension: 'md' },
+    { id: 'tm2', name: '月会-202404.docx', type: 'file', size: '120 KB', modifyTime: '2024-04-30 16:00:00', extension: 'docx' },
+  ],
+  'tf-2': [
+    { id: 'tf2-d1', name: 'UI 设计', type: 'folder', size: '--', modifyTime: '2024-05-06 08:00:00' },
+    { id: 'tf2-d2', name: '品牌素材', type: 'folder', size: '--', modifyTime: '2024-05-04 11:00:00' },
+    { id: 'tf2-f1', name: 'logo.svg', type: 'file', size: '15 KB', modifyTime: '2024-05-01 14:00:00', extension: 'svg' },
+    { id: 'tf2-f2', name: 'banner.psd', type: 'file', size: '45 MB', modifyTime: '2024-04-28 16:30:00', extension: 'psd' },
+  ],
+  'tf-2/ui': [
+    { id: 'tu1', name: '首页设计.fig', type: 'file', size: '12 MB', modifyTime: '2024-05-05 14:00:00', extension: 'fig' },
+  ],
+  'tf-2/brand': [
+    { id: 'tb1', name: '品牌手册.pdf', type: 'file', size: '25 MB', modifyTime: '2024-04-20 10:00:00', extension: 'pdf' },
+    { id: 'tb2', name: '字体包.zip', type: 'file', size: '120 MB', modifyTime: '2024-04-15 09:00:00', extension: 'zip' },
+  ],
+  'tf-3': [
+    { id: 'tf3-d1', name: '2024 年报', type: 'folder', size: '--', modifyTime: '2024-05-05 09:00:00' },
+    { id: 'tf3-d2', name: '税务资料', type: 'folder', size: '--', modifyTime: '2024-05-02 15:30:00' },
+    { id: 'tf3-f1', name: '资产负债表.pdf', type: 'file', size: '1.2 MB', modifyTime: '2024-04-30 11:00:00', extension: 'pdf' },
+  ],
+  'tf-3/2024': [
+    { id: 'ta1', name: 'Q1.xlsx', type: 'file', size: '200 KB', modifyTime: '2024-03-31 09:00:00', extension: 'xlsx' },
+    { id: 'ta2', name: 'Q2.xlsx', type: 'file', size: '220 KB', modifyTime: '2024-06-30 17:00:00', extension: 'xlsx' },
+  ],
+  'tf-3/tax': [
+    { id: 'tt1', name: '增值税.xlsx', type: 'file', size: '180 KB', modifyTime: '2024-04-15 09:00:00', extension: 'xlsx' },
+    { id: 'tt2', name: '个税申报.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-04-10 10:00:00', extension: 'pdf' },
+  ],
+
+  // 他人共享文件
+  'zs-share1': [
+    { id: 'zs1-f1', name: '项目计划书.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-05-06 10:30:00', extension: 'pdf', isShared: true },
+    { id: 'zs1-f2', name: '设计规范.docx', type: 'file', size: '856 KB', modifyTime: '2024-05-05 14:20:00', extension: 'docx', isShared: true },
+    { id: 'zs1-f3', name: 'Q1报表.xlsx', type: 'file', size: '340 KB', modifyTime: '2024-05-03 09:15:00', extension: 'xlsx', isShared: true },
+  ],
+  'zs-share2': [
+    { id: 'zs2-f1', name: '产品原型.rp', type: 'file', size: '12 MB', modifyTime: '2024-04-28 16:00:00', extension: 'rp', isShared: true },
+    { id: 'zs2-f2', name: '架构图.png', type: 'file', size: '3.2 MB', modifyTime: '2024-04-20 09:00:00', extension: 'png', isShared: true },
+  ],
+  'ls-share1': [
+    { id: 'ls1-f1', name: '技术方案.md', type: 'file', size: '28 KB', modifyTime: '2024-04-15 14:00:00', extension: 'md', isShared: true },
+    { id: 'ls1-f2', name: '接口文档.pdf', type: 'file', size: '1.5 MB', modifyTime: '2024-04-10 10:00:00', extension: 'pdf', isShared: true },
+  ],
+  'ls-share2': [
+    { id: 'ls2-f1', name: '新员工培训.mp4', type: 'file', size: '512 MB', modifyTime: '2024-03-20 10:00:00', extension: 'mp4', isShared: true },
+    { id: 'ls2-f2', name: '安全规范.pdf', type: 'file', size: '8 MB', modifyTime: '2024-03-15 09:00:00', extension: 'pdf', isShared: true },
+  ],
+  'ww-share1': [
+    { id: 'ww1-f1', name: '周会-20240501.mp3', type: 'file', size: '45 MB', modifyTime: '2024-05-01 12:00:00', extension: 'mp3', isShared: true },
+    { id: 'ww1-f2', name: '周会-20240508.mp3', type: 'file', size: '52 MB', modifyTime: '2024-05-08 12:00:00', extension: 'mp3', isShared: true },
+  ],
+
+  // 回收站
+};
+
+// ─── 状态 ───
+const treeData = ref<FileTreeNode[]>(mockTree);
+const selectedKeys = ref<string[]>(['spaces']);
+const expandedKeys = ref<string[]>(['spaces', 'shared-from-others']);
+const loading = ref(false);
+const searchText = ref('');
+const viewMode = ref<'list' | 'grid'>('list');
+const currentFiles = ref<MyFileItem[]>([]);
+
+// 重命名
 const renameModalVisible = ref(false);
 const renameFormRef = ref();
 const renameForm = ref({ name: '' });
+const editingFile = ref<MyFileItem | null>(null);
 
+// 移动到
+const moveModalVisible = ref(false);
+const moveTarget = ref('');
+
+// 共享设置
 const shareModalVisible = ref(false);
 const shareFormRef = ref();
 const shareForm = ref({
@@ -193,153 +265,175 @@ const shareForm = ref({
   password: '',
 });
 
-const moveModalVisible = ref(false);
-const moveTarget = ref('');
-
-const folderOptions = [
-  { label: '存储空间1 / 文档', value: 's1-doc' },
-  { label: '存储空间1 / 图片', value: 's1-img' },
-  { label: '存储空间1 / 视频', value: 's1-video' },
-  { label: '存储空间2 / 备份', value: 's2-backup' },
-  { label: '存储空间2 / 下载', value: 's2-download' },
-  { label: '团队文件 / 文档', value: 'tf-1' },
-  { label: '团队文件 / 设计资源', value: 'tf-2' },
-  { label: '团队文件 / 财务资料', value: 'tf-3' },
-  { label: '共享文件 / 共享文档', value: 'shared-docs' },
-  { label: '共享文件 / 共享设计', value: 'shared-design' },
-  { label: '共享文件 / 共享媒体', value: 'shared-media' },
-];
-
-function findPath(nodes: any[], targetKey: string, path: { key: string; title: string }[] = []): { key: string; title: string }[] | null {
-  for (const node of nodes) {
-    const newPath = [...path, { key: String(node.key), title: String(node.title) }];
-    if (node.key === targetKey) return newPath;
-    if (node.children) {
-      const result = findPath(node.children, targetKey, newPath);
-      if (result) return result;
+// 移动目标选项（所有叶子/文件夹节点）
+const folderOptions = computed(() => {
+  const opts: { label: string; value: string }[] = [];
+  function walk(nodes: FileTreeNode[], prefix: string) {
+    for (const n of nodes) {
+      const label = prefix ? `${prefix} / ${n.title}` : n.title;
+      if (n.children) {
+        walk(n.children, label);
+      }
+      // 允许作为移动目标的节点（排除分类节点本身）
+      if (n.type !== 'category' && n.type !== 'shared-user') {
+        opts.push({ label, value: n.key });
+      }
     }
   }
-  return null;
-}
-
-const currentPath = computed(() => {
-  return findPath(treeData, currentKey.value) || [{ key: 'root', title: '我的文件' }];
+  walk(treeData.value, '');
+  return opts;
 });
 
-const currentFiles = computed(() => {
-  return fileDataMap[currentKey.value] || [];
-});
+// ─── 计算属性 ───
 
-const filteredFiles = computed(() => {
-  if (!searchText.value) return currentFiles.value;
-  const kw = searchText.value.toLowerCase();
-  return currentFiles.value.filter(f => f.name.toLowerCase().includes(kw));
-});
+/** 自定义面包屑路径 */
+const breadcrumbPath = computed(() => {
+  const key = selectedKeys.value[0];
+  if (!key) return [{ title: '我的文件', key: 'root' }];
 
-function handleTreeSelect(keys: (string | number)[]) {
-  if (keys.length > 0) {
-    currentKey.value = String(keys[0]);
-    selectedKeys.value = keys;
+  const parts: { title: string; key: string }[] = [{ title: '我的文件', key: 'root' }];
+
+  function findPath(
+    nodes: FileTreeNode[],
+    target: string,
+    current: { title: string; key: string }[],
+  ): boolean {
+    for (const node of nodes) {
+      if (node.key === target) {
+        parts.push(...current, { title: node.title, key: node.key });
+        return true;
+      }
+      if (node.children) {
+        const res = findPath(node.children, target, [
+          ...current,
+          { title: node.title, key: node.key },
+        ]);
+        if (res) return true;
+      }
+    }
+    return false;
   }
+
+  findPath(treeData.value, key, []);
+  return parts;
+});
+
+/** 概览统计 */
+const overviewStats = computed(() => {
+  const spaces = treeData.value.find(n => n.key === 'spaces')?.children?.length || 0;
+  const teamFolders = treeData.value.find(n => n.key === 'team')?.children?.length || 0;
+  const sharedUsers = treeData.value.find(n => n.key === 'shared-from-others')?.children?.length || 0;
+  let fileCount = 0;
+  Object.values(mockFiles).forEach(list => {
+    list.forEach(f => { if (f.type === 'file') fileCount++; });
+  });
+  return { spaces, teamFolders, sharedUsers, files: fileCount };
+});
+
+/** 当前是否为回收站 */
+const isTrash = computed(() => selectedKeys.value[0] === 'trash');
+
+// ─── 方法 ───
+
+function loadFiles(key: string) {
+  loading.value = true;
+  setTimeout(() => {
+    const direct = mockFiles[key];
+    if (direct) {
+      currentFiles.value = direct;
+    } else {
+      // 若选中分类/中间节点，展示其子节点作为文件夹入口
+      const node = findNodeInTree(treeData.value, key);
+      if (node?.children) {
+        currentFiles.value = node.children.map(child => ({
+          id: child.key,
+          name: child.title,
+          type: 'folder' as const,
+          size: '--',
+          modifyTime: '--',
+          isShared: child.type?.startsWith('shared'),
+        }));
+      } else {
+        currentFiles.value = [];
+      }
+    }
+    loading.value = false;
+  }, 150);
 }
 
-function enterFolder(file: any) {
+function onSelectTree(key: string) {
+  selectedKeys.value = [key];
+  loadFiles(key);
+}
+
+function onBreadcrumbClick(item: { key: string }) {
+  if (item.key === 'root') {
+    selectedKeys.value = ['spaces'];
+    expandedKeys.value = ['spaces'];
+    loadFiles('spaces');
+    return;
+  }
+  selectedKeys.value = [item.key];
+  const parentKeys = findParentKeys(treeData.value, item.key);
+  expandedKeys.value = [...new Set([...expandedKeys.value, ...parentKeys])];
+  loadFiles(item.key);
+}
+
+function handleOpenFolder(file: MyFileItem) {
   if (file.type !== 'folder') return;
-  currentKey.value = file.id;
   selectedKeys.value = [file.id];
-  if (!expandedKeys.value.includes(file.id)) {
-    expandedKeys.value = [...expandedKeys.value, file.id];
-  }
+  const parentKeys = findParentKeys(treeData.value, file.id);
+  expandedKeys.value = [...new Set([...expandedKeys.value, ...parentKeys, file.id])];
+  loadFiles(file.id);
 }
 
-function navigateTo(index: number) {
-  const target = currentPath.value[index];
-  if (!target) return;
-  currentKey.value = target.key;
-  selectedKeys.value = [target.key];
+function refresh() {
+  loadFiles(selectedKeys.value[0]);
+  message.success('已刷新');
 }
 
-function getFileIcon(file: FileItem): string {
-  if (file.type === 'folder') return '📁';
-  switch (file.extension) {
-    case 'md': case 'txt': return '📄';
-    case 'json': case 'xml': case 'sh': return '⚙️';
-    case 'zip': case 'rar': return '📦';
-    case 'pdf': return '📕';
-    case 'xlsx': case 'xls': case 'csv': return '📊';
-    case 'doc': case 'docx': return '📝';
-    case 'jpg': case 'jpeg': case 'png': case 'gif': case 'svg': return '🖼️';
-    case 'mp4': case 'avi': return '🎬';
-    case 'mp3': return '🎵';
-    case 'exe': return '⚙️';
-    case 'sql': return '🗃️';
-    case 'rp': return '📐';
-    default: return '📃';
-  }
-}
+// ─── 文件操作 ───
 
-// 操作：上传
-function handleUpload() {
-  message.info('上传功能：请选择要上传的文件');
-}
-
-// 操作：下载
-function handleDownload(file: any) {
+function handleDownload(file: MyFileItem) {
   message.success(`开始下载：${file.name}`);
 }
 
-// 操作：删除
-function handleDelete(file: any) {
-  const list = fileDataMap[currentKey.value];
-  if (list) {
-    fileDataMap[currentKey.value] = list.filter(f => f.id !== file.id);
-  }
-  message.success(`"${file.name}" 已删除`);
-}
-
-// 操作：重命名
-function openRenameModal(file: any) {
-  selectedFile.value = file;
+function openRenameModal(file: MyFileItem) {
+  editingFile.value = file;
   renameForm.value = { name: file.name };
   renameModalVisible.value = true;
 }
 
 function handleRename() {
   renameFormRef.value?.validate().then(() => {
-    if (selectedFile.value) {
-      selectedFile.value.name = renameForm.value.name;
+    if (editingFile.value) {
+      editingFile.value.name = renameForm.value.name;
       message.success('重命名成功');
     }
     renameModalVisible.value = false;
   }).catch(() => {});
 }
 
-// 操作：移动
-function openMoveModal(file: any) {
-  selectedFile.value = file;
+function openMoveModal(file: MyFileItem) {
+  editingFile.value = file;
   moveTarget.value = '';
   moveModalVisible.value = true;
 }
 
 function handleMove() {
-  if (!moveTarget.value || !selectedFile.value) return;
-  // 从当前目录移除
-  const srcList = fileDataMap[currentKey.value];
-  if (srcList) {
-    fileDataMap[currentKey.value] = srcList.filter(f => f.id !== selectedFile.value.id);
-  }
-  // 添加到目标目录
-  const targetList = fileDataMap[moveTarget.value];
-  if (targetList) {
-    targetList.push({ ...selectedFile.value });
-  }
-  message.success(`"${selectedFile.value.name}" 已移动`);
+  if (!moveTarget.value || !editingFile.value) return;
+  message.success(`"${editingFile.value.name}" 已移动`);
+  currentFiles.value = currentFiles.value.filter(f => f.id !== editingFile.value!.id);
   moveModalVisible.value = false;
 }
 
-// 操作：共享设置
-function openShareModal(file: any) {
-  selectedFile.value = file;
+function handleDeleteFile(file: MyFileItem) {
+  message.success(`"${file.name}" 已删除`);
+  currentFiles.value = currentFiles.value.filter(f => f.id !== file.id);
+}
+
+function openShareModal(file: MyFileItem) {
+  editingFile.value = file;
   shareForm.value = {
     enableShare: !!file.isShared,
     shareLink: `https://nas.example.com/s/${file.id}`,
@@ -350,8 +444,8 @@ function openShareModal(file: any) {
 }
 
 function handleSaveShare() {
-  if (selectedFile.value) {
-    selectedFile.value.isShared = shareForm.value.enableShare;
+  if (editingFile.value) {
+    editingFile.value.isShared = shareForm.value.enableShare;
     message.success(shareForm.value.enableShare ? '共享设置已启用' : '共享已关闭');
   }
   shareModalVisible.value = false;
@@ -361,190 +455,158 @@ function copyShareLink() {
   message.success('链接已复制到剪贴板');
 }
 
-const columns = [
-  { title: '名称', dataIndex: 'name', key: 'name', width: 280 },
-  { title: '类型', dataIndex: 'type', key: 'type', width: 100 },
-  { title: '大小', dataIndex: 'size', key: 'size', width: 100 },
-  { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime', width: 160 },
-  { title: '状态', key: 'status', width: 80 },
-  { title: '操作', key: 'action', width: 220 },
-];
+// ─── 树节点图标 ───
+function nodeIconResolver(node: FileTreeNode) {
+  switch (node.type) {
+    case 'category':
+      // 根据分类 key 返回对应图标
+      if (node.key === 'spaces') {
+        return { icon: 'lucide:database', color: '#1677ff' };
+      }
+      if (node.key === 'team') {
+        return { icon: 'lucide:users', color: '#fa8c16' };
+      }
+      if (node.key === 'shared-from-others') {
+        return { icon: 'lucide:share-2', color: '#722ed1' };
+      }
+      return { icon: 'lucide:folder-kanban', color: '#595959' };
+    case 'space':
+      return { icon: 'lucide:hard-drive', color: '#1677ff' };
+    case 'team-folder':
+      return { icon: 'lucide:folder-heart', color: '#fa8c16' };
+    case 'shared-user':
+      return { icon: 'lucide:user-circle', color: '#722ed1' };
+    case 'shared-folder':
+      return { icon: 'lucide:folder-symlink', color: '#a855f7' };
+    case 'subfolder':
+      return { icon: 'lucide:folder-open', color: '#faad14' };
+    default:
+      return { icon: 'lucide:folder', color: '#faad14' };
+  }
+}
+
+onMounted(() => {
+  loadFiles('spaces');
+});
 </script>
 
 <template>
-  <div class="my-files-explorer">
-    <!-- 左侧树形导航 -->
-    <div class="explorer-sidebar">
-      <div class="sidebar-header">📁 我的文件</div>
-      <Tree
+  <div class="file-manager-page">
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">我的文件</h1>
+          <p class="page-desc">普通用户所能访问到的所有文件资源</p>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">存储空间</span>
+            <span class="overview-value">{{ overviewStats.spaces }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:folder-heart" style="font-size: 16px; color: #faad14;" />
+          <div class="overview-info">
+            <span class="overview-label">团队文件夹</span>
+            <span class="overview-value">{{ overviewStats.teamFolders }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #722ed1;" />
+          <div class="overview-info">
+            <span class="overview-label">他人共享</span>
+            <span class="overview-value">{{ overviewStats.sharedUsers }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:file" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">文件总数</span>
+            <span class="overview-value">{{ overviewStats.files }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ 主体区域 ═══════ -->
+    <div class="fm-body">
+      <!-- 左侧目录树 -->
+      <FileTreePanel
         :tree-data="treeData"
-        :selected-keys="selectedKeys"
-        :expanded-keys="expandedKeys"
-        @select="handleTreeSelect"
-        @update:expanded-keys="(v: (string | number)[]) => expandedKeys = v"
+        v-model:selected-keys="selectedKeys"
+        v-model:expanded-keys="expandedKeys"
+        :node-icon-resolver="nodeIconResolver"
+        @select="onSelectTree"
+      />
+
+      <!-- 右侧文件区域 -->
+      <FileManagerPanel
+        :files="currentFiles"
+        :breadcrumb-path="breadcrumbPath"
+        :loading="loading"
+        v-model:search-text="searchText"
+        v-model:view-mode="viewMode"
+        :show-new-folder="!isTrash"
+        :empty-description="isTrash ? '回收站为空' : '暂无文件'"
+        @breadcrumb-click="onBreadcrumbClick"
+        @refresh="refresh"
+        @open-folder="handleOpenFolder"
+        @rename="openRenameModal"
+        @delete-file="handleDeleteFile"
       >
-        <template #title="{ data }">
-          <span class="tree-node">
-            <span class="tree-icon">{{ data.icon }}</span>
-            <span>{{ data.title }}</span>
-          </span>
+        <!-- 自定义操作列：下载 / 重命名 / 更多 -->
+        <template #action-cell="{ file }">
+          <div class="custom-actions">
+            <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
+              <IconifyIcon icon="lucide:download" style="font-size: 13px;" />
+              下载
+            </Button>
+            <Button size="small" type="link" class="action-link" @click="openRenameModal(file)">
+              <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
+              重命名
+            </Button>
+            <Dropdown :trigger="['click']">
+              <Button size="small" type="link" class="action-link">
+                <IconifyIcon icon="lucide:more-horizontal" style="font-size: 13px;" />
+                更多
+              </Button>
+              <template #overlay>
+                <Menu>
+                  <Menu.Item key="move" @click="openMoveModal(file)">
+                    <span class="menu-item-inner">
+                      <IconifyIcon icon="lucide:folder-input" style="font-size: 13px;" />
+                      移动
+                    </span>
+                  </Menu.Item>
+                  <Menu.Item v-if="file.type === 'folder' && !isTrash" key="share" @click="openShareModal(file)">
+                    <span class="menu-item-inner">
+                      <IconifyIcon icon="lucide:share-2" style="font-size: 13px;" />
+                      共享设置
+                    </span>
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item key="delete" danger @click="handleDeleteFile(file)">
+                    <span class="menu-item-danger">
+                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                      删除
+                    </span>
+                  </Menu.Item>
+                </Menu>
+              </template>
+            </Dropdown>
+          </div>
         </template>
-      </Tree>
+      </FileManagerPanel>
     </div>
 
-    <!-- 右侧内容区 -->
-    <div class="explorer-content">
-      <!-- 工具栏 -->
-      <div class="content-toolbar">
-        <div class="breadcrumb-wrapper">
-          <Breadcrumb>
-            <Breadcrumb.Item
-              v-for="(item, index) in currentPath"
-              :key="item.key"
-            >
-              <a v-if="index < currentPath.length - 1" @click="navigateTo(index)">
-                <span v-if="index === 0">📁</span>
-                {{ item.title }}
-              </a>
-              <span v-else>
-                <span v-if="index === 0">📁</span>
-                {{ item.title }}
-              </span>
-            </Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
-        <div class="toolbar-right">
-          <Input
-            v-model:value="searchText"
-            placeholder="搜索"
-            class="search-input"
-            allow-clear
-          />
-          <Radio.Group v-model:value="viewMode" size="small">
-            <Radio.Button value="list">☰</Radio.Button>
-            <Radio.Button value="grid">▦</Radio.Button>
-          </Radio.Group>
-        </div>
-      </div>
-
-      <!-- 操作栏 -->
-      <div class="action-bar">
-        <div>
-          <Button type="primary" @click="handleUpload">
-            ⬆️ 上传
-          </Button>
-          <Button v-if="currentKey === 'trash'" style="margin-left: 8px;" @click="router.push('/file/recycle')">
-            🗑️ 打开回收站页面
-          </Button>
-        </div>
-      </div>
-
-      <!-- 文件列表 -->
-      <div class="file-list-wrapper">
-        <!-- 列表视图 -->
-        <Table
-          v-if="viewMode === 'list'"
-          :columns="columns"
-          :data-source="filteredFiles"
-          row-key="id"
-          size="small"
-          :pagination="false"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'name'">
-              <div
-                class="file-name-cell"
-                :class="{ clickable: record.type === 'folder' }"
-                @click="record.type === 'folder' && enterFolder(record)"
-              >
-                <span class="file-icon">{{ getFileIcon(record) }}</span>
-                <span class="file-name">{{ record.name }}</span>
-                <Tag v-if="record.isShared" color="blue" size="small" class="share-tag">共享中</Tag>
-              </div>
-            </template>
-            <template v-if="column.key === 'type'">
-              {{ record.type === 'folder' ? '文件夹' : (record.extension?.toUpperCase() || '文件') }}
-            </template>
-            <template v-if="column.key === 'status'">
-              <Tag v-if="record.isShared" color="blue" size="small">共享</Tag>
-              <span v-else>-</span>
-            </template>
-            <template v-if="column.key === 'action'">
-              <div class="file-actions">
-                <Button size="small" type="link" @click="handleDownload(record)">下载</Button>
-                <Button size="small" type="link" @click="openRenameModal(record)">重命名</Button>
-                <Dropdown :trigger="['click']">
-                  <Button size="small" type="link">更多 ▼</Button>
-                  <template #overlay>
-                    <div class="dropdown-menu">
-                      <div class="dropdown-item" @click="openMoveModal(record)">📂 移动</div>
-                      <div v-if="record.type === 'folder'" class="dropdown-item" @click="openShareModal(record)">🔗 共享设置</div>
-                      <div class="dropdown-divider" />
-                      <Popconfirm
-                        title="确认删除"
-                        description="删除后无法恢复，是否继续？"
-                        ok-text="确认"
-                        cancel-text="取消"
-                        @confirm="handleDelete(record)"
-                      >
-                        <div class="dropdown-item danger">🗑️ 删除</div>
-                      </Popconfirm>
-                    </div>
-                  </template>
-                </Dropdown>
-              </div>
-            </template>
-          </template>
-        </Table>
-
-        <!-- 网格视图 -->
-        <div v-else class="file-grid">
-          <div
-            v-for="file in filteredFiles"
-            :key="file.id"
-            class="file-grid-item"
-            :class="{ clickable: file.type === 'folder' }"
-          >
-            <div @click="file.type === 'folder' && enterFolder(file)">
-              <div class="file-grid-icon">{{ getFileIcon(file) }}</div>
-              <div class="file-grid-name">
-                {{ file.name }}
-                <Tag v-if="file.isShared" color="blue" size="small">共</Tag>
-              </div>
-              <div class="file-grid-meta">{{ file.type === 'folder' ? '文件夹' : file.size }}</div>
-            </div>
-            <div class="file-grid-actions">
-              <Button size="small" type="link" @click="handleDownload(file)">下载</Button>
-              <Dropdown :trigger="['click']">
-                <Button size="small" type="link">更多</Button>
-                <template #overlay>
-                  <div class="dropdown-menu">
-                    <div class="dropdown-item" @click="openRenameModal(file)">✏️ 重命名</div>
-                    <div class="dropdown-item" @click="openMoveModal(file)">📂 移动</div>
-                    <div v-if="file.type === 'folder'" class="dropdown-item" @click="openShareModal(file)">🔗 共享设置</div>
-                    <div class="dropdown-divider" />
-                    <Popconfirm
-                      title="确认删除"
-                      description="删除后无法恢复，是否继续？"
-                      ok-text="确认"
-                      cancel-text="取消"
-                      @confirm="handleDelete(file)"
-                    >
-                      <div class="dropdown-item danger">🗑️ 删除</div>
-                    </Popconfirm>
-                  </div>
-                </template>
-              </Dropdown>
-            </div>
-          </div>
-          <div v-if="filteredFiles.length === 0" class="file-grid-empty">
-            暂无文件
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 重命名弹窗 -->
+    <!-- ═══════ 重命名弹窗 ═══════ -->
     <Modal
       v-model:open="renameModalVisible"
       title="重命名"
@@ -563,7 +625,7 @@ const columns = [
       </Form>
     </Modal>
 
-    <!-- 移动弹窗 -->
+    <!-- ═══════ 移动到弹窗 ═══════ -->
     <Modal
       v-model:open="moveModalVisible"
       title="移动到"
@@ -572,11 +634,6 @@ const columns = [
     >
       <Form layout="vertical">
         <Form.Item label="目标文件夹">
-          <Input.Search
-            v-model:value="moveTarget"
-            placeholder="选择目标文件夹"
-            readonly
-          />
           <div class="move-folder-list">
             <div
               v-for="opt in folderOptions"
@@ -585,14 +642,15 @@ const columns = [
               :class="{ active: moveTarget === opt.value }"
               @click="moveTarget = opt.value"
             >
-              📁 {{ opt.label }}
+              <IconifyIcon icon="lucide:folder" style="font-size: 13px; color: #bfbfbf; margin-right: 6px;" />
+              {{ opt.label }}
             </div>
           </div>
         </Form.Item>
       </Form>
     </Modal>
 
-    <!-- 共享设置弹窗 -->
+    <!-- ═══════ 共享设置弹窗 ═══════ -->
     <Modal
       v-model:open="shareModalVisible"
       title="共享设置"
@@ -617,12 +675,12 @@ const columns = [
           </Form.Item>
 
           <Form.Item label="有效期">
-            <Radio.Group v-model:value="shareForm.expireDays">
-              <Radio value="1">1天</Radio>
-              <Radio value="7">7天</Radio>
-              <Radio value="30">30天</Radio>
-              <Radio value="0">永久</Radio>
-            </Radio.Group>
+            <AntRadio.Group v-model:value="shareForm.expireDays">
+              <AntRadio value="1">1天</AntRadio>
+              <AntRadio value="7">7天</AntRadio>
+              <AntRadio value="30">30天</AntRadio>
+              <AntRadio value="0">永久</AntRadio>
+            </AntRadio.Group>
           </Form.Item>
 
           <Form.Item label="访问密码（选填）">
@@ -635,225 +693,153 @@ const columns = [
 </template>
 
 <style scoped>
-.my-files-explorer {
-  display: flex;
-  height: calc(100vh - 120px);
-  background: #fff;
-}
-
-/* 左侧树形面板 */
-.explorer-sidebar {
-  width: 240px;
-  border-right: 1px solid #f0f0f0;
-  background: #fafafa;
-  padding: 12px 0;
-  overflow-y: auto;
-  flex-shrink: 0;
-}
-
-.sidebar-header {
-  padding: 0 16px 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #262626;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 8px;
-}
-
-.tree-node {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.tree-icon {
-  font-size: 14px;
-}
-
-/* 右侧内容区 */
-.explorer-content {
-  flex: 1;
+.file-manager-page {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  height: 100%;
+  background: #f5f5f5;
 }
 
-.content-toolbar {
+/* ═══ 页面顶部概览 ═══ */
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 16px 20px;
+  background: #fff;
   border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.breadcrumb-wrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-.toolbar-right {
+.page-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e6f4ff;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.search-input {
-  width: 180px;
-}
-
-/* 操作栏 */
-.action-bar {
-  padding: 10px 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-/* 文件列表 */
-.file-list-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 16px;
-}
-
-.file-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.file-name-cell.clickable {
-  cursor: pointer;
-  color: #1890ff;
-}
-
-.file-name-cell.clickable:hover {
-  text-decoration: underline;
-}
-
-.file-icon {
-  font-size: 18px;
-}
-
-.share-tag {
-  margin-left: 4px;
-}
-
-.file-actions {
-  display: flex;
-  gap: 2px;
-}
-
-/* 下拉菜单 */
-.dropdown-menu {
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
-  padding: 4px 0;
-  min-width: 120px;
-}
-
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 14px;
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
   color: #262626;
-  transition: background 0.2s;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.dropdown-item:hover {
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
   background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
 }
 
-.dropdown-item.danger {
-  color: #ff4d4f;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: #f0f0f0;
-  margin: 4px 0;
-}
-
-/* 网格视图 */
-.file-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 16px;
-  padding: 8px;
-}
-
-.file-grid-item {
+.overview-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 12px 8px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-  text-align: center;
+  gap: 1px;
 }
 
-.file-grid-item.clickable {
-  cursor: pointer;
-}
-
-.file-grid-item:hover {
-  background: #f5f5f5;
-  border-color: #d9d9d9;
-}
-
-.file-grid-icon {
-  font-size: 36px;
-  margin-bottom: 6px;
-}
-
-.file-grid-name {
-  font-size: 12px;
-  color: #262626;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-  margin-bottom: 2px;
-}
-
-.file-grid-meta {
+.overview-label {
   font-size: 11px;
   color: #8c8c8c;
-  margin-bottom: 6px;
 }
 
-.file-grid-actions {
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ═══ 主体区域 ═══ */
+.fm-body {
   display: flex;
-  gap: 4px;
+  flex: 1;
+  overflow: hidden;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* ═══ 自定义操作列 ═══ */
+.custom-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.file-grid-item:hover .file-grid-actions {
+:deep(.ant-table-tbody > tr:hover) .custom-actions {
   opacity: 1;
 }
 
-.file-grid-empty {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 48px 0;
-  color: #bfbfbf;
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 6px;
 }
 
-/* 移动文件夹列表 */
+.menu-item-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.menu-item-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff4d4f;
+}
+
+/* 修复 Dropdown Menu danger 项 hover 颜色 */
+:global(.ant-dropdown-menu-item-danger:hover) {
+  color: #ff4d4f !important;
+  background: #fff1f0 !important;
+}
+
+:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-title-content) {
+  color: #ff4d4f !important;
+}
+
+/* ═══ 移动文件夹列表 ═══ */
 .move-folder-list {
-  margin-top: 8px;
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
   border: 1px solid #f0f0f0;
   border-radius: 6px;
 }
 
 .move-folder-item {
+  display: flex;
+  align-items: center;
   padding: 8px 12px;
   cursor: pointer;
   font-size: 13px;
@@ -867,10 +853,10 @@ const columns = [
 
 .move-folder-item.active {
   background: #e6f7ff;
-  color: #1890ff;
+  color: #1677ff;
 }
 
-/* 共享链接 */
+/* ═══ 共享链接 ═══ */
 .share-link-row {
   display: flex;
   gap: 8px;
@@ -878,5 +864,13 @@ const columns = [
 
 .share-link-row :deep(.ant-input) {
   flex: 1;
+}
+
+/* ═══ 响应式 ═══ */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 </style>
