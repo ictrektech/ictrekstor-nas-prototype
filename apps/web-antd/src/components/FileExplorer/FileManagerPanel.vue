@@ -31,6 +31,16 @@ interface Props {
   emptyDescription?: string;
   /** 面包屑根节点点击后的目标 key */
   rootKey?: string;
+  /** 是否开启文件拖拽 */
+  draggable?: boolean;
+  /** 是否作为放置区域（接收拖拽文件） */
+  dropZone?: boolean;
+  /** 拖拽数据标识前缀，用于区分来源 */
+  dragSourceKey?: string;
+  /** 拖拽放置时的提示文本 */
+  dropHint?: string;
+  /** 面板标题（显示在面包屑左侧） */
+  panelTitle?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -40,6 +50,11 @@ const props = withDefaults(defineProps<Props>(), {
   showNewFolder: true,
   emptyDescription: '暂无文件',
   rootKey: 'root',
+  draggable: false,
+  dropZone: false,
+  dragSourceKey: 'panel',
+  dropHint: '释放以传输到此处',
+  panelTitle: '',
 });
 
 const emit = defineEmits<{
@@ -59,6 +74,12 @@ const emit = defineEmits<{
   rename: [file: FileItem];
   /** 删除 */
   deleteFile: [file: FileItem];
+  /** 文件拖拽开始 */
+  dragStart: [file: FileItem, event: DragEvent];
+  /** 文件拖放完成 */
+  drop: [files: FileItem[], event: DragEvent];
+  /** 拖拽悬停状态变化 */
+  dragOverChange: [isOver: boolean];
 }>();
 
 const internalSearch = computed({
@@ -96,6 +117,8 @@ const tableColumns = computed(() => {
   );
 });
 
+const isDragOver = ref(false);
+
 function onBreadcrumbClick(item: BreadcrumbItem) {
   emit('breadcrumbClick', item);
 }
@@ -125,13 +148,84 @@ function onRename(file: FileItem) {
 function onDelete(file: FileItem) {
   emit('deleteFile', file);
 }
+
+// ═══ 拖拽相关 ═══
+
+function onRowDragStart(file: FileItem, event: DragEvent) {
+  if (!props.draggable) return;
+  const data = JSON.stringify({
+    source: props.dragSourceKey,
+    file: file,
+  });
+  event.dataTransfer?.setData('application/json', data);
+  event.dataTransfer!.effectAllowed = 'copyMove';
+  emit('dragStart', file, event);
+}
+
+function onPanelDragOver(event: DragEvent) {
+  if (!props.dropZone) return;
+  event.preventDefault();
+  event.dataTransfer!.dropEffect = 'copy';
+  isDragOver.value = true;
+  emit('dragOverChange', true);
+}
+
+function onPanelDragLeave(event: DragEvent) {
+  if (!props.dropZone) return;
+  // 只有当真正离开面板时才取消高亮
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  const x = event.clientX;
+  const y = event.clientY;
+  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+    isDragOver.value = false;
+    emit('dragOverChange', false);
+  }
+}
+
+function onPanelDrop(event: DragEvent) {
+  if (!props.dropZone) return;
+  event.preventDefault();
+  isDragOver.value = false;
+  emit('dragOverChange', false);
+
+  try {
+    const dataStr = event.dataTransfer?.getData('application/json');
+    if (dataStr) {
+      const data = JSON.parse(dataStr);
+      // 阻止自己拖到自己
+      if (data.source === props.dragSourceKey) return;
+      if (data.file) {
+        emit('drop', [data.file], event);
+      }
+    }
+  } catch {
+    // 忽略解析错误
+  }
+}
+</script>
+
+<script lang="ts">
+import { ref } from 'vue';
 </script>
 
 <template>
-  <div class="file-manager-panel">
+  <div
+    class="file-manager-panel"
+    :class="{
+      'file-manager-panel--drop-zone': dropZone,
+      'file-manager-panel--drag-over': isDragOver && dropZone,
+    }"
+    @dragover="onPanelDragOver"
+    @dragleave="onPanelDragLeave"
+    @drop="onPanelDrop"
+  >
     <!-- 工具栏 -->
     <div class="file-manager-panel__toolbar">
       <div class="file-manager-panel__breadcrumb-wrap">
+        <div v-if="panelTitle" class="file-manager-panel__panel-title">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
+          <span>{{ panelTitle }}</span>
+        </div>
         <Breadcrumb class="file-manager-panel__breadcrumb">
           <Breadcrumb.Item
             v-for="(item, idx) in breadcrumbPath"
@@ -189,6 +283,14 @@ function onDelete(file: FileItem) {
       </div>
     </div>
 
+    <!-- 拖拽提示遮罩 -->
+    <div v-if="isDragOver && dropZone" class="file-manager-panel__drop-overlay">
+      <div class="file-manager-panel__drop-overlay-content">
+        <IconifyIcon icon="lucide:arrow-down-circle" style="font-size: 40px; color: #1677ff;" />
+        <span class="file-manager-panel__drop-overlay-text">{{ dropHint }}</span>
+      </div>
+    </div>
+
     <!-- 文件内容区 -->
     <div class="file-manager-panel__body">
       <!-- 列表视图 -->
@@ -206,8 +308,10 @@ function onDelete(file: FileItem) {
           <template v-if="column.key === 'name'">
             <div
               class="file-manager-panel__name-cell"
-              :class="{ 'file-manager-panel__name-cell--folder': record.type === 'folder' }"
-              @click="onOpenFolder(record)"
+              :class="{ 'file-manager-panel__name-cell--folder': record.type === 'folder', 'file-manager-panel__name-cell--draggable': draggable }"
+              :draggable="draggable && record.type === 'file'"
+              @click="onOpenFolder(record as FileItem)"
+              @dragstart="onRowDragStart(record as FileItem, $event)"
             >
               <div
                 class="file-manager-panel__icon-box"
@@ -236,7 +340,7 @@ function onDelete(file: FileItem) {
             <slot name="action-cell" :file="record">
               <div class="file-manager-panel__actions-cell">
                 <Tooltip title="重命名">
-                  <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record)">
+                  <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record as FileItem)">
                     <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
                   </Button>
                 </Tooltip>
@@ -246,7 +350,7 @@ function onDelete(file: FileItem) {
                     description="确定要删除该文件吗？"
                     ok-text="确认"
                     cancel-text="取消"
-                    @confirm="onDelete(record)"
+                    @confirm="onDelete(record as FileItem)"
                   >
                     <Button size="small" type="text" danger class="file-manager-panel__action-btn">
                       <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
@@ -274,8 +378,10 @@ function onDelete(file: FileItem) {
           v-for="file in sortedFiles"
           :key="file.id"
           class="file-manager-panel__grid-item"
-          :class="{ 'file-manager-panel__grid-item--folder': file.type === 'folder' }"
-          @click="onOpenFolder(file)"
+          :class="{ 'file-manager-panel__grid-item--folder': file.type === 'folder', 'file-manager-panel__grid-item--draggable': draggable }"
+          :draggable="draggable && file.type === 'file'"
+          @click="onOpenFolder(file as FileItem)"
+          @dragstart="onRowDragStart(file as FileItem, $event)"
         >
           <div
             class="file-manager-panel__grid-icon-box"
@@ -293,7 +399,7 @@ function onDelete(file: FileItem) {
           </div>
           <div class="file-manager-panel__grid-actions">
             <Tooltip title="重命名">
-              <Button size="small" type="text" @click.stop="onRename(file)">
+              <Button size="small" type="text" @click.stop="onRename(file as FileItem)">
                 <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
               </Button>
             </Tooltip>
@@ -303,7 +409,7 @@ function onDelete(file: FileItem) {
                 description="确定要删除该文件吗？"
                 ok-text="确认"
                 cancel-text="取消"
-                @confirm.stop="onDelete(file)"
+                @confirm.stop="onDelete(file as FileItem)"
               >
                 <Button size="small" type="text" danger @click.stop>
                   <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
@@ -337,6 +443,48 @@ function onDelete(file: FileItem) {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.file-manager-panel--drop-zone {
+  border: 2px dashed #d9d9d9;
+}
+
+.file-manager-panel--drag-over {
+  border-color: #1677ff !important;
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
+  background: #f0f5ff;
+}
+
+/* ═══ 拖拽覆盖层 ═══ */
+.file-manager-panel__drop-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(22, 119, 255, 0.06);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.file-manager-panel__drop-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 48px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  border: 2px dashed #1677ff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.file-manager-panel__drop-overlay-text {
+  font-size: 14px;
+  color: #1677ff;
+  font-weight: 500;
 }
 
 /* ═══ 工具栏 ═══ */
@@ -356,6 +504,21 @@ function onDelete(file: FileItem) {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  gap: 10px;
+}
+
+.file-manager-panel__panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: #e6f4ff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1677ff;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .file-manager-panel__breadcrumb {
@@ -451,6 +614,14 @@ function onDelete(file: FileItem) {
   cursor: pointer;
 }
 
+.file-manager-panel__name-cell--draggable[draggable="true"] {
+  cursor: grab;
+}
+
+.file-manager-panel__name-cell--draggable[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 .file-manager-panel__name-cell--folder:hover .file-manager-panel__name-text {
   color: #1677ff;
 }
@@ -532,6 +703,14 @@ function onDelete(file: FileItem) {
 
 .file-manager-panel__grid-item--folder {
   cursor: pointer;
+}
+
+.file-manager-panel__grid-item--draggable[draggable="true"] {
+  cursor: grab;
+}
+
+.file-manager-panel__grid-item--draggable[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .file-manager-panel__grid-item:hover {
