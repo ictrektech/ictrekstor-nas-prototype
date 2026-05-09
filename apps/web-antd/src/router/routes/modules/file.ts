@@ -50,7 +50,7 @@ const routes: RouteRecordRaw[] = [
       {
         name: 'FileRecycle',
         path: '/file/recycle',
-        component: () => import('#/views/file/recycle/index.vue'),
+        component: () => import('#/views/storage/recycle-bin/index.vue'),
         meta: {
           icon: 'lucide:trash-2',
           title: '回收站',

@@ -23,6 +23,10 @@ export interface FileItem {
   size: string;
   modifyTime: string;
   extension?: string;
+  /** 回收站：删除时间 */
+  deletedTime?: string;
+  /** 回收站：原路径 */
+  originalPath?: string;
 }
 
 /** 文件图标配置 */

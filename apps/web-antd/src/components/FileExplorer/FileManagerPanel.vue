@@ -41,6 +41,8 @@ interface Props {
   dropHint?: string;
   /** 面板标题（显示在面包屑左侧） */
   panelTitle?: string;
+  /** 操作模式：normal 普通文件管理 / recycle 回收站 */
+  mode?: 'normal' | 'recycle';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -55,6 +57,7 @@ const props = withDefaults(defineProps<Props>(), {
   dragSourceKey: 'panel',
   dropHint: '释放以传输到此处',
   panelTitle: '',
+  mode: 'normal',
 });
 
 const emit = defineEmits<{
@@ -72,8 +75,10 @@ const emit = defineEmits<{
   openFolder: [file: FileItem];
   /** 重命名 */
   rename: [file: FileItem];
-  /** 删除 */
+  /** 删除 / 回收站彻底删除 */
   deleteFile: [file: FileItem];
+  /** 回收站：还原 */
+  restore: [file: FileItem];
   /** 文件拖拽开始 */
   dragStart: [file: FileItem, event: DragEvent];
   /** 文件拖放完成 */
@@ -106,16 +111,31 @@ const sortedFiles = computed(() => {
 });
 
 const tableColumns = computed(() => {
-  return (
-    props.columns || [
-      { title: '名称', dataIndex: 'name', key: 'name', width: 320, ellipsis: true },
-      { title: '类型', dataIndex: 'type', key: 'type', width: 90, align: 'center' as const },
-      { title: '大小', dataIndex: 'size', key: 'size', width: 100, align: 'right' as const },
-      { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime', width: 170 },
-      { title: '操作', key: 'action', width: 140, align: 'center' as const },
-    ]
-  );
+  if (props.columns) return props.columns;
+  if (props.mode === 'recycle') {
+    return [
+      { title: '名称', dataIndex: 'name', key: 'name', width: 280, ellipsis: true },
+      { title: '类型', dataIndex: 'type', key: 'type', width: 80, align: 'center' as const },
+      { title: '大小', dataIndex: 'size', key: 'size', width: 90, align: 'right' as const },
+      { title: '删除时间', dataIndex: 'deletedTime', key: 'deletedTime', width: 150 },
+      { title: '原路径', dataIndex: 'originalPath', key: 'originalPath', width: 220, ellipsis: true },
+      { title: '操作', key: 'action', width: 130, align: 'center' as const },
+    ];
+  }
+  return [
+    { title: '名称', dataIndex: 'name', key: 'name', width: 320, ellipsis: true },
+    { title: '类型', dataIndex: 'type', key: 'type', width: 90, align: 'center' as const },
+    { title: '大小', dataIndex: 'size', key: 'size', width: 100, align: 'right' as const },
+    { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime', width: 170 },
+    { title: '操作', key: 'action', width: 140, align: 'center' as const },
+  ];
 });
+
+const emptyDesc = computed(() => props.emptyDescription);
+
+function onRestore(file: FileItem) {
+  emit('restore', file);
+}
 
 const isDragOver = ref(false);
 
@@ -267,7 +287,7 @@ import { ref } from 'vue';
           </Button>
         </Tooltip>
         <Button
-          v-if="showNewFolder"
+          v-if="showNewFolder && mode !== 'recycle'"
           type="primary"
           size="small"
           class="file-manager-panel__new-folder"
@@ -276,7 +296,7 @@ import { ref } from 'vue';
           <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
           新建文件夹
         </Button>
-        <Button size="small" class="file-manager-panel__upload" @click="onUpload">
+        <Button v-if="mode !== 'recycle'" size="small" class="file-manager-panel__upload" @click="onUpload">
           <IconifyIcon icon="lucide:upload" style="font-size: 13px;" />
           上传
         </Button>
@@ -336,27 +356,56 @@ import { ref } from 'vue';
           <template v-if="column.key === 'modifyTime'">
             <span class="file-manager-panel__time">{{ record.modifyTime }}</span>
           </template>
+          <template v-if="column.key === 'deletedTime'">
+            <span class="file-manager-panel__time">{{ record.deletedTime || '--' }}</span>
+          </template>
+          <template v-if="column.key === 'originalPath'">
+            <span class="file-manager-panel__path" :title="record.originalPath">{{ record.originalPath || '--' }}</span>
+          </template>
           <template v-if="column.key === 'action'">
             <slot name="action-cell" :file="record">
               <div class="file-manager-panel__actions-cell">
-                <Tooltip title="重命名">
-                  <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record as FileItem)">
-                    <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="删除">
-                  <Popconfirm
-                    title="确认删除"
-                    description="确定要删除该文件吗？"
-                    ok-text="确认"
-                    cancel-text="取消"
-                    @confirm="onDelete(record as FileItem)"
-                  >
-                    <Button size="small" type="text" danger class="file-manager-panel__action-btn">
-                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                <template v-if="mode === 'recycle'">
+                  <Tooltip title="还原">
+                    <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRestore(record as FileItem)">
+                      <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 13px; color: #1677ff;" />
                     </Button>
-                  </Popconfirm>
-                </Tooltip>
+                  </Tooltip>
+                  <Tooltip title="彻底删除">
+                    <Popconfirm
+                      title="确认彻底删除"
+                      description="此操作不可恢复，确定要彻底删除吗？"
+                      ok-text="确认"
+                      cancel-text="取消"
+                      ok-type="danger"
+                      @confirm="onDelete(record as FileItem)"
+                    >
+                      <Button size="small" type="text" danger class="file-manager-panel__action-btn">
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                      </Button>
+                    </Popconfirm>
+                  </Tooltip>
+                </template>
+                <template v-else>
+                  <Tooltip title="重命名">
+                    <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record as FileItem)">
+                      <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="删除">
+                    <Popconfirm
+                      title="确认删除"
+                      description="确定要删除该文件吗？"
+                      ok-text="确认"
+                      cancel-text="取消"
+                      @confirm="onDelete(record as FileItem)"
+                    >
+                      <Button size="small" type="text" danger class="file-manager-panel__action-btn">
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                      </Button>
+                    </Popconfirm>
+                  </Tooltip>
+                </template>
               </div>
             </slot>
           </template>
@@ -397,25 +446,54 @@ import { ref } from 'vue';
             <span v-if="file.type === 'file'">{{ file.size }}</span>
             <span v-else>文件夹</span>
           </div>
+          <div v-if="mode === 'recycle'" class="file-manager-panel__grid-meta file-manager-panel__grid-path">
+            {{ file.originalPath || '--' }}
+          </div>
+          <div v-if="mode === 'recycle'" class="file-manager-panel__grid-meta file-manager-panel__grid-path">
+            {{ file.deletedTime || '--' }}
+          </div>
           <div class="file-manager-panel__grid-actions">
-            <Tooltip title="重命名">
-              <Button size="small" type="text" @click.stop="onRename(file as FileItem)">
-                <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
-              </Button>
-            </Tooltip>
-            <Tooltip title="删除">
-              <Popconfirm
-                title="确认删除"
-                description="确定要删除该文件吗？"
-                ok-text="确认"
-                cancel-text="取消"
-                @confirm.stop="onDelete(file as FileItem)"
-              >
-                <Button size="small" type="text" danger @click.stop>
-                  <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
+            <template v-if="mode === 'recycle'">
+              <Tooltip title="还原">
+                <Button size="small" type="text" @click.stop="onRestore(file as FileItem)">
+                  <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px; color: #1677ff;" />
                 </Button>
-              </Popconfirm>
-            </Tooltip>
+              </Tooltip>
+              <Tooltip title="彻底删除">
+                <Popconfirm
+                  title="确认彻底删除"
+                  description="此操作不可恢复，确定要彻底删除吗？"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  ok-type="danger"
+                  @confirm.stop="onDelete(file as FileItem)"
+                >
+                  <Button size="small" type="text" danger @click.stop>
+                    <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            </template>
+            <template v-else>
+              <Tooltip title="重命名">
+                <Button size="small" type="text" @click.stop="onRename(file as FileItem)">
+                  <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
+                </Button>
+              </Tooltip>
+              <Tooltip title="删除">
+                <Popconfirm
+                  title="确认删除"
+                  description="确定要删除该文件吗？"
+                  ok-text="确认"
+                  cancel-text="取消"
+                  @confirm.stop="onDelete(file as FileItem)"
+                >
+                  <Button size="small" type="text" danger @click.stop>
+                    <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
+                  </Button>
+                </Popconfirm>
+              </Tooltip>
+            </template>
           </div>
         </div>
         <Empty
@@ -771,6 +849,15 @@ import { ref } from 'vue';
 .file-manager-panel__grid-empty {
   grid-column: 1 / -1;
   padding: 48px 0;
+}
+
+.file-manager-panel__grid-path {
+  font-size: 10px;
+  color: #bfbfbf;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ═══ 响应式 ═══ */
