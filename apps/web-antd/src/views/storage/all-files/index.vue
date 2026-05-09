@@ -1,60 +1,35 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
-import {
-  Button,
-  Input,
-  Tree,
-  Table,
-  Empty,
-  Radio,
-  Tag,
-  Tooltip,
-  Breadcrumb,
-  Modal,
-  Form,
-  message,
-  Popconfirm,
-} from 'ant-design-vue';
+import { Button, Modal, Form, Input, message } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
+import {
+  FileTreePanel,
+  FileManagerPanel,
+} from '#/components/FileExplorer';
+import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
+import { getFileIconClass, buildBreadcrumbPath, findParentKeys, findNodeInTree } from '#/components/FileExplorer';
 
-// ─── 类型 ───
-interface FileTreeNode {
-  key: string;
-  title: string;
-  type: 'space' | 'folder';
-  path?: string;
-  spaceId?: string;
-  children?: FileTreeNode[];
-  isLeaf?: boolean;
-}
+// ─── 页面级类型 ───
+// 复用通用 FileTreeNode / FileItem，类型别名保持兼容
 
-interface FileItem {
-  id: string;
-  name: string;
-  type: 'folder' | 'file';
-  size: string;
-  modifyTime: string;
-  extension?: string;
-}
-
-// ─── Mock 数据 ───
+// ─── Mock 树数据 ───
 const mockTree: FileTreeNode[] = [
   {
     key: 'space-1',
     title: '存储空间1',
     type: 'space',
     path: '/share/space1',
-    spaceId: 'space-1',
+    businessId: 'space-1',
     children: [
       {
         key: 'space-1/docs',
         title: '文档',
         type: 'folder',
         path: '/share/space1/文档',
-        spaceId: 'space-1',
+        businessId: 'space-1',
         children: [
-          { key: 'space-1/docs/2024', title: '2024', type: 'folder', path: '/share/space1/文档/2024', spaceId: 'space-1', isLeaf: true },
-          { key: 'space-1/docs/2025', title: '2025', type: 'folder', path: '/share/space1/文档/2025', spaceId: 'space-1', isLeaf: true },
+          { key: 'space-1/docs/2024', title: '2024', type: 'folder', path: '/share/space1/文档/2024', businessId: 'space-1', isLeaf: true },
+          { key: 'space-1/docs/2025', title: '2025', type: 'folder', path: '/share/space1/文档/2025', businessId: 'space-1', isLeaf: true },
         ],
       },
       {
@@ -62,15 +37,15 @@ const mockTree: FileTreeNode[] = [
         title: '图片',
         type: 'folder',
         path: '/share/space1/图片',
-        spaceId: 'space-1',
+        businessId: 'space-1',
         children: [
-          { key: 'space-1/images/photos', title: '相册', type: 'folder', path: '/share/space1/图片/相册', spaceId: 'space-1', isLeaf: true },
-          { key: 'space-1/images/screenshots', title: '截图', type: 'folder', path: '/share/space1/图片/截图', spaceId: 'space-1', isLeaf: true },
+          { key: 'space-1/images/photos', title: '相册', type: 'folder', path: '/share/space1/图片/相册', businessId: 'space-1', isLeaf: true },
+          { key: 'space-1/images/screenshots', title: '截图', type: 'folder', path: '/share/space1/图片/截图', businessId: 'space-1', isLeaf: true },
         ],
       },
-      { key: 'space-1/videos', title: '视频', type: 'folder', path: '/share/space1/视频', spaceId: 'space-1', isLeaf: true },
-      { key: 'space-1/music', title: '音乐', type: 'folder', path: '/share/space1/音乐', spaceId: 'space-1', isLeaf: true },
-      { key: 'space-1/software', title: '软件', type: 'folder', path: '/share/space1/软件', spaceId: 'space-1', isLeaf: true },
+      { key: 'space-1/videos', title: '视频', type: 'folder', path: '/share/space1/视频', businessId: 'space-1', isLeaf: true },
+      { key: 'space-1/music', title: '音乐', type: 'folder', path: '/share/space1/音乐', businessId: 'space-1', isLeaf: true },
+      { key: 'space-1/software', title: '软件', type: 'folder', path: '/share/space1/软件', businessId: 'space-1', isLeaf: true },
     ],
   },
   {
@@ -78,15 +53,16 @@ const mockTree: FileTreeNode[] = [
     title: '存储空间2',
     type: 'space',
     path: '/share/space2',
-    spaceId: 'space-2',
+    businessId: 'space-2',
     children: [
-      { key: 'space-2/backup', title: '备份', type: 'folder', path: '/share/space2/备份', spaceId: 'space-2', isLeaf: true },
-      { key: 'space-2/logs', title: '日志', type: 'folder', path: '/share/space2/日志', spaceId: 'space-2', isLeaf: true },
-      { key: 'space-2/configs', title: '配置文件', type: 'folder', path: '/share/space2/配置文件', spaceId: 'space-2', isLeaf: true },
+      { key: 'space-2/backup', title: '备份', type: 'folder', path: '/share/space2/备份', businessId: 'space-2', isLeaf: true },
+      { key: 'space-2/logs', title: '日志', type: 'folder', path: '/share/space2/日志', businessId: 'space-2', isLeaf: true },
+      { key: 'space-2/configs', title: '配置文件', type: 'folder', path: '/share/space2/配置文件', businessId: 'space-2', isLeaf: true },
     ],
   },
 ];
 
+// ─── Mock 文件数据 ───
 const mockFiles: Record<string, FileItem[]> = {
   'space-1': [
     { id: 'f-1', name: '文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
@@ -172,41 +148,9 @@ const editingFile = ref<FileItem | null>(null);
 const breadcrumbPath = computed(() => {
   const key = selectedKeys.value[0];
   if (!key) return [{ title: '设备全部文件', key: 'root' }];
-
-  const parts: { title: string; key: string }[] = [{ title: '设备全部文件', key: 'root' }];
-
-  function findPath(nodes: FileTreeNode[], target: string, current: { title: string; key: string }[]): boolean {
-    for (const node of nodes) {
-      if (node.key === target) {
-        parts.push(...current, { title: node.title, key: node.key });
-        return true;
-      }
-      if (node.children) {
-        const res = findPath(node.children, target, [...current, { title: node.title, key: node.key }]);
-        if (res) return true;
-      }
-    }
-    return false;
-  }
-
-  findPath(treeData.value, key, []);
-  return parts;
+  return buildBreadcrumbPath(treeData.value, key, '设备全部文件', 'root');
 });
 
-const filteredFiles = computed(() => {
-  if (!searchText.value) return currentFiles.value;
-  const kw = searchText.value.toLowerCase();
-  return currentFiles.value.filter((f) => f.name.toLowerCase().includes(kw));
-});
-
-const sortedFiles = computed(() => {
-  return [...filteredFiles.value].sort((a, b) => {
-    if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
-});
-
-// 概览统计
 const overviewStats = computed(() => {
   let folderCount = 0;
   let fileCount = 0;
@@ -232,11 +176,9 @@ function loadFiles(key: string) {
   }, 150);
 }
 
-function onSelectTree(selected: string[]) {
-  if (selected.length > 0) {
-    selectedKeys.value = selected;
-    loadFiles(selected[0]);
-  }
+function onSelectTree(key: string) {
+  selectedKeys.value = [key];
+  loadFiles(key);
 }
 
 function onBreadcrumbClick(item: { key: string }) {
@@ -252,68 +194,18 @@ function onBreadcrumbClick(item: { key: string }) {
   loadFiles(item.key);
 }
 
-function findParentKeys(nodes: FileTreeNode[], target: string): string[] {
-  for (const node of nodes) {
-    if (node.key === target) return [];
-    if (node.children) {
-      const child = findParentKeys(node.children, target);
-      if (child.length >= 0 && node.children.some((c) => c.key === target || findParentKeysInChildren(c, target))) {
-        return [node.key, ...child];
-      }
-      const deeper = findParentKeys(node.children, target);
-      if (deeper.length > 0) return [node.key, ...deeper];
-    }
+function handleOpenFolder(file: FileItem) {
+  if (file.type !== 'folder') return;
+  const currentKey = selectedKeys.value[0];
+  const newKey = `${currentKey}/${file.name}`;
+  const node = findNodeInTree(treeData.value, newKey);
+  if (node) {
+    selectedKeys.value = [newKey];
+    expandedKeys.value = [...new Set([...expandedKeys.value, currentKey])];
+    loadFiles(newKey);
+  } else {
+    message.info('该目录暂无数据');
   }
-  return [];
-}
-
-function findParentKeysInChildren(node: FileTreeNode, target: string): boolean {
-  if (node.key === target) return true;
-  if (node.children) {
-    return node.children.some((c) => findParentKeysInChildren(c, target));
-  }
-  return false;
-}
-
-function getFileIconClass(file: FileItem): { icon: string; color: string; bg: string } {
-  if (file.type === 'folder') {
-    return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6' };
-  }
-  const ext = (file.extension || '').toLowerCase();
-  const iconMap: Record<string, { icon: string; color: string; bg: string }> = {
-    md: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    txt: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    json: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb' },
-    xml: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb' },
-    zip: { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
-    rar: { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
-    '7z': { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
-    'tar.gz': { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
-    pdf: { icon: 'lucide:file-type', color: '#f5222d', bg: '#fff1f0' },
-    xlsx: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    xls: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    csv: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    doc: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    docx: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    jpg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    jpeg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    png: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    gif: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    svg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    psd: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
-    mp4: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    avi: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    mkv: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    mp3: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
-    wav: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
-    flac: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
-    exe: { icon: 'lucide:terminal', color: '#595959', bg: '#f5f5f5' },
-    log: { icon: 'lucide:scroll-text', color: '#8c8c8c', bg: '#fafafa' },
-    conf: { icon: 'lucide:settings', color: '#8c8c8c', bg: '#fafafa' },
-    yml: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb' },
-    sql: { icon: 'lucide:database', color: '#1677ff', bg: '#e6f4ff' },
-  };
-  return iconMap[ext] || { icon: 'lucide:file', color: '#8c8c8c', bg: '#f5f5f5' };
 }
 
 function openRenameModal(file: FileItem) {
@@ -337,42 +229,18 @@ function handleDeleteFile(file: FileItem) {
   currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
 }
 
-function handleOpenFolder(file: FileItem) {
-  if (file.type !== 'folder') return;
-  const currentKey = selectedKeys.value[0];
-  const newKey = `${currentKey}/${file.name}`;
-  const findNode = (nodes: FileTreeNode[], target: string): FileTreeNode | null => {
-    for (const n of nodes) {
-      if (n.key === target) return n;
-      if (n.children) {
-        const found = findNode(n.children, target);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-  const node = findNode(treeData.value, newKey);
-  if (node) {
-    selectedKeys.value = [newKey];
-    expandedKeys.value = [...new Set([...expandedKeys.value, currentKey])];
-    loadFiles(newKey);
-  } else {
-    message.info('该目录暂无数据');
-  }
-}
-
 function refresh() {
   loadFiles(selectedKeys.value[0]);
   message.success('已刷新');
 }
 
-const columns = [
-  { title: '名称', dataIndex: 'name', key: 'name', width: 320, ellipsis: true },
-  { title: '类型', dataIndex: 'type', key: 'type', width: 90, align: 'center' as const },
-  { title: '大小', dataIndex: 'size', key: 'size', width: 100, align: 'right' as const },
-  { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime', width: 170 },
-  { title: '操作', key: 'action', width: 140, align: 'center' as const },
-];
+// 树节点图标自定义
+function nodeIconResolver(node: FileTreeNode) {
+  if (node.type === 'space') {
+    return { icon: 'lucide:hard-drive', color: '#1677ff' };
+  }
+  return { icon: 'lucide:folder', color: '#faad14' };
+}
 
 onMounted(() => {
   loadFiles('space-1');
@@ -420,219 +288,27 @@ onMounted(() => {
     <!-- ═══════ 主体区域 ═══════ -->
     <div class="fm-body">
       <!-- 左侧目录树 -->
-      <div class="fm-sidebar">
-        <Tree
-          :tree-data="treeData"
-          :selected-keys="selectedKeys"
-          :expanded-keys="expandedKeys"
-          :field-names="{ title: 'title', key: 'key', children: 'children' }"
-          @update:selected-keys="onSelectTree"
-          @update:expanded-keys="expandedKeys = $event"
-          class="fm-tree"
-          :show-line="{ showLeafIcon: false }"
-        >
-          <template #title="node">
-            <span class="tree-node-title">
-              <IconifyIcon
-                :icon="node.type === 'space' ? 'lucide:hard-drive' : 'lucide:folder'"
-                :style="{ fontSize: '14px', color: node.type === 'space' ? '#1677ff' : '#faad14', marginRight: '6px' }"
-              />
-              <span class="tree-node-text">{{ node.title }}</span>
-            </span>
-          </template>
-        </Tree>
-      </div>
+      <FileTreePanel
+        :tree-data="treeData"
+        v-model:selected-keys="selectedKeys"
+        v-model:expanded-keys="expandedKeys"
+        :node-icon-resolver="nodeIconResolver"
+        @select="onSelectTree"
+      />
 
       <!-- 右侧文件区域 -->
-      <div class="fm-content">
-        <!-- 文件区顶部工具栏 -->
-        <div class="content-toolbar">
-          <div class="toolbar-path">
-            <Breadcrumb class="content-breadcrumb">
-              <Breadcrumb.Item
-                v-for="(item, idx) in breadcrumbPath"
-                :key="item.key"
-              >
-                <a
-                  v-if="idx < breadcrumbPath.length - 1"
-                  class="breadcrumb-link"
-                  @click="onBreadcrumbClick(item)"
-                >
-                  {{ item.title }}
-                </a>
-                <span v-else class="breadcrumb-current">{{ item.title }}</span>
-              </Breadcrumb.Item>
-            </Breadcrumb>
-          </div>
-          <div class="toolbar-actions">
-            <Input
-              v-model:value="searchText"
-              placeholder="搜索文件"
-              class="fm-search-input"
-              allow-clear
-            >
-              <template #prefix>
-                <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
-              </template>
-            </Input>
-            <Radio.Group v-model:value="viewMode" size="small" class="fm-view-toggle">
-              <Radio.Button value="list">
-                <IconifyIcon icon="lucide:list" style="font-size: 13px;" />
-              </Radio.Button>
-              <Radio.Button value="grid">
-                <IconifyIcon icon="lucide:layout-grid" style="font-size: 13px;" />
-              </Radio.Button>
-            </Radio.Group>
-            <Tooltip title="刷新">
-              <Button size="small" class="fm-refresh-btn" @click="refresh">
-                <IconifyIcon icon="lucide:refresh-cw" style="font-size: 13px;" />
-              </Button>
-            </Tooltip>
-            <Button type="primary" size="small" class="fm-new-folder-btn">
-              <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
-              新建文件夹
-            </Button>
-            <Button size="small" class="fm-upload-btn">
-              <IconifyIcon icon="lucide:upload" style="font-size: 13px;" />
-              上传
-            </Button>
-          </div>
-        </div>
-
-        <!-- 文件列表 -->
-        <div class="content-body">
-          <Table
-            v-if="viewMode === 'list'"
-            :columns="columns"
-            :data-source="sortedFiles"
-            :loading="loading"
-            row-key="id"
-            size="small"
-            :pagination="false"
-            class="fm-table"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'name'">
-                <div
-                  class="file-name-cell"
-                  :class="{ 'folder-row': record.type === 'folder' }"
-                  @click="record.type === 'folder' ? handleOpenFolder(record) : null"
-                >
-                  <div
-                    class="file-icon-box"
-                    :style="{ background: getFileIconClass(record).bg }"
-                  >
-                    <IconifyIcon
-                      :icon="getFileIconClass(record).icon"
-                      :style="{ fontSize: '16px', color: getFileIconClass(record).color }"
-                    />
-                  </div>
-                  <span class="file-name-text" :title="record.name">{{ record.name }}</span>
-                </div>
-              </template>
-              <template v-if="column.key === 'type'">
-                <Tag :color="record.type === 'folder' ? 'blue' : 'default'" size="small">
-                  {{ record.type === 'folder' ? '文件夹' : '文件' }}
-                </Tag>
-              </template>
-              <template v-if="column.key === 'size'">
-                <span class="file-size">{{ record.size }}</span>
-              </template>
-              <template v-if="column.key === 'modifyTime'">
-                <span class="file-time">{{ record.modifyTime }}</span>
-              </template>
-              <template v-if="column.key === 'action'">
-                <div class="file-actions">
-                  <Tooltip title="重命名">
-                    <Button size="small" type="text" class="action-btn" @click="openRenameModal(record)">
-                      <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="删除">
-                    <Popconfirm
-                      title="确认删除"
-                      description="确定要删除该文件吗？"
-                      ok-text="确认"
-                      cancel-text="取消"
-                      @confirm="handleDeleteFile(record)"
-                    >
-                      <Button size="small" type="text" danger class="action-btn">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
-                </div>
-              </template>
-            </template>
-            <template #emptyText>
-              <Empty description="暂无文件" class="fm-empty">
-                <template #image>
-                  <div class="empty-image">
-                    <IconifyIcon icon="lucide:folder-open" style="font-size: 48px; color: #d9d9d9;" />
-                  </div>
-                </template>
-              </Empty>
-            </template>
-          </Table>
-
-          <!-- 网格视图 -->
-          <div v-else class="file-grid">
-            <div
-              v-for="file in sortedFiles"
-              :key="file.id"
-              class="file-grid-item"
-              :class="{ 'folder-item': file.type === 'folder' }"
-              @click="file.type === 'folder' ? handleOpenFolder(file) : null"
-            >
-              <div
-                class="file-grid-icon-box"
-                :style="{ background: getFileIconClass(file).bg }"
-              >
-                <IconifyIcon
-                  :icon="getFileIconClass(file).icon"
-                  :style="{ fontSize: '32px', color: getFileIconClass(file).color }"
-                />
-              </div>
-              <div class="file-grid-name" :title="file.name">{{ file.name }}</div>
-              <div class="file-grid-meta">
-                <span v-if="file.type === 'file'">{{ file.size }}</span>
-                <span v-else>文件夹</span>
-              </div>
-              <div class="file-grid-actions">
-                <Tooltip title="重命名">
-                  <Button size="small" type="text" @click.stop="openRenameModal(file)">
-                    <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="删除">
-                  <Popconfirm
-                    title="确认删除"
-                    description="确定要删除该文件吗？"
-                    ok-text="确认"
-                    cancel-text="取消"
-                    @confirm.stop="handleDeleteFile(file)"
-                  >
-                    <Button size="small" type="text" danger @click.stop>
-                      <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
-                    </Button>
-                  </Popconfirm>
-                </Tooltip>
-              </div>
-            </div>
-            <Empty
-              v-if="sortedFiles.length === 0 && !loading"
-              description="暂无文件"
-              class="file-grid-empty"
-            >
-              <template #image>
-                <div class="empty-image">
-                  <IconifyIcon icon="lucide:folder-open" style="font-size: 48px; color: #d9d9d9;" />
-                </div>
-              </template>
-            </Empty>
-          </div>
-        </div>
-      </div>
+      <FileManagerPanel
+        :files="currentFiles"
+        :breadcrumb-path="breadcrumbPath"
+        :loading="loading"
+        v-model:search-text="searchText"
+        v-model:view-mode="viewMode"
+        @breadcrumb-click="onBreadcrumbClick"
+        @refresh="refresh"
+        @open-folder="handleOpenFolder"
+        @rename="openRenameModal"
+        @delete-file="handleDeleteFile"
+      />
     </div>
 
     <!-- 重命名弹窗 -->
@@ -750,352 +426,11 @@ onMounted(() => {
   gap: 12px;
 }
 
-/* ═══ 左侧目录树 ═══ */
-.fm-sidebar {
-  width: 220px;
-  min-width: 180px;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  flex-shrink: 0;
-  padding: 8px 4px;
-}
-
-.fm-tree {
-  flex: 1;
-  overflow: auto;
-}
-
-.fm-tree :deep(.ant-tree-treenode) {
-  padding: 2px 0;
-}
-
-.fm-tree :deep(.ant-tree-node-content-wrapper) {
-  display: flex;
-  align-items: center;
-  border-radius: 6px;
-  transition: all 0.2s;
-  padding: 4px 6px;
-}
-
-.fm-tree :deep(.ant-tree-node-content-wrapper:hover) {
-  background: #f0f5ff;
-}
-
-.fm-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
-  background: #e6f4ff !important;
-  color: #1677ff;
-  font-weight: 500;
-}
-
-.fm-tree :deep(.ant-tree-switcher-leaf-line::before) {
-  display: none !important;
-}
-
-.fm-tree :deep(.ant-tree-switcher-leaf-line::after) {
-  display: none !important;
-}
-
-.tree-node-title {
-  display: inline-flex;
-  align-items: center;
-  font-size: 13px;
-}
-
-.tree-node-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
-}
-
-/* ═══ 右侧文件区域 ═══ */
-.fm-content {
-  flex: 1;
-  background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 文件区顶部工具栏 */
-.content-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 1px solid #f5f5f5;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.toolbar-path {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.content-breadcrumb {
-  font-size: 13px;
-}
-
-.content-breadcrumb :deep(.ant-breadcrumb-link) {
-  display: inline-flex;
-  align-items: center;
-}
-
-.breadcrumb-link {
-  color: #1677ff;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.breadcrumb-link:hover {
-  color: #4096ff;
-  text-decoration: underline;
-}
-
-.breadcrumb-current {
-  color: #262626;
-  font-weight: 600;
-}
-
-.toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.fm-search-input {
-  width: 180px;
-}
-
-.fm-view-toggle :deep(.ant-radio-button-wrapper) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 10px;
-}
-
-.fm-refresh-btn,
-.fm-new-folder-btn,
-.fm-upload-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-/* 文件内容区域 */
-.content-body {
-  flex: 1;
-  overflow: auto;
-  padding: 8px 12px 12px;
-}
-
-/* ═══ 表格样式 ═══ */
-.fm-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.fm-table :deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
-  font-weight: 600;
-  font-size: 12px;
-  color: #595959;
-  padding: 10px 12px;
-}
-
-.fm-table :deep(.ant-table-tbody > tr > td) {
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
-.fm-table :deep(.ant-table-tbody > tr:hover > td) {
-  background: #f5f5f5;
-}
-
-.file-name-cell {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: default;
-}
-
-.file-name-cell.folder-row {
-  cursor: pointer;
-}
-
-.file-name-cell.folder-row:hover .file-name-text {
-  color: #1677ff;
-}
-
-.file-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.file-name-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: #262626;
-  transition: color 0.2s;
-}
-
-.file-size {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  color: #8c8c8c;
-  font-size: 12px;
-}
-
-.file-time {
-  color: #8c8c8c;
-  font-size: 12px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.file-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.fm-table :deep(.ant-table-tbody > tr:hover) .file-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  width: 28px;
-  height: 28px;
-}
-
-.fm-empty {
-  padding: 48px 0;
-}
-
-/* ═══ 网格视图 ═══ */
-.file-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
-}
-
-.file-grid-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 8px 8px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: default;
-  position: relative;
-}
-
-.file-grid-item.folder-item {
-  cursor: pointer;
-}
-
-.file-grid-item:hover {
-  background: #fafafa;
-  border-color: #e8e8e8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.file-grid-item.folder-item:hover {
-  background: #f0f5ff;
-  border-color: #bae0ff;
-}
-
-.file-grid-icon-box {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  transition: transform 0.2s;
-}
-
-.file-grid-item:hover .file-grid-icon-box {
-  transform: scale(1.05);
-}
-
-.file-grid-name {
-  font-size: 12px;
-  color: #262626;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-
-.file-grid-meta {
-  font-size: 11px;
-  color: #8c8c8c;
-  margin-bottom: 6px;
-}
-
-.file-grid-actions {
-  display: flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.file-grid-item:hover .file-grid-actions {
-  opacity: 1;
-}
-
-.file-grid-empty {
-  grid-column: 1 / -1;
-  padding: 48px 0;
-}
-
 /* ═══ 响应式 ═══ */
 @media (max-width: 768px) {
-  .fm-sidebar {
-    width: 180px;
-    min-width: 180px;
-  }
-
   .page-header {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .content-toolbar {
-    flex-wrap: wrap;
-  }
-
-  .fm-search-input {
-    width: 160px;
   }
 }
 </style>
