@@ -59,30 +59,12 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'StorageTeamFileDetail',
-        path: '/storage/team-files/detail/:id',
-        component: () => import('#/views/storage/team-files/detail.vue'),
-        meta: {
-          hideInMenu: true,
-          title: '团队文件夹详情',
-        },
-      },
-      {
         name: 'StorageAllFiles',
         path: '/storage/all-files',
         component: () => import('#/views/storage/all-files/index.vue'),
         meta: {
           icon: 'lucide:folder-open',
           title: '设备全部文件',
-        },
-      },
-      {
-        name: 'StorageAllFilesDetail',
-        path: '/storage/all-files/detail/:id',
-        component: () => import('#/views/storage/all-files/detail.vue'),
-        meta: {
-          hideInMenu: true,
-          title: '存储空间文件',
         },
       },
     ],
