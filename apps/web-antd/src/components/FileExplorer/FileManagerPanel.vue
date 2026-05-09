@@ -526,13 +526,14 @@ import { ref } from 'vue';
 }
 
 .file-manager-panel--drop-zone {
-  border: 2px dashed #d9d9d9;
+  /* 默认状态下与其他页面保持一致（实线边框），仅在拖拽悬停时显示虚线高亮 */
+  border: 1px solid #f0f0f0;
 }
 
 .file-manager-panel--drag-over {
-  border-color: #1677ff !important;
+  border: 2px dashed #1677ff !important;
   box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.1);
-  background: #f0f5ff;
+  background: rgba(255, 255, 255, 0.95);
 }
 
 /* ═══ 拖拽覆盖层 ═══ */
