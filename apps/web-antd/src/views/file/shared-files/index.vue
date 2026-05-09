@@ -12,7 +12,11 @@ import {
   Popconfirm,
   Empty,
   Radio,
+  Tooltip,
+  Badge,
+  Divider,
 } from 'ant-design-vue';
+import { IconifyIcon } from '@vben/icons';
 
 interface SharedDir {
   id: string;
@@ -29,7 +33,7 @@ const shareDirs = ref<SharedDir[]>([
   {
     id: 'sd-1',
     name: 'test',
-    sourcePath: '存储空间1/我的文件/test',
+    sourcePath: '存储空间1 / 我的文件 / test',
     shareUsers: ['zhangsan', 'lisi'],
     shareTime: '2024-05-06 10:30:00',
     expireTime: '2024-06-06 10:30:00',
@@ -38,7 +42,7 @@ const shareDirs = ref<SharedDir[]>([
   {
     id: 'sd-2',
     name: 'test4',
-    sourcePath: '存储空间1/我的文件/test4',
+    sourcePath: '存储空间1 / 我的文件 / test4',
     shareUsers: ['wangwu'],
     shareTime: '2024-05-05 14:20:00',
     expireTime: '永久',
@@ -47,11 +51,29 @@ const shareDirs = ref<SharedDir[]>([
   {
     id: 'sd-3',
     name: '项目资料',
-    sourcePath: '存储空间2/团队文件/项目资料',
+    sourcePath: '存储空间2 / 团队文件 / 项目资料',
     shareUsers: ['zhangsan', 'lisi', 'wangwu'],
     shareTime: '2024-04-20 09:15:00',
     expireTime: '2024-05-20 09:15:00',
     status: 'expired',
+  },
+  {
+    id: 'sd-4',
+    name: '设计资源',
+    sourcePath: '存储空间1 / 图片 / 设计资源',
+    shareUsers: ['admin'],
+    shareTime: '2024-05-08 11:00:00',
+    expireTime: '2024-08-08 11:00:00',
+    status: 'active',
+  },
+  {
+    id: 'sd-5',
+    name: 'Q2 报表',
+    sourcePath: '存储空间2 / 备份 / Q2 报表',
+    shareUsers: ['zhangsan', 'wangwu'],
+    shareTime: '2024-05-01 09:00:00',
+    expireTime: '永久',
+    status: 'active',
   },
 ]);
 
@@ -80,15 +102,16 @@ const userOptions = [
 ];
 
 const folderOptions = [
-  { label: '存储空间1 / 我的文件 / test', value: '存储空间1/我的文件/test' },
-  { label: '存储空间1 / 我的文件 / test4', value: '存储空间1/我的文件/test4' },
-  { label: '存储空间1 / 文档', value: '存储空间1/文档' },
-  { label: '存储空间1 / 图片', value: '存储空间1/图片' },
-  { label: '存储空间2 / 备份', value: '存储空间2/备份' },
-  { label: '存储空间2 / 下载', value: '存储空间2/下载' },
-  { label: '团队文件 / 文档', value: '团队文件/文档' },
-  { label: '团队文件 / 设计资源', value: '团队文件/设计资源' },
-  { label: '团队文件 / 财务资料', value: '团队文件/财务资料' },
+  { label: '存储空间1 / 我的文件 / test', value: '存储空间1 / 我的文件 / test' },
+  { label: '存储空间1 / 我的文件 / test4', value: '存储空间1 / 我的文件 / test4' },
+  { label: '存储空间1 / 文档', value: '存储空间1 / 文档' },
+  { label: '存储空间1 / 图片', value: '存储空间1 / 图片' },
+  { label: '存储空间1 / 设计资源', value: '存储空间1 / 设计资源' },
+  { label: '存储空间2 / 备份', value: '存储空间2 / 备份' },
+  { label: '存储空间2 / 下载', value: '存储空间2 / 下载' },
+  { label: '团队文件 / 文档', value: '团队文件 / 文档' },
+  { label: '团队文件 / 设计资源', value: '团队文件 / 设计资源' },
+  { label: '团队文件 / 财务资料', value: '团队文件 / 财务资料' },
 ];
 
 const filteredDirs = computed(() => {
@@ -98,20 +121,28 @@ const filteredDirs = computed(() => {
     result = result.filter(
       (d) =>
         d.name.toLowerCase().includes(kw) ||
-        d.sourcePath.toLowerCase().includes(kw),
+        d.sourcePath.toLowerCase().includes(kw) ||
+        d.shareUsers.some((u) => u.toLowerCase().includes(kw)),
     );
   }
   return result;
 });
 
+const overviewStats = computed(() => {
+  const active = shareDirs.value.filter((d) => d.status === 'active').length;
+  const expired = shareDirs.value.filter((d) => d.status === 'expired').length;
+  const userSet = new Set<string>();
+  shareDirs.value.forEach((d) => d.shareUsers.forEach((u) => userSet.add(u)));
+  return { total: shareDirs.value.length, active, expired, userCount: userSet.size };
+});
+
 const columns = [
-  { title: '共享名', dataIndex: 'name', key: 'name', width: 200 },
-  { title: '原文件夹', dataIndex: 'sourcePath', key: 'sourcePath' },
-  { title: '共享用户', key: 'shareUsers', width: 200 },
-  { title: '共享时间', dataIndex: 'shareTime', key: 'shareTime', width: 160 },
+  { title: '共享名称', dataIndex: 'name', key: 'name', width: 180 },
+  { title: '原文件夹', dataIndex: 'sourcePath', key: 'sourcePath', ellipsis: true },
+  { title: '共享用户', key: 'shareUsers', width: 180 },
   { title: '有效期', dataIndex: 'expireTime', key: 'expireTime', width: 140 },
-  { title: '状态', key: 'status', width: 80 },
-  { title: '操作', key: 'action', width: 160 },
+  { title: '状态', key: 'status', width: 90, align: 'center' as const },
+  { title: '操作', key: 'action', width: 120, align: 'center' as const },
 ];
 
 function openCreateModal() {
@@ -147,7 +178,7 @@ function handleCreate() {
     .catch(() => {});
 }
 
-function openEditUsersModal(dir: any) {
+function openEditUsersModal(dir: SharedDir) {
   editingDir.value = dir;
   editUsersForm.value = {
     shareUsers: [...dir.shareUsers],
@@ -163,106 +194,230 @@ function handleSaveUsers() {
   editUsersModalVisible.value = false;
 }
 
-function handleDelete(dir: any) {
+function handleDelete(dir: SharedDir) {
   shareDirs.value = shareDirs.value.filter((d) => d.id !== dir.id);
   message.success(`"${dir.name}" 已删除`);
+}
+
+// 获取用户首字母作为颜色标识
+function getUserColor(user: string) {
+  const colors: Record<string, string> = {
+    zhangsan: '#1677ff',
+    lisi: '#52c41a',
+    wangwu: '#fa8c16',
+    admin: '#722ed1',
+  };
+  return colors[user] || '#595959';
+}
+
+function getUserInitial(user: string) {
+  return user.charAt(0).toUpperCase();
 }
 </script>
 
 <template>
   <div class="shared-files-page">
-    <!-- 工具栏 -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="breadcrumb-bar">
-          <span class="breadcrumb-icon">🔗</span>
-          <span class="breadcrumb-text">我的共享</span>
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:link" style="font-size: 20px; color: #722ed1;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">我的共享</h1>
+          <p class="page-desc">管理当前用户对其他用户分享的文件</p>
         </div>
       </div>
-      <div class="toolbar-right">
-        <Button type="primary" @click="openCreateModal">
-          + 创建共享
-        </Button>
-        <Input
-          v-model:value="searchText"
-          placeholder="搜索共享名"
-          class="search-input"
-          allow-clear
-        />
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:folder-heart" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">有效共享</span>
+            <span class="overview-value">{{ overviewStats.active }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:folder-x" style="font-size: 16px; color: #8c8c8c;" />
+          <div class="overview-info">
+            <span class="overview-label">已过期</span>
+            <span class="overview-value">{{ overviewStats.expired }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">共享用户</span>
+            <span class="overview-value">{{ overviewStats.userCount }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
+          <div class="overview-info">
+            <span class="overview-label">共享总数</span>
+            <span class="overview-value">{{ overviewStats.total }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 共享目录列表 -->
-    <div class="table-wrapper">
-      <Table
-        :columns="columns"
-        :data-source="filteredDirs"
-        row-key="id"
-        size="small"
-        :pagination="false"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'name'">
-            <div class="dir-name-cell">
-              <span class="dir-icon">📁</span>
-              <span class="dir-name">{{ record.name }}</span>
-            </div>
-          </template>
-          <template v-if="column.key === 'shareUsers'">
-            <div class="user-tags">
+    <!-- ═══════ 主体内容 ═══════ -->
+    <div class="page-body">
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <Button
+            type="primary"
+            class="create-btn"
+            @click="openCreateModal"
+          >
+            <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
+            创建共享
+          </Button>
+        </div>
+        <div class="toolbar-right">
+          <Input
+            v-model:value="searchText"
+            placeholder="搜索共享名称、路径或用户"
+            class="search-input"
+            allow-clear
+          >
+            <template #prefix>
+              <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+            </template>
+          </Input>
+        </div>
+      </div>
+
+      <!-- 表格卡片 -->
+      <div class="table-card">
+        <Table
+          :columns="columns"
+          :data-source="filteredDirs"
+          row-key="id"
+          size="small"
+          :pagination="false"
+          class="shared-table"
+        >
+          <template #bodyCell="{ column, record }">
+            <!-- 共享名称 -->
+            <template v-if="column.key === 'name'">
+              <div class="name-cell">
+                <div
+                  class="name-icon-box"
+                  :class="{ 'name-icon-box--expired': record.status === 'expired' }"
+                >
+                  <IconifyIcon icon="lucide:folder-share" style="font-size: 18px;" />
+                </div>
+                <div class="name-text-area">
+                  <div class="name-title">{{ record.name }}</div>
+                  <div class="name-time">创建于 {{ record.shareTime }}</div>
+                </div>
+              </div>
+            </template>
+
+            <!-- 原文件夹 -->
+            <template v-if="column.key === 'sourcePath'">
+              <div class="path-cell">
+                <IconifyIcon icon="lucide:folder-open" style="font-size: 13px; color: #bfbfbf; flex-shrink: 0;" />
+                <span class="path-text" :title="record.sourcePath">{{ record.sourcePath }}</span>
+              </div>
+            </template>
+
+            <!-- 共享用户 -->
+            <template v-if="column.key === 'shareUsers'">
+              <div class="user-cell">
+                <Tooltip
+                  v-for="user in record.shareUsers"
+                  :key="user"
+                  :title="user"
+                >
+                  <div
+                    class="user-avatar"
+                    :style="{ backgroundColor: getUserColor(user) + '20', color: getUserColor(user), borderColor: getUserColor(user) + '40' }"
+                  >
+                    {{ getUserInitial(user) }}
+                  </div>
+                </Tooltip>
+                <span v-if="record.shareUsers.length === 0" class="no-users">无</span>
+              </div>
+            </template>
+
+            <!-- 有效期 -->
+            <template v-if="column.key === 'expireTime'">
+              <div class="expire-cell">
+                <IconifyIcon
+                  :icon="record.expireTime === '永久' ? 'lucide:infinity' : 'lucide:calendar-clock'"
+                  :style="{ fontSize: '13px', color: record.status === 'expired' ? '#ff4d4f' : '#8c8c8c', flexShrink: 0 }"
+                />
+                <span :class="{ 'expire-expired': record.status === 'expired' }">
+                  {{ record.expireTime }}
+                </span>
+              </div>
+            </template>
+
+            <!-- 状态 -->
+            <template v-if="column.key === 'status'">
               <Tag
-                v-for="user in record.shareUsers"
-                :key="user"
-                color="blue"
+                :color="record.status === 'active' ? 'success' : 'default'"
                 size="small"
+                class="status-tag"
               >
-                {{ user }}
+                <Badge
+                  :color="record.status === 'active' ? '#52c41a' : '#8c8c8c'"
+                  style="margin-right: 4px;"
+                />
+                {{ record.status === 'active' ? '有效' : '已过期' }}
               </Tag>
-              <span
-                v-if="record.shareUsers.length === 0"
-                class="no-users"
-              >
-                无
-              </span>
-            </div>
+            </template>
+
+            <!-- 操作 -->
+            <template v-if="column.key === 'action'">
+              <div class="action-cell">
+                <Tooltip title="管理共享用户">
+                  <Button
+                    size="small"
+                    type="text"
+                    class="action-icon-btn"
+                    @click="openEditUsersModal(record)"
+                  >
+                    <IconifyIcon icon="lucide:users" style="font-size: 14px;" />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="删除共享">
+                  <Popconfirm
+                    title="确认删除"
+                    description="删除后该共享将失效，是否继续？"
+                    ok-text="确认"
+                    cancel-text="取消"
+                    @confirm="handleDelete(record)"
+                  >
+                    <Button size="small" type="text" danger class="action-icon-btn">
+                      <IconifyIcon icon="lucide:trash-2" style="font-size: 14px;" />
+                    </Button>
+                  </Popconfirm>
+                </Tooltip>
+              </div>
+            </template>
           </template>
-          <template v-if="column.key === 'status'">
-            <Tag :color="record.status === 'active' ? 'success' : 'default'" size="small">
-              {{ record.status === 'active' ? '有效' : '已过期' }}
-            </Tag>
+
+          <template #emptyText>
+            <Empty description="暂无共享目录" class="table-empty">
+              <template #image>
+                <div class="empty-image">
+                  <IconifyIcon icon="lucide:link" style="font-size: 48px; color: #d9d9d9;" />
+                </div>
+              </template>
+            </Empty>
           </template>
-          <template v-if="column.key === 'action'">
-            <div class="action-btns">
-              <Button
-                size="small"
-                type="link"
-                @click="openEditUsersModal(record)"
-              >
-                共享用户
-              </Button>
-              <Popconfirm
-                title="确认删除"
-                description="删除后该共享将失效，是否继续？"
-                ok-text="确认"
-                cancel-text="取消"
-                @confirm="handleDelete(record)"
-              >
-                <Button size="small" type="link" danger>
-                  删除
-                </Button>
-              </Popconfirm>
-            </div>
-          </template>
-        </template>
-      </Table>
-      <Empty v-if="filteredDirs.length === 0" description="暂无共享目录" />
+        </Table>
+      </div>
     </div>
 
-    <!-- 创建共享弹窗 -->
+    <!-- ═══════ 创建共享弹窗 ═══════ -->
     <Modal
       v-model:open="createModalVisible"
       title="创建共享"
-      width="480px"
+      width="520px"
       ok-text="创建"
       cancel-text="取消"
       @ok="handleCreate"
@@ -273,16 +428,15 @@ function handleDelete(dir: any) {
         layout="vertical"
         :rules="{
           name: [{ required: true, message: '请输入共享名称', trigger: 'blur' }],
-          sourcePath: [
-            { required: true, message: '请选择原文件夹', trigger: 'change' },
-          ],
+          sourcePath: [{ required: true, message: '请选择原文件夹', trigger: 'change' }],
         }"
       >
         <Form.Item label="共享名称" name="name">
-          <Input
-            v-model:value="createForm.name"
-            placeholder="请输入共享名称"
-          />
+          <Input v-model:value="createForm.name" placeholder="请输入共享名称">
+            <template #prefix>
+              <IconifyIcon icon="lucide:folder-share" style="font-size: 14px; color: #bfbfbf;" />
+            </template>
+          </Input>
         </Form.Item>
         <Form.Item label="原文件夹" name="sourcePath">
           <Select
@@ -310,7 +464,7 @@ function handleDelete(dir: any) {
       </Form>
     </Modal>
 
-    <!-- 编辑共享用户弹窗 -->
+    <!-- ═══════ 编辑共享用户弹窗 ═══════ -->
     <Modal
       v-model:open="editUsersModalVisible"
       :title="`共享用户 - ${editingDir?.name}`"
@@ -335,15 +489,102 @@ function handleDelete(dir: any) {
 
 <style scoped>
 .shared-files-page {
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
 }
 
-/* 工具栏 */
+/* ═══ 页面顶部概览 ═══ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f9f0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ═══ 主体内容 ═══ */
+.page-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+/* ═══ 工具栏 ═══ */
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   gap: 12px;
 }
 
@@ -352,61 +593,122 @@ function handleDelete(dir: any) {
   align-items: center;
 }
 
-.breadcrumb-bar {
-  display: flex;
+.create-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 4px 12px;
-}
-
-.breadcrumb-icon {
-  font-size: 14px;
-}
-
-.breadcrumb-text {
-  font-size: 14px;
-  color: #262626;
+  gap: 6px;
 }
 
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .search-input {
-  width: 220px;
+  width: 260px;
 }
 
-/* 表格 */
-.table-wrapper {
+/* ═══ 表格卡片 ═══ */
+.table-card {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #f0f0f0;
-  padding: 16px;
+  overflow: hidden;
 }
 
-.dir-name-cell {
+.shared-table :deep(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+  font-size: 12px;
+  color: #595959;
+  padding: 10px 14px;
+}
+
+.shared-table :deep(.ant-table-tbody > tr > td) {
+  padding: 12px 14px;
+  font-size: 13px;
+}
+
+.shared-table :deep(.ant-table-tbody > tr:hover > td) {
+  background: #f5f5f5;
+}
+
+/* ═══ 名称列 ═══ */
+.name-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.dir-icon {
-  font-size: 18px;
-}
-
-.dir-name {
-  font-weight: 500;
-}
-
-.user-tags {
+.name-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0f5ff;
+  color: #1677ff;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.name-icon-box--expired {
+  background: #f5f5f5;
+  color: #8c8c8c;
+}
+
+.name-text-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+}
+
+.name-time {
+  font-size: 11px;
+  color: #bfbfbf;
+}
+
+/* ═══ 路径列 ═══ */
+.path-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+.path-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ═══ 用户列 ═══ */
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: 4px;
+}
+
+.user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid;
+  cursor: default;
 }
 
 .no-users {
@@ -414,8 +716,68 @@ function handleDelete(dir: any) {
   font-size: 13px;
 }
 
-.action-btns {
+/* ═══ 有效期列 ═══ */
+.expire-cell {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 6px;
+  color: #595959;
+  font-size: 13px;
+}
+
+.expire-expired {
+  color: #ff4d4f;
+}
+
+/* ═══ 状态列 ═══ */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ═══ 操作列 ═══ */
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.action-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  width: 28px;
+  height: 28px;
+}
+
+/* ═══ 空状态 ═══ */
+.table-empty {
+  padding: 48px 0;
+}
+
+.empty-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* ═══ 响应式 ═══ */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .search-input {
+    width: 200px;
+  }
 }
 </style>
