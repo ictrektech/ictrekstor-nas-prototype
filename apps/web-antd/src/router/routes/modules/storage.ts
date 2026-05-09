@@ -32,16 +32,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'StoragePools',
-        path: '/storage/pools',
-        component: () => import('#/views/storage/pools/index.vue'),
-        meta: {
-          icon: 'lucide:layers',
-          title: $t('page.storage.pools'),
-          hideInMenu: true,
-        },
-      },
-      {
         name: 'StoragePoolDetail',
         path: '/storage/pools/detail/:id',
         component: () => import('#/views/storage/pools/detail.vue'),

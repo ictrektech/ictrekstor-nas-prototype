@@ -171,6 +171,26 @@ function getPoolStatusDotColor(status: string): string {
   return status === '正常' ? '#52c41a' : '#ff4d4f';
 }
 
+// 概览使用率颜色
+function getOverviewUsedColor(): string {
+  const totalCap = overviewStats.value.totalCap;
+  const totalUsed = overviewStats.value.totalUsed;
+  const capNum = parseFloat(totalCap);
+  const usedNum = parseFloat(totalUsed);
+  if (capNum <= 0) return '#1677ff';
+  const percent = (usedNum / capNum) * 100;
+  if (percent >= 90) return '#ff4d4f';
+  if (percent >= 70) return '#faad14';
+  return '#1677ff';
+}
+
+function getOverviewUsedBg(): string {
+  const color = getOverviewUsedColor();
+  if (color === '#ff4d4f') return '#fff1f0';
+  if (color === '#faad14') return '#fffbe6';
+  return '#e6f7ff';
+}
+
 function goToPoolDetail(poolId: string) {
   router.push(`/storage/pools/detail/${poolId}`);
 }
@@ -253,12 +273,59 @@ onMounted(loadData);
 
 <template>
   <div class="volume-manager">
-    <!-- 操作栏 -->
-    <div class="action-bar">
-      <Button type="primary" @click="openCreatePoolModal">
-        <IconifyIcon icon="lucide:plus" style="font-size: 14px;" />
-        创建存储池
-      </Button>
+    <!-- 概览区域 -->
+    <div class="overview-section">
+      <div class="overview-header">
+        <div class="overview-title">
+          <IconifyIcon icon="lucide:layout-dashboard" style="font-size: 16px; color: #1677ff;" />
+          <span>存储概览</span>
+        </div>
+        <Button type="primary" class="create-pool-btn" @click="openCreatePoolModal">
+          <IconifyIcon icon="lucide:plus" style="font-size: 14px;" />
+          创建存储池
+        </Button>
+      </div>
+      <div class="overview-divider" />
+      <div class="overview-stats">
+        <div class="stat-item">
+          <div class="stat-icon-box" style="background: #e6f7ff;">
+            <IconifyIcon icon="lucide:database" style="font-size: 20px; color: #1677ff;" />
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ pools.length }}</div>
+            <div class="stat-label">存储池</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-box" style="background: #e6f7ff;">
+            <IconifyIcon icon="lucide:box" style="font-size: 20px; color: #1677ff;" />
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ overviewStats.total }}</div>
+            <div class="stat-label">存储空间</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-box" style="background: #f6ffed;">
+            <IconifyIcon icon="lucide:hard-drive" style="font-size: 20px; color: #52c41a;" />
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ overviewStats.totalCap }}</div>
+            <div class="stat-label">总容量</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon-box" :style="{ background: getOverviewUsedBg() }">
+            <IconifyIcon icon="lucide:pie-chart" style="font-size: 20px;" :style="{ color: getOverviewUsedColor() }" />
+          </div>
+          <div class="stat-info">
+            <div class="stat-value" :style="{ color: getOverviewUsedColor() }">
+              {{ Math.round((parseFloat(overviewStats.totalUsed) / parseFloat(overviewStats.totalCap)) * 100) || 0 }}%
+            </div>
+            <div class="stat-label">使用率</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 存储空间列表 -->
@@ -495,13 +562,26 @@ onMounted(loadData);
             <div class="pool-header-body">
               <div class="ph-row ph-row-name">
                 <span class="pool-name">基于目录的存储空间</span>
-                <Tag color="green" size="small">
-                  <span class="status-dot" style="background: #52c41a;" />
-                  {{ directoryVolumes.length }} 个
-                </Tag>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 存储空间表头 -->
+        <div class="volumes-section-header">
+          <div class="volumes-section-title">
+            <IconifyIcon icon="lucide:box" style="font-size: 14px; color: #1677ff;" />
+            <span>存储空间</span>
+            <span class="volumes-count">{{ directoryVolumes.length }}</span>
+          </div>
+          <Button
+            size="small"
+            class="create-volume-inline-btn"
+            @click="openCreateModal"
+          >
+            <IconifyIcon icon="lucide:plus" style="font-size: 12px;" />
+            创建存储空间
+          </Button>
         </div>
 
         <!-- 目录下的存储空间卡片 -->
@@ -758,6 +838,91 @@ onMounted(loadData);
   width: 100%;
 }
 
+/* 概览区域 */
+.overview-section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+}
+
+.overview-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #262626;
+}
+
+.overview-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0 20px;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  padding: 16px 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-right: 1px solid #f0f0f0;
+}
+
+.stat-item:first-child {
+  padding-left: 0;
+}
+
+.stat-item:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.stat-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #262626;
+  line-height: 1.2;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
 /* 操作栏 */
 .action-bar {
   margin-bottom: 10px;
@@ -774,23 +939,26 @@ onMounted(loadData);
 .pool-wrapper-card {
   background: #fff;
   border-radius: 12px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #d9d9d9;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .pool-wrapper-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  border-color: #d9d9d9;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+  border-color: #b7b7b7;
+  transform: translateY(-1px);
 }
 
 .directory-wrapper {
-  border-color: #d9f7be;
+  border-color: #b7eb8f;
+  box-shadow: 0 2px 10px rgba(82, 196, 26, 0.06);
 }
 
 .directory-wrapper:hover {
-  border-color: #95de64;
-  box-shadow: 0 4px 16px rgba(82, 196, 26, 0.08);
+  border-color: #73d13d;
+  box-shadow: 0 6px 24px rgba(82, 196, 26, 0.12);
 }
 
 /* 存储池头部 */
