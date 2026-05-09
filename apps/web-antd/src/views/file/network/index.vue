@@ -3,16 +3,21 @@ import { ref, computed } from 'vue';
 import {
   Button,
   Input,
-  Table,
-  Tag,
   Switch,
+  Tag,
   Modal,
   Form,
   Tabs,
   message,
   Card,
+  Tooltip,
+  Badge,
 } from 'ant-design-vue';
+import { IconifyIcon } from '@vben/icons';
 
+const TabPane = Tabs.TabPane;
+
+// ==================== 类型定义 ====================
 interface NetworkProtocol {
   id: string;
   name: string;
@@ -23,10 +28,26 @@ interface NetworkProtocol {
   autoMount: boolean;
   requireAuth: boolean;
   description: string;
+  // 协议特有配置
+  config: ProtocolConfig;
 }
 
-const TabPane = Tabs.TabPane;
-const searchText = ref('');
+interface ProtocolConfig {
+  // SMB
+  workgroup?: string;
+  enableV1?: boolean;
+  // NFS
+  squash?: string;
+  // WebDAV
+  https?: boolean;
+  // FTP
+  passiveMode?: boolean;
+  // AFP
+  timeMachine?: boolean;
+}
+
+// ==================== 协议数据 ====================
+const nasHost = ref('192.168.1.100');
 
 const protocols = ref<NetworkProtocol[]>([
   {
@@ -38,7 +59,8 @@ const protocols = ref<NetworkProtocol[]>([
     port: 445,
     autoMount: true,
     requireAuth: true,
-    description: 'Windows 系统原生支持的文件共享协议',
+    description: 'Windows 系统原生支持的文件共享协议，局域网内传输速度快',
+    config: { workgroup: 'WORKGROUP', enableV1: false },
   },
   {
     id: 'nfs',
@@ -49,7 +71,8 @@ const protocols = ref<NetworkProtocol[]>([
     port: 2049,
     autoMount: false,
     requireAuth: false,
-    description: 'Linux/Unix 系统原生支持的文件共享协议',
+    description: 'Linux / Unix 系统原生支持的文件共享协议，性能优异',
+    config: { squash: 'no_root_squash' },
   },
   {
     id: 'webdav',
@@ -60,7 +83,8 @@ const protocols = ref<NetworkProtocol[]>([
     port: 5005,
     autoMount: false,
     requireAuth: true,
-    description: '基于 HTTP 的文件共享协议，支持远程访问',
+    description: '基于 HTTP 的文件共享协议，支持跨平台远程访问',
+    config: { https: false },
   },
   {
     id: 'ftp',
@@ -71,7 +95,8 @@ const protocols = ref<NetworkProtocol[]>([
     port: 21,
     autoMount: false,
     requireAuth: true,
-    description: '传统文件传输协议，兼容性好',
+    description: '传统文件传输协议，兼容性好，适合大文件批量传输',
+    config: { passiveMode: true },
   },
   {
     id: 'afp',
@@ -82,26 +107,14 @@ const protocols = ref<NetworkProtocol[]>([
     port: 548,
     autoMount: false,
     requireAuth: true,
-    description: 'macOS 原生支持的文件共享协议',
+    description: 'macOS 原生支持的文件共享协议，Apple 设备首选',
+    config: { timeMachine: false },
   },
 ]);
 
-const nasHost = ref('192.168.1.100');
+const searchText = ref('');
 
-// 弹窗状态
-const configModalVisible = ref(false);
-const configFormRef = ref();
-const editingProtocol = ref<NetworkProtocol | null>(null);
-const configForm = ref({
-  path: '',
-  port: 0,
-  requireAuth: true,
-});
-
-const guideModalVisible = ref(false);
-const guideProtocol = ref<NetworkProtocol | null>(null);
-const guideOs = ref('windows');
-
+// ==================== 计算属性 ====================
 const filteredProtocols = computed(() => {
   let result = protocols.value;
   if (searchText.value) {
@@ -109,35 +122,101 @@ const filteredProtocols = computed(() => {
     result = result.filter(
       (p) =>
         p.name.toLowerCase().includes(kw) ||
-        p.protocol.toLowerCase().includes(kw),
+        p.protocol.toLowerCase().includes(kw) ||
+        p.description.toLowerCase().includes(kw),
     );
   }
   return result;
 });
 
-const columns = [
-  { title: '协议', dataIndex: 'name', key: 'name', width: 160 },
-  { title: '状态', key: 'status', width: 100 },
-  { title: '共享路径', dataIndex: 'path', key: 'path' },
-  { title: '端口', dataIndex: 'port', key: 'port', width: 80 },
-  { title: '认证', key: 'auth', width: 80 },
-  { title: '自动挂载', key: 'autoMount', width: 100 },
-  { title: '操作', key: 'action', width: 180 },
-];
+const activeCount = computed(
+  () => protocols.value.filter((p) => p.status === 'active').length,
+);
 
-function toggleStatus(protocol: any) {
+// ==================== 图标与颜色 ====================
+function getProtocolIcon(protocol: string): string {
+  const icons: Record<string, string> = {
+    SMB: 'lucide:monitor',
+    NFS: 'lucide:terminal',
+    WebDAV: 'lucide:globe',
+    FTP: 'lucide:folder-sync',
+    AFP: 'lucide:apple',
+  };
+  return icons[protocol] || 'lucide:network';
+}
+
+function getProtocolColor(protocol: string): string {
+  const colors: Record<string, string> = {
+    SMB: '#1677ff',
+    NFS: '#52c41a',
+    WebDAV: '#722ed1',
+    FTP: '#fa8c16',
+    AFP: '#eb2f96',
+  };
+  return colors[protocol] || '#8c8c8c';
+}
+
+function getProtocolBg(protocol: string): string {
+  const bgs: Record<string, string> = {
+    SMB: '#e6f4ff',
+    NFS: '#f6ffed',
+    WebDAV: '#f9f0ff',
+    FTP: '#fff7e6',
+    AFP: '#fff0f6',
+  };
+  return bgs[protocol] || '#f5f5f5';
+}
+
+function getProtocolGradient(protocol: string): string {
+  const gradients: Record<string, string> = {
+    SMB: 'linear-gradient(135deg, #1677ff 0%, #36cfc9 100%)',
+    NFS: 'linear-gradient(135deg, #52c41a 0%, #95de64 100%)',
+    WebDAV: 'linear-gradient(135deg, #722ed1 0%, #b37feb 100%)',
+    FTP: 'linear-gradient(135deg, #fa8c16 0%, #ffc069 100%)',
+    AFP: 'linear-gradient(135deg, #eb2f96 0%, #ff85c0 100%)',
+  };
+  return gradients[protocol] || 'linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%)';
+}
+
+// ==================== 操作 ====================
+function toggleStatus(protocol: NetworkProtocol) {
   protocol.status = protocol.status === 'active' ? 'disabled' : 'active';
   message.success(
     `${protocol.name} 已${protocol.status === 'active' ? '启用' : '禁用'}`,
   );
 }
 
-function openConfigModal(protocol: any) {
+// ==================== 配置弹窗 ====================
+const configModalVisible = ref(false);
+const configFormRef = ref();
+const editingProtocol = ref<NetworkProtocol | null>(null);
+const configForm = ref({
+  path: '',
+  port: 0,
+  requireAuth: true,
+  autoMount: false,
+  // 特有配置
+  workgroup: '',
+  enableV1: false,
+  squash: '',
+  https: false,
+  passiveMode: true,
+  timeMachine: false,
+});
+
+function openConfigModal(protocol: NetworkProtocol) {
   editingProtocol.value = protocol;
   configForm.value = {
     path: protocol.path,
     port: protocol.port,
     requireAuth: protocol.requireAuth,
+    autoMount: protocol.autoMount,
+    workgroup: protocol.config.workgroup || '',
+    enableV1: protocol.config.enableV1 || false,
+    squash: protocol.config.squash || '',
+    https: protocol.config.https || false,
+    passiveMode: protocol.config.passiveMode !== false,
+    timeMachine: protocol.config.timeMachine || false,
   };
   configModalVisible.value = true;
 }
@@ -150,6 +229,24 @@ function handleSaveConfig() {
         editingProtocol.value.path = configForm.value.path;
         editingProtocol.value.port = configForm.value.port;
         editingProtocol.value.requireAuth = configForm.value.requireAuth;
+        editingProtocol.value.autoMount = configForm.value.autoMount;
+        // 保存特有配置
+        if (editingProtocol.value.protocol === 'SMB') {
+          editingProtocol.value.config.workgroup = configForm.value.workgroup;
+          editingProtocol.value.config.enableV1 = configForm.value.enableV1;
+        }
+        if (editingProtocol.value.protocol === 'NFS') {
+          editingProtocol.value.config.squash = configForm.value.squash;
+        }
+        if (editingProtocol.value.protocol === 'WebDAV') {
+          editingProtocol.value.config.https = configForm.value.https;
+        }
+        if (editingProtocol.value.protocol === 'FTP') {
+          editingProtocol.value.config.passiveMode = configForm.value.passiveMode;
+        }
+        if (editingProtocol.value.protocol === 'AFP') {
+          editingProtocol.value.config.timeMachine = configForm.value.timeMachine;
+        }
         message.success('配置已保存');
       }
       configModalVisible.value = false;
@@ -157,7 +254,12 @@ function handleSaveConfig() {
     .catch(() => {});
 }
 
-function openGuideModal(protocol: any) {
+// ==================== 使用指南弹窗 ====================
+const guideModalVisible = ref(false);
+const guideProtocol = ref<NetworkProtocol | null>(null);
+const guideOs = ref('windows');
+
+function openGuideModal(protocol: NetworkProtocol) {
   guideProtocol.value = protocol;
   guideOs.value = 'windows';
   guideModalVisible.value = true;
@@ -167,10 +269,10 @@ function getGuideContent(protocol: string, os: string): string {
   const guides: Record<string, Record<string, string>> = {
     SMB: {
       windows: `在 Windows 资源管理器地址栏输入：
-\\${nasHost.value}\\share
+\\\\${nasHost.value}\\share
 
 或者在命令提示符中执行：
-net use Z: \\${nasHost.value}\\share /persistent:yes`,
+net use Z: \\\\${nasHost.value}\\share /persistent:yes`,
       linux: `安装 cifs-utils：
 sudo apt-get install cifs-utils
 
@@ -281,81 +383,245 @@ mount_afp afp://user:pass@${nasHost.value}/share/afp /Volumes/nas-afp`,
   };
   return guides[protocol]?.[os] || '暂无使用指南';
 }
+
+// ==================== 特有配置展示 ====================
+function getConfigItems(protocol: NetworkProtocol): { label: string; value: string }[] {
+  const items: { label: string; value: string }[] = [];
+  const { config, requireAuth, autoMount } = protocol;
+
+  // 通用配置
+  items.push({ label: '共享路径', value: protocol.path });
+  items.push({ label: '端口', value: String(protocol.port) });
+  items.push({ label: '认证', value: requireAuth ? '需要' : '不需要' });
+  items.push({ label: '自动挂载', value: autoMount ? '已启用' : '未启用' });
+
+  // 协议特有
+  if (protocol.protocol === 'SMB') {
+    items.push({ label: '工作组', value: config.workgroup || 'WORKGROUP' });
+    items.push({ label: 'SMBv1', value: config.enableV1 ? '已启用' : '已禁用' });
+  }
+  if (protocol.protocol === 'NFS') {
+    items.push({ label: 'Root Squash', value: config.squash || 'no_root_squash' });
+  }
+  if (protocol.protocol === 'WebDAV') {
+    items.push({ label: 'HTTPS', value: config.https ? '已启用' : '未启用' });
+  }
+  if (protocol.protocol === 'FTP') {
+    items.push({ label: '被动模式', value: config.passiveMode !== false ? '已启用' : '已禁用' });
+  }
+  if (protocol.protocol === 'AFP') {
+    items.push({ label: 'Time Machine', value: config.timeMachine ? '已启用' : '未启用' });
+  }
+
+  return items;
+}
+
+// ==================== 访问地址 ====================
+function getAccessUrl(protocol: NetworkProtocol): string {
+  const host = nasHost.value;
+  switch (protocol.protocol) {
+    case 'SMB':
+      return `\\\\${host}\\share`;
+    case 'NFS':
+      return `${host}:/share/nfs`;
+    case 'WebDAV':
+      return `${protocol.config.https ? 'https' : 'http'}://${host}:${protocol.port}`;
+    case 'FTP':
+      return `ftp://${host}:${protocol.port}`;
+    case 'AFP':
+      return `afp://${host}/share/afp`;
+    default:
+      return '';
+  }
+}
+
+function copyAccessUrl(protocol: NetworkProtocol) {
+  const url = getAccessUrl(protocol);
+  navigator.clipboard.writeText(url);
+  message.success('访问地址已复制');
+}
 </script>
 
 <template>
   <div class="network-page">
-    <!-- 工具栏 -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="breadcrumb-bar">
-          <span class="breadcrumb-icon">🌐</span>
-          <span class="breadcrumb-text">网络访问</span>
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-title-row">
+          <IconifyIcon icon="lucide:globe" class="page-title-icon" />
+          <h1 class="page-title">网络访问</h1>
         </div>
+        <p class="page-desc">启用文件共享协议，让不同平台的设备通过网络访问您的文件</p>
       </div>
-      <div class="toolbar-right">
+      <div class="page-header-right">
+        <div class="status-summary">
+          <Badge :count="activeCount" :offset="[-4, 4]" :overflow-count="99">
+            <div class="status-chip" :class="{ 'status-chip-active': activeCount > 0 }">
+              <span
+                class="status-dot"
+                :style="{ background: activeCount > 0 ? '#52c41a' : '#bfbfbf' }"
+              />
+              <span class="status-text">{{ activeCount }} 个协议运行中</span>
+            </div>
+          </Badge>
+        </div>
         <Input
           v-model:value="searchText"
-          placeholder="搜索协议"
+          placeholder="搜索协议..."
           class="search-input"
           allow-clear
-        />
+        >
+          <template #prefix>
+            <IconifyIcon icon="lucide:search" style="font-size: 13px; color: #bfbfbf;" />
+          </template>
+        </Input>
       </div>
     </div>
 
-    <!-- 协议列表 -->
-    <div class="table-wrapper">
-      <Table
-        :columns="columns"
-        :data-source="filteredProtocols"
-        row-key="id"
-        size="small"
-        :pagination="false"
+    <!-- 协议卡片列表 -->
+    <div class="protocol-list">
+      <div
+        v-for="protocol in filteredProtocols"
+        :key="protocol.id"
+        class="protocol-card"
+        :class="{ 'protocol-card-disabled': protocol.status === 'disabled' }"
       >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'name'">
-            <div class="protocol-name">
-              <span class="protocol-icon">🌐</span>
-              <div>
-                <div class="protocol-title">{{ record.name }}</div>
-                <div class="protocol-desc">{{ record.description }}</div>
+        <!-- 启用状态：紧凑上下布局 -->
+        <template v-if="protocol.status === 'active'">
+          <div class="card-body-active">
+            <!-- 第一行：头部信息 + 操作按钮 + Switch -->
+            <div class="card-header-row">
+              <div class="header-left">
+                <div
+                  class="protocol-icon-wrap"
+                  :style="{ background: getProtocolBg(protocol.protocol) }"
+                >
+                  <IconifyIcon
+                    :icon="getProtocolIcon(protocol.protocol)"
+                    class="protocol-icon"
+                    :style="{ color: getProtocolColor(protocol.protocol) }"
+                  />
+                </div>
+                <div class="protocol-meta">
+                  <div class="protocol-name">
+                    {{ protocol.name }}
+                    <Tag size="small" color="success" class="status-tag">已启用</Tag>
+                  </div>
+                  <div class="protocol-desc">{{ protocol.description }}</div>
+                </div>
+              </div>
+              <div class="header-actions">
+                <Button size="small" @click="openConfigModal(protocol)">
+                  <IconifyIcon icon="lucide:settings" style="font-size: 12px; margin-right: 4px;" />
+                  配置
+                </Button>
+                <Button size="small" type="primary" @click="openGuideModal(protocol)">
+                  <IconifyIcon icon="lucide:book-open" style="font-size: 12px; margin-right: 4px;" />
+                  使用指南
+                </Button>
+                <Switch
+                  :checked="true"
+                  size="small"
+                  @change="toggleStatus(protocol)"
+                />
               </div>
             </div>
-          </template>
-          <template v-if="column.key === 'status'">
-            <Switch
-              :checked="record.status === 'active'"
-              size="small"
-              @change="toggleStatus(record)"
+
+            <!-- 彩色分隔线 -->
+            <div
+              class="card-divider"
+              :style="{ background: getProtocolGradient(protocol.protocol) }"
             />
-          </template>
-          <template v-if="column.key === 'auth'">
-            <Tag :color="record.requireAuth ? 'warning' : 'default'" size="small">
-              {{ record.requireAuth ? '需要' : '不需要' }}
-            </Tag>
-          </template>
-          <template v-if="column.key === 'autoMount'">
-            <Switch :checked="record.autoMount" size="small" />
-          </template>
-          <template v-if="column.key === 'action'">
-            <div class="action-btns">
-              <Button size="small" type="link" @click="openConfigModal(record)">
-                配置
-              </Button>
-              <Button size="small" type="link" @click="openGuideModal(record)">
-                使用指南
-              </Button>
+
+            <!-- 第二行：访问地址 + 配置 + 操作 -->
+            <div class="card-body-row">
+              <!-- 左侧：访问地址 -->
+              <div class="access-url-section">
+                <div class="section-label">
+                  <IconifyIcon icon="lucide:link" style="font-size: 11px;" />
+                  访问地址
+                </div>
+                <div class="access-url-bar">
+                  <code class="access-url">{{ getAccessUrl(protocol) }}</code>
+                  <Tooltip title="复制地址">
+                    <Button
+                      size="small"
+                      type="text"
+                      class="copy-btn"
+                      @click="copyAccessUrl(protocol)"
+                    >
+                      <IconifyIcon icon="lucide:copy" style="font-size: 12px;" />
+                    </Button>
+                  </Tooltip>
+                </div>
+              </div>
+
+              <!-- 中间：配置信息 -->
+              <div class="card-config-area">
+                <div class="section-label">
+                  <IconifyIcon icon="lucide:settings-2" style="font-size: 11px;" />
+                  配置信息
+                </div>
+                <div class="config-list">
+                  <div
+                    v-for="item in getConfigItems(protocol)"
+                    :key="item.label"
+                    class="config-item"
+                  >
+                    <span class="config-item-label">{{ item.label }}</span>
+                    <span class="config-item-value">{{ item.value }}</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </template>
+          </div>
         </template>
-      </Table>
+
+        <!-- 禁用状态：精简单行 -->
+        <template v-else>
+          <div class="card-body-disabled">
+            <div class="disabled-left">
+              <div class="protocol-icon-wrap" style="background: #f5f5f5;">
+                <IconifyIcon
+                  :icon="getProtocolIcon(protocol.protocol)"
+                  class="protocol-icon"
+                  style="color: #bfbfbf;"
+                />
+              </div>
+              <div class="protocol-meta">
+                <div class="protocol-name">
+                  {{ protocol.name }}
+                  <Tag size="small" class="status-tag">未启用</Tag>
+                </div>
+                <div class="protocol-desc">{{ protocol.description }}</div>
+              </div>
+            </div>
+            <Switch
+              :checked="false"
+              size="small"
+              @change="toggleStatus(protocol)"
+            />
+          </div>
+        </template>
+      </div>
     </div>
 
-    <!-- 配置弹窗 -->
+    <!-- 空状态 -->
+    <div v-if="filteredProtocols.length === 0" class="empty-state">
+      <IconifyIcon icon="lucide:search-x" class="empty-icon" />
+      <div class="empty-text">未找到匹配的协议</div>
+      <Button size="small" @click="searchText = ''">
+        <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px; margin-right: 4px;" />
+        清除搜索
+      </Button>
+    </div>
+
+    <!-- ==================== 配置弹窗 ==================== -->
     <Modal
       v-model:open="configModalVisible"
       :title="`配置 - ${editingProtocol?.name}`"
-      width="480px"
+      width="520px"
       ok-text="保存"
       cancel-text="取消"
       @ok="handleSaveConfig"
@@ -369,46 +635,93 @@ mount_afp afp://user:pass@${nasHost.value}/share/afp /Volumes/nas-afp`,
           port: [{ required: true, message: '请输入端口', trigger: 'blur' }],
         }"
       >
+        <div class="form-section-title">基础配置</div>
         <Form.Item label="共享路径" name="path">
           <Input v-model:value="configForm.path" placeholder="/share/xxx" />
         </Form.Item>
         <Form.Item label="端口" name="port">
-          <Input
-            v-model:value="configForm.port"
-            type="number"
-            placeholder="端口号"
-          />
+          <Input v-model:value="configForm.port" type="number" placeholder="端口号" />
         </Form.Item>
-        <Form.Item>
-          <Switch
-            v-model:checked="configForm.requireAuth"
-            size="small"
-          />
-          <span style="margin-left: 8px;">需要认证</span>
-        </Form.Item>
+        <div class="form-switch-row">
+          <Form.Item class="form-switch-item">
+            <Switch v-model:checked="configForm.requireAuth" size="small" />
+            <span class="switch-label">需要认证</span>
+          </Form.Item>
+          <Form.Item class="form-switch-item">
+            <Switch v-model:checked="configForm.autoMount" size="small" />
+            <span class="switch-label">自动挂载</span>
+          </Form.Item>
+        </div>
+
+        <!-- SMB 特有 -->
+        <template v-if="editingProtocol?.protocol === 'SMB'">
+          <div class="form-section-title">SMB 特有配置</div>
+          <Form.Item label="工作组">
+            <Input v-model:value="configForm.workgroup" placeholder="WORKGROUP" />
+          </Form.Item>
+          <Form.Item>
+            <Switch v-model:checked="configForm.enableV1" size="small" />
+            <span class="switch-label">启用 SMBv1（不推荐，存在安全风险）</span>
+          </Form.Item>
+        </template>
+
+        <!-- NFS 特有 -->
+        <template v-if="editingProtocol?.protocol === 'NFS'">
+          <div class="form-section-title">NFS 特有配置</div>
+          <Form.Item label="Root Squash">
+            <Input v-model:value="configForm.squash" placeholder="no_root_squash" />
+          </Form.Item>
+        </template>
+
+        <!-- WebDAV 特有 -->
+        <template v-if="editingProtocol?.protocol === 'WebDAV'">
+          <div class="form-section-title">WebDAV 特有配置</div>
+          <Form.Item>
+            <Switch v-model:checked="configForm.https" size="small" />
+            <span class="switch-label">启用 HTTPS</span>
+          </Form.Item>
+        </template>
+
+        <!-- FTP 特有 -->
+        <template v-if="editingProtocol?.protocol === 'FTP'">
+          <div class="form-section-title">FTP 特有配置</div>
+          <Form.Item>
+            <Switch v-model:checked="configForm.passiveMode" size="small" />
+            <span class="switch-label">被动模式</span>
+          </Form.Item>
+        </template>
+
+        <!-- AFP 特有 -->
+        <template v-if="editingProtocol?.protocol === 'AFP'">
+          <div class="form-section-title">AFP 特有配置</div>
+          <Form.Item>
+            <Switch v-model:checked="configForm.timeMachine" size="small" />
+            <span class="switch-label">Time Machine 备份支持</span>
+          </Form.Item>
+        </template>
       </Form>
     </Modal>
 
-    <!-- 使用指南弹窗 -->
+    <!-- ==================== 使用指南弹窗 ==================== -->
     <Modal
       v-model:open="guideModalVisible"
       :title="`使用指南 - ${guideProtocol?.name}`"
-      width="700px"
+      width="720px"
       :footer="null"
     >
       <div class="guide-content">
         <Tabs v-model:active-key="guideOs">
-          <TabPane key="windows" tab="🪟 Windows">
+          <TabPane key="windows" tab="Windows">
             <Card size="small" class="guide-card">
               <pre class="guide-code">{{ getGuideContent(guideProtocol?.protocol || '', 'windows') }}</pre>
             </Card>
           </TabPane>
-          <TabPane key="linux" tab="🐧 Linux">
+          <TabPane key="linux" tab="Linux">
             <Card size="small" class="guide-card">
               <pre class="guide-code">{{ getGuideContent(guideProtocol?.protocol || '', 'linux') }}</pre>
             </Card>
           </TabPane>
-          <TabPane key="mac" tab="🍎 macOS">
+          <TabPane key="mac" tab="macOS">
             <Card size="small" class="guide-card">
               <pre class="guide-code">{{ getGuideContent(guideProtocol?.protocol || '', 'mac') }}</pre>
             </Card>
@@ -421,88 +734,356 @@ mount_afp afp://user:pass@${nasHost.value}/share/afp /Volumes/nas-afp`,
 
 <style scoped>
 .network-page {
-  padding: 24px;
+  padding: 20px 24px 24px;
 }
 
-/* 工具栏 */
-.toolbar {
+/* ==================== 页面头部 ==================== */
+.page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-title-icon {
+  font-size: 22px;
+  color: #1677ff;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #141414;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-desc {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
-.toolbar-left {
+.status-summary {
   display: flex;
   align-items: center;
 }
 
-.breadcrumb-bar {
+.status-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 4px 12px;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 20px;
+  transition: all 0.3s ease;
 }
 
-.breadcrumb-icon {
-  font-size: 14px;
+.status-chip-active {
+  background: #f6ffed;
+  border-color: #b7eb8f;
 }
 
-.breadcrumb-text {
-  font-size: 14px;
-  color: #262626;
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: background 0.3s ease;
 }
 
-.toolbar-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.status-text {
+  font-size: 13px;
+  color: #595959;
+  font-weight: 500;
 }
 
 .search-input {
   width: 220px;
 }
 
-/* 表格 */
-.table-wrapper {
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #f0f0f0;
-  padding: 16px;
+/* ==================== 协议卡片列表 ==================== */
+.protocol-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.protocol-name {
+.protocol-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.protocol-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: #d9d9d9;
+}
+
+.protocol-card-disabled {
+  opacity: 0.65;
+  background: #fafafa;
+}
+
+.protocol-card-disabled:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ==================== 启用状态：紧凑上下布局 ==================== */
+.card-body-active {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+}
+
+/* 第一行：头部 + 操作按钮 + Switch */
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.protocol-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
 }
 
 .protocol-icon {
   font-size: 22px;
-  margin-top: 2px;
+  transition: color 0.3s ease;
 }
 
-.protocol-title {
+.protocol-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.protocol-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #141414;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-tag {
+  font-size: 11px;
   font-weight: 500;
-  font-size: 14px;
 }
 
 .protocol-desc {
   font-size: 12px;
   color: #8c8c8c;
-  margin-top: 2px;
+  line-height: 1.4;
 }
 
-.action-btns {
+/* 彩色分隔线 */
+.card-divider {
+  height: 3px;
+  transition: all 0.3s ease;
+  margin: 0 20px;
+  border-radius: 2px;
+}
+
+/* 第二行：内容区 + 操作区 */
+.card-body-row {
   display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 10px 20px 14px;
+}
+
+/* 访问地址 - 固定宽度 */
+.access-url-section {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
   gap: 4px;
 }
 
-/* 使用指南 */
+.access-url-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.access-url {
+  flex: 1;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 13px;
+  color: #135200;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-btn {
+  color: #52c41a;
+  padding: 2px 6px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  color: #389e0d;
+  background: #d9f7be;
+}
+
+/* 配置信息区域 - 固定宽度横排 */
+.card-config-area {
+  width: 420px;
+  flex-shrink: 0;
+}
+
+.config-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.config-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.config-item-label {
+  color: #8c8c8c;
+  flex-shrink: 0;
+}
+
+.config-item-value {
+  color: #262626;
+  font-weight: 500;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* 操作按钮区 */
+.card-actions-area {
+  width: 140px;
+  flex-shrink: 0;
+  padding-left: 16px;
+  border-left: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+/* ==================== 禁用状态：精简单行 ==================== */
+.card-body-disabled {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  gap: 16px;
+}
+
+.disabled-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ==================== 空状态 ==================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #d9d9d9;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+/* ==================== 使用指南弹窗 ==================== */
 .guide-content {
   padding-top: 8px;
 }
@@ -524,5 +1105,60 @@ mount_afp afp://user:pass@${nasHost.value}/share/afp /Volumes/nas-afp`,
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-x: auto;
+}
+
+/* ==================== 表单样式 ==================== */
+.form-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  margin: 16px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.form-section-title:first-child {
+  margin-top: 0;
+}
+
+.form-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.form-switch-item {
+  margin-bottom: 0;
+}
+
+.switch-label {
+  margin-left: 8px;
+  font-size: 13px;
+  color: #595959;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+  .protocol-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .search-input {
+    width: 180px;
+  }
+
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
