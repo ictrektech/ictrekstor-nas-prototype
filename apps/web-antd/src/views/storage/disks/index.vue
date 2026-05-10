@@ -236,6 +236,42 @@ onMounted(loadData);
 
 <template>
   <div class="disk-manager">
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 20px; color: #1677ff;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">硬盘管理</h1>
+          <p class="page-desc">查看和管理 NAS 中的所有物理硬盘</p>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">硬盘数</span>
+            <span class="overview-value">{{ filteredDisks.length }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">总容量(TB)</span>
+            <span class="overview-value">{{ (filteredDisks.reduce((sum, d) => sum + (parseCapacity(d.size) / (1024 ** 4)), 0)).toFixed(2) }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:heart-pulse" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">健康</span>
+            <span class="overview-value">{{ filteredDisks.filter(d => d.healthStatus === '正常').length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- NAS 设备 Canvas 示意图 + 右侧概览 -->
     <div class="nas-diagram-real">
       <div class="nas-diagram-header">
@@ -592,8 +628,84 @@ onMounted(loadData);
 
 <style scoped>
 .disk-manager {
-  padding: 0 16px 16px;
+  padding: 0 0 16px;
   width: 100%;
+}
+
+/* ===== 页面顶部概览 ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #fff;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e6f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* ===== NAS 设备真实 Canvas 示意图 ===== */

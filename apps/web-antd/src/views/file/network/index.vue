@@ -11,7 +11,6 @@ import {
   message,
   Card,
   Tooltip,
-  Badge,
 } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 
@@ -447,35 +446,44 @@ function copyAccessUrl(protocol: NetworkProtocol) {
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-title-row">
-          <IconifyIcon icon="lucide:globe" class="page-title-icon" />
-          <h1 class="page-title">网络访问</h1>
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:globe" style="font-size: 22px; color: #1677ff;" />
         </div>
-        <p class="page-desc">启用文件共享协议，让不同平台的设备通过网络访问您的文件</p>
+        <div class="page-title-area">
+          <h1 class="page-title">网络访问</h1>
+          <p class="page-desc">启用文件共享协议，让不同平台的设备通过网络访问您的文件</p>
+        </div>
       </div>
       <div class="page-header-right">
-        <div class="status-summary">
-          <Badge :count="activeCount" :offset="[-4, 4]" :overflow-count="99">
-            <div class="status-chip" :class="{ 'status-chip-active': activeCount > 0 }">
-              <span
-                class="status-dot"
-                :style="{ background: activeCount > 0 ? '#52c41a' : '#bfbfbf' }"
-              />
-              <span class="status-text">{{ activeCount }} 个协议运行中</span>
-            </div>
-          </Badge>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:activity" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">运行中协议</span>
+            <span class="overview-value">{{ activeCount }}</span>
+          </div>
         </div>
-        <Input
-          v-model:value="searchText"
-          placeholder="搜索协议..."
-          class="search-input"
-          allow-clear
-        >
-          <template #prefix>
-            <IconifyIcon icon="lucide:search" style="font-size: 13px; color: #bfbfbf;" />
-          </template>
-        </Input>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:network" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">总协议数</span>
+            <span class="overview-value">{{ protocols.length }}</span>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="network-toolbar">
+      <Input
+        v-model:value="searchText"
+        placeholder="搜索协议..."
+        class="search-input"
+        allow-clear
+      >
+        <template #prefix>
+          <IconifyIcon icon="lucide:search" style="font-size: 13px; color: #bfbfbf;" />
+        </template>
+      </Input>
     </div>
 
     <!-- 协议卡片列表 -->
@@ -734,38 +742,47 @@ function copyAccessUrl(protocol: NetworkProtocol) {
 
 <style scoped>
 .network-page {
-  padding: 20px 24px 24px;
+  padding: 0 0 24px;
 }
 
 /* ==================== 页面头部 ==================== */
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
   gap: 16px;
   flex-wrap: wrap;
 }
 
 .page-header-left {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
 }
 
-.page-title-row {
+.page-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #e6f4ff;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.page-title-icon {
-  font-size: 22px;
-  color: #1677ff;
+.page-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .page-title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #141414;
   margin: 0;
@@ -786,38 +803,41 @@ function copyAccessUrl(protocol: NetworkProtocol) {
   flex-shrink: 0;
 }
 
-.status-summary {
+.overview-card {
   display: flex;
   align-items: center;
-}
-
-.status-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  gap: 8px;
+  padding: 8px 14px;
   background: #f5f5f5;
-  border: 1px solid #e8e8e8;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  min-width: 90px;
 }
 
-.status-chip-active {
-  background: #f6ffed;
-  border-color: #b7eb8f;
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  transition: background 0.3s ease;
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
 }
 
-.status-text {
-  font-size: 13px;
-  color: #595959;
-  font-weight: 500;
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ==================== 搜索栏 ==================== */
+.network-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px 12px;
+  gap: 12px;
 }
 
 .search-input {

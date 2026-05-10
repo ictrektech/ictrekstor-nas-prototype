@@ -14,6 +14,7 @@ import {
   Empty,
   Radio,
 } from 'ant-design-vue';
+import { IconifyIcon } from '@vben/icons';
 import {
   getStorageSpaceFilesApi,
   getStorageSpacesApi,
@@ -175,38 +176,50 @@ onMounted(loadData);
 
 <template>
   <div class="space-detail-page">
-    <!-- 工具栏 -->
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <div class="nav-btns">
-          <Button size="small" class="nav-btn" @click="goBack">
-            ←
-          </Button>
-          <Button size="small" class="nav-btn" @click="loadData">
-            ⟳
-          </Button>
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <Button size="small" class="back-btn" @click="goBack">
+          <IconifyIcon icon="lucide:arrow-left" style="font-size: 13px;" />
+        </Button>
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
         </div>
-        <div class="breadcrumb-bar">
-          <span class="breadcrumb-icon">📁</span>
-          <span class="breadcrumb-text">
-            <span class="breadcrumb-link" @click="goBack">设备全部文件</span>
-            <span class="breadcrumb-separator">/</span>
-            <span>{{ spaceInfo?.name || '加载中...' }}</span>
-          </span>
+        <div class="page-title-area">
+          <h1 class="page-title">{{ spaceInfo?.name || '加载中...' }}</h1>
+          <p class="page-desc">设备全部文件 · {{ filteredFiles.length }} 个项目</p>
         </div>
       </div>
-      <div class="toolbar-right">
-        <Input
-          v-model:value="searchText"
-          placeholder="搜索文件"
-          class="search-input"
-          allow-clear
-        />
-        <Radio.Group v-model:value="viewMode" size="small">
-          <Radio.Button value="list">☰ 列表</Radio.Button>
-          <Radio.Button value="grid">▦ 网格</Radio.Button>
-        </Radio.Group>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:files" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">文件</span>
+            <span class="overview-value">{{ files.filter(f => f.type === 'file').length }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:folder" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">文件夹</span>
+            <span class="overview-value">{{ files.filter(f => f.type === 'folder').length }}</span>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <Input
+        v-model:value="searchText"
+        placeholder="搜索文件"
+        class="search-input"
+        allow-clear
+      />
+      <Radio.Group v-model:value="viewMode" size="small">
+        <Radio.Button value="list">☰ 列表</Radio.Button>
+        <Radio.Button value="grid">▦ 网格</Radio.Button>
+      </Radio.Group>
     </div>
 
     <!-- 文件列表 -->
@@ -326,77 +339,104 @@ onMounted(loadData);
 
 <style scoped>
 .space-detail-page {
-  padding: 24px;
+  padding: 0 16px 16px;
+  width: 100%;
 }
 
-/* 工具栏 */
-.toolbar {
+/* ===== 页面顶部概览 ===== */
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 12px;
+  padding: 12px 20px;
+  background: #fff;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.toolbar-left {
+.page-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex: 1;
 }
 
-.nav-btns {
-  display: flex;
+.back-btn {
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
   gap: 4px;
+  border-radius: 6px;
 }
 
-.nav-btn {
-  padding: 0 8px;
+.page-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e6f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.breadcrumb-bar {
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 4px 12px;
-  flex: 1;
-  max-width: 500px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
 }
 
-.breadcrumb-icon {
-  font-size: 14px;
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
-.breadcrumb-text {
-  font-size: 14px;
-  color: #262626;
-}
-
-.breadcrumb-link {
-  color: #1890ff;
-  cursor: pointer;
-}
-
-.breadcrumb-link:hover {
-  text-decoration: underline;
-}
-
-.breadcrumb-separator {
-  margin: 0 6px;
+.overview-label {
+  font-size: 11px;
   color: #8c8c8c;
 }
 
-.toolbar-right {
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* 搜索栏 */
+.search-bar {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 10px 0;
 }
 
 .search-input {
-  width: 220px;
+  width: 240px;
 }
 
 /* 文件内容 */

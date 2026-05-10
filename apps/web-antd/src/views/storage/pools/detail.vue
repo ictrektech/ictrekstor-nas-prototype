@@ -216,115 +216,51 @@ onMounted(loadData);
 
 <template>
   <div class="pool-detail">
-    <!-- 返回按钮 -->
-    <div class="back-bar">
-      <Button type="link" class="back-btn" @click="goBack">
-        <IconifyIcon icon="lucide:arrow-left" style="font-size: 14px;" />
-        返回存储池列表
-      </Button>
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <Button size="small" class="back-btn" @click="goBack">
+          <IconifyIcon icon="lucide:arrow-left" style="font-size: 13px;" />
+        </Button>
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:database" style="font-size: 20px; color: #1677ff;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">{{ poolDetail?.name || '加载中...' }}</h1>
+          <p class="page-desc">RAID {{ poolDetail?.raidType }} · {{ poolDetail?.diskCount }} 块硬盘 · {{ poolDetail?.status }}</p>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">总容量</span>
+            <span class="overview-value">{{ poolDetail?.totalCapacity || '--' }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #faad14;" />
+          <div class="overview-info">
+            <span class="overview-label">已用容量</span>
+            <span class="overview-value">{{ poolDetail?.usedCapacity || '--' }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:circle-check" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">可用容量</span>
+            <span class="overview-value">{{ (parseFloat(poolDetail?.totalCapacity || '0') - parseFloat(poolDetail?.usedCapacity || '0')).toFixed(2) }} TB</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:percent" style="font-size: 16px; color: #722ed1;" />
+          <div class="overview-info">
+            <span class="overview-label">使用率</span>
+            <span class="overview-value" :style="{ color: getCapacityColor(capacityPercent) }">{{ capacityPercent }}%</span>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- 存储池头部概览卡片 -->
-    <Card
-      class="pool-header-card"
-      :bordered="true"
-      :body-style="{ padding: '0' }"
-    >
-      <!-- 头部渐变区域 -->
-      <div
-        class="pool-header-bg"
-        :style="{
-          background: poolDetail?.status === '正常'
-            ? 'linear-gradient(135deg, #e6f7ff 0%, #bae0ff 100%)'
-            : 'linear-gradient(135deg, #fff1f0 0%, #ffccc7 100%)',
-        }"
-      >
-        <div class="pool-header-main">
-          <div class="pool-icon-box" style="background: #fff;">
-            <IconifyIcon icon="lucide:database" style="font-size: 24px; color: #1677ff;" />
-          </div>
-          <div class="pool-title-info">
-            <div class="pool-name-row">
-              <h2 class="pool-name">{{ poolDetail?.name || '加载中...' }}</h2>
-              <Tag
-                :color="poolDetail?.status === '正常' ? 'success' : 'error'"
-                size="small"
-              >
-                <span
-                  class="status-dot"
-                  :style="{ background: poolDetail?.status === '正常' ? '#52c41a' : '#ff4d4f' }"
-                />
-                {{ poolDetail?.status }}
-              </Tag>
-            </div>
-            <div class="pool-meta-row">
-              <span class="meta-item">
-                <IconifyIcon icon="lucide:layers" style="font-size: 11px;" />
-                RAID {{ poolDetail?.raidType }}
-              </span>
-              <span class="meta-item">
-                <IconifyIcon icon="lucide:disc-3" style="font-size: 11px;" />
-                {{ poolDetail?.diskCount }} 块硬盘
-              </span>
-              <span class="meta-item">
-                <IconifyIcon icon="lucide:calendar" style="font-size: 11px;" />
-                {{ poolDetail?.createTime }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 容量概览 -->
-      <div class="pool-capacity-bar">
-        <div class="capacity-stat-item">
-          <div class="stat-icon-box" style="background: #f0f5ff;">
-            <IconifyIcon icon="lucide:hard-drive" style="font-size: 18px; color: #1677ff;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">总容量</div>
-            <div class="stat-value">{{ poolDetail?.totalCapacity || '--' }}</div>
-          </div>
-        </div>
-        <div class="capacity-stat-item">
-          <div class="stat-icon-box" style="background: #fff7e6;">
-            <IconifyIcon icon="lucide:database" style="font-size: 18px; color: #faad14;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">已用容量</div>
-            <div class="stat-value">{{ poolDetail?.usedCapacity || '--' }}</div>
-          </div>
-        </div>
-        <div class="capacity-stat-item">
-          <div class="stat-icon-box" style="background: #f6ffed;">
-            <IconifyIcon icon="lucide:circle-check" style="font-size: 18px; color: #52c41a;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-label">可用容量</div>
-            <div class="stat-value">
-              {{ (parseFloat(poolDetail?.totalCapacity || '0') - parseFloat(poolDetail?.usedCapacity || '0')).toFixed(2) }} TB
-            </div>
-          </div>
-        </div>
-        <div class="capacity-stat-item usage-stat">
-          <div class="stat-info">
-            <div class="stat-label">使用率</div>
-            <div class="stat-value" :style="{ color: getCapacityColor(capacityPercent) }">
-              {{ capacityPercent }}%
-            </div>
-          </div>
-          <div class="mini-progress">
-            <Progress
-              :percent="capacityPercent"
-              :stroke-color="getCapacityColor(capacityPercent)"
-              :show-info="false"
-              :stroke-width="6"
-              size="small"
-            />
-          </div>
-        </div>
-      </div>
-    </Card>
 
     <!-- Tab 内容 -->
     <Card
@@ -532,64 +468,88 @@ onMounted(loadData);
   width: 100%;
 }
 
-/* 返回栏 */
-.back-bar {
-  margin-bottom: 8px;
-}
-
-.back-btn {
-  display: inline-flex;
+/* ===== 页面顶部概览 ===== */
+.page-header {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding-left: 0;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #fff;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-/* 头部卡片 */
-.pool-header-card {
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.pool-header-bg {
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
-
-.pool-header-main {
+.page-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.pool-icon-box {
-  width: 40px;
-  height: 40px;
+.back-btn {
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+}
+
+.page-icon-box {
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
+  background: #e6f4ff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.pool-title-info {
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
 }
 
-.pool-name-row {
+.overview-card {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
 }
 
-.pool-name {
-  margin: 0;
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.overview-value {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 .status-dot {
@@ -597,85 +557,6 @@ onMounted(loadData);
   height: 6px;
   border-radius: 50%;
   display: inline-block;
-}
-
-.pool-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.meta-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: #595959;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 1px 8px;
-  border-radius: 3px;
-}
-
-/* 容量概览栏 */
-.pool-capacity-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  padding: 10px 16px;
-}
-
-.capacity-stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  border-right: 1px solid #f0f0f0;
-}
-
-.capacity-stat-item:last-child {
-  border-right: none;
-}
-
-.usage-stat {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.stat-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
-.stat-value {
-  font-size: 14px;
-  font-weight: 700;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-.mini-progress {
-  width: 100%;
-}
-
-.mini-progress :deep(.ant-progress) {
-  margin-bottom: 0;
 }
 
 /* Tab 卡片 */

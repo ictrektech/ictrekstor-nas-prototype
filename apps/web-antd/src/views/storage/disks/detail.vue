@@ -336,80 +336,67 @@ onMounted(loadDisk);
 
 <template>
   <div class="disk-detail" v-if="disk">
-    <!-- 面包屑返回 -->
-    <div class="detail-breadcrumb">
-      <Button size="small" class="back-btn" @click="goBack">
-        <IconifyIcon icon="lucide:arrow-left" style="font-size: 13px;" />
-        返回磁盘列表
-      </Button>
-    </div>
-
-    <!-- ===== 主体内容：限制最大宽度 ===== -->
-    <div class="detail-body">
-      <!-- 设备概览卡片：名称 + 基本信息 合并 -->
-      <Card class="overview-card" :bordered="true" :body-style="{ padding: '20px' }">
-        <!-- 设备名称区（主） -->
-        <div class="device-hero">
-          <div class="hero-left">
-            <div
-              class="disk-icon-box"
-              :style="{
-                background: `${getDeviceIconColor(disk.deviceType)}15`,
-                borderColor: `${getDeviceIconColor(disk.deviceType)}30`,
-              }"
-            >
-              <IconifyIcon
-                :icon="getDeviceIcon(disk.deviceType)"
-                class="disk-icon"
-                :style="{ color: getDeviceIconColor(disk.deviceType) }"
-              />
-            </div>
-            <div class="hero-text">
-              <div class="hero-name-row">
-                <span class="disk-name">{{ disk.deviceName }}</span>
-                <span class="disk-model">{{ disk.model }}</span>
-              </div>
-              <div class="hero-tags">
-                <Tag :color="getStatusColor(disk.status)" size="small" class="status-tag">
-                  <span class="status-dot" :style="{ background: getStatusDot(disk.status) }" />
-                  {{ disk.usageStatus || disk.status }}
-                </Tag>
-                <span v-if="disk.healthStatus" class="health-badge"
-                  :style="{ color: getHealthBadgeColor(disk.healthStatus), borderColor: getHealthBadgeColor(disk.healthStatus) }">
-                  <span class="health-dot" :style="{ background: getHealthBadgeColor(disk.healthStatus) }" />
-                  {{ disk.healthStatus }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="hero-stats">
-            <div class="stat-pill">
-              <IconifyIcon icon="lucide:database" style="font-size: 12px; color: #1677ff;" />
-              <span class="pill-label">容量</span>
-              <span class="pill-value">{{ disk.size }}</span>
-            </div>
-            <div v-if="disk.temperature !== undefined" class="stat-pill">
-              <IconifyIcon icon="lucide:thermometer" style="font-size: 12px; color: #faad14;" />
-              <span class="pill-label">温度</span>
-              <span class="pill-value" :style="{ color: getTempColor(disk.temperature) }">{{ disk.temperature }}°C</span>
-            </div>
-            <div v-if="disk.usedHours" class="stat-pill">
-              <IconifyIcon icon="lucide:clock" style="font-size: 12px; color: #52c41a;" />
-              <span class="pill-label">使用时长</span>
-              <span class="pill-value">{{ formatHours(disk.usedHours) }}</span>
-            </div>
-            <div v-if="disk.partitions" class="stat-pill">
-              <IconifyIcon icon="lucide:folder-open" style="font-size: 12px; color: #722ed1;" />
-              <span class="pill-label">分区数</span>
-              <span class="pill-value">{{ disk.partitions.length }}</span>
-            </div>
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <Button size="small" class="back-btn" @click="goBack">
+          <IconifyIcon icon="lucide:arrow-left" style="font-size: 13px;" />
+        </Button>
+        <div
+          class="page-icon-box"
+          :style="{
+            background: `${getDeviceIconColor(disk.deviceType)}15`,
+            border: `1px solid ${getDeviceIconColor(disk.deviceType)}30`,
+          }"
+        >
+          <IconifyIcon
+            :icon="getDeviceIcon(disk.deviceType)"
+            style="font-size: 20px;"
+            :style="{ color: getDeviceIconColor(disk.deviceType) }"
+          />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">{{ disk.deviceName }}</h1>
+          <p class="page-desc">{{ disk.model }} · {{ disk.usageStatus || disk.status }}</p>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">容量</span>
+            <span class="overview-value">{{ disk.size }}</span>
           </div>
         </div>
+        <div v-if="disk.temperature !== undefined" class="overview-card">
+          <IconifyIcon icon="lucide:thermometer" style="font-size: 16px; color: #faad14;" />
+          <div class="overview-info">
+            <span class="overview-label">温度</span>
+            <span class="overview-value" :style="{ color: getTempColor(disk.temperature) }">{{ disk.temperature }}°C</span>
+          </div>
+        </div>
+        <div v-if="disk.usedHours" class="overview-card">
+          <IconifyIcon icon="lucide:clock" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">使用时长</span>
+            <span class="overview-value">{{ formatHours(disk.usedHours) }}</span>
+          </div>
+        </div>
+        <div v-if="disk.partitions" class="overview-card">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #722ed1;" />
+          <div class="overview-info">
+            <span class="overview-label">分区数</span>
+            <span class="overview-value">{{ disk.partitions.length }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <!-- 分隔线 -->
-        <div class="hero-divider" />
-
-        <!-- 设备信息区（次） -->
+    <!-- ===== 主体内容 ===== -->
+    <div class="detail-body">
+      <!-- 设备信息卡片 -->
+      <Card class="info-card" :bordered="true" :body-style="{ padding: '20px' }">
+        <!-- 设备信息区 -->
         <div class="device-info">
           <Descriptions :column="3" size="small">
             <Descriptions.Item label="设备名称">{{ disk.deviceName }}</Descriptions.Item>
@@ -603,9 +590,21 @@ onMounted(loadDisk);
   width: 100%;
 }
 
-/* 面包屑 */
-.detail-breadcrumb {
-  margin-bottom: 12px;
+/* ===== 页面顶部概览 ===== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #fff;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .back-btn {
@@ -616,151 +615,75 @@ onMounted(loadDisk);
   border-radius: 6px;
 }
 
-/* ===== 主体 ===== */
-.detail-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* ===== 设备概览卡片 ===== */
-.overview-card {
+.page-icon-box {
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
-}
-
-/* 设备名称区（主） */
-.device-hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
-.hero-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.disk-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid;
   flex-shrink: 0;
 }
 
-.disk-icon {
-  font-size: 24px;
-}
-
-.hero-text {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.hero-name-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.disk-name {
-  font-size: 24px;
-  font-weight: 700;
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
   color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  line-height: 1;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.disk-model {
-  font-size: 13px;
+.page-desc {
+  font-size: 12px;
   color: #8c8c8c;
+  margin: 2px 0 0;
 }
 
-.hero-tags {
+.page-header-right {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.health-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 7px;
-  border-radius: 10px;
-  border: 1px solid;
-  font-size: 12px;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.health-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-/* 快捷统计 pill */
-.hero-stats {
+.overview-card {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.stat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
+  gap: 8px;
+  padding: 8px 14px;
   background: #f5f5f5;
   border-radius: 8px;
-  font-size: 12px;
+  min-width: 90px;
 }
 
-.pill-label {
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
   color: #8c8c8c;
 }
 
-.pill-value {
+.overview-value {
+  font-size: 16px;
   font-weight: 600;
   color: #262626;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-/* 分隔线 */
-.hero-divider {
-  height: 1px;
-  background: #f0f0f0;
-  margin: 16px 0;
+/* ===== 主体 ===== */
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+/* ===== 设备信息卡片 ===== */
+.info-card {
+  border-radius: 10px;
 }
 
 /* 设备信息区（次） */
