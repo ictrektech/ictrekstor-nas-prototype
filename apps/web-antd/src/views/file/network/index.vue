@@ -849,6 +849,7 @@ function copyAccessUrl(protocol: NetworkProtocol) {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin: 0 20px;
 }
 
 .protocol-card {

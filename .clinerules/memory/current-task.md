@@ -35,7 +35,9 @@
 - [x] 5.2 修复 storage/disks/index.vue 和 volumes/index.vue 左右边距
 - [x] 5.3 移除 storage.ts 中废弃的 public-dirs 和 recycle-bin 路由
 - [x] 5.4 构建验证与截图确认（11/11 通过）
-- [ ] 5.5 git commit 提交
+- [x] 5.5 git commit 已提交（第一轮）
+- [x] 5.6 主体内容加左右边距（network/disks/volumes）
+- [x] 5.7 构建验证与截图确认（11/11 通过）
 
 ### 验收与提交
 - [x] 4.1 pnpm run build:antd 确认无构建错误（11/11 全部通过）

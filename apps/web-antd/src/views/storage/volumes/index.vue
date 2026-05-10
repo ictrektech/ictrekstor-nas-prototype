@@ -822,7 +822,7 @@ onMounted(loadData);
 
 <style scoped>
 .volume-manager {
-  padding: 0 0 16px;
+  padding: 0 20px 16px;
   width: 100%;
 }
 
@@ -836,7 +836,7 @@ onMounted(loadData);
   border-bottom: 1px solid #f0f0f0;
   gap: 16px;
   flex-shrink: 0;
-  margin-bottom: 16px;
+  margin: 0 -20px 16px;
 }
 
 .page-header-left {

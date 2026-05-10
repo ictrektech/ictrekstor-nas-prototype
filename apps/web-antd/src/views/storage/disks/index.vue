@@ -628,7 +628,7 @@ onMounted(loadData);
 
 <style scoped>
 .disk-manager {
-  padding: 0 0 16px;
+  padding: 0 20px 16px;
   width: 100%;
 }
 
@@ -641,6 +641,7 @@ onMounted(loadData);
   background: #fff;
   gap: 16px;
   flex-shrink: 0;
+  margin: 0 -20px;
 }
 
 .page-header-left {
