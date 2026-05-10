@@ -111,23 +111,7 @@ const protocols = ref<NetworkProtocol[]>([
   },
 ]);
 
-const searchText = ref('');
-
 // ==================== 计算属性 ====================
-const filteredProtocols = computed(() => {
-  let result = protocols.value;
-  if (searchText.value) {
-    const kw = searchText.value.toLowerCase();
-    result = result.filter(
-      (p) =>
-        p.name.toLowerCase().includes(kw) ||
-        p.protocol.toLowerCase().includes(kw) ||
-        p.description.toLowerCase().includes(kw),
-    );
-  }
-  return result;
-});
-
 const activeCount = computed(
   () => protocols.value.filter((p) => p.status === 'active').length,
 );
@@ -472,24 +456,10 @@ function copyAccessUrl(protocol: NetworkProtocol) {
       </div>
     </div>
 
-    <!-- 搜索栏 -->
-    <div class="network-toolbar">
-      <Input
-        v-model:value="searchText"
-        placeholder="搜索协议..."
-        class="search-input"
-        allow-clear
-      >
-        <template #prefix>
-          <IconifyIcon icon="lucide:search" style="font-size: 13px; color: #bfbfbf;" />
-        </template>
-      </Input>
-    </div>
-
     <!-- 协议卡片列表 -->
     <div class="protocol-list">
       <div
-        v-for="protocol in filteredProtocols"
+        v-for="protocol in protocols"
         :key="protocol.id"
         class="protocol-card"
         :class="{ 'protocol-card-disabled': protocol.status === 'disabled' }"
@@ -615,15 +585,6 @@ function copyAccessUrl(protocol: NetworkProtocol) {
       </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-if="filteredProtocols.length === 0" class="empty-state">
-      <IconifyIcon icon="lucide:search-x" class="empty-icon" />
-      <div class="empty-text">未找到匹配的协议</div>
-      <Button size="small" @click="searchText = ''">
-        <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px; margin-right: 4px;" />
-        清除搜索
-      </Button>
-    </div>
 
     <!-- ==================== 配置弹窗 ==================== -->
     <Modal
