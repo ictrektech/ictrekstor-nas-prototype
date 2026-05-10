@@ -693,6 +693,42 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">文件管理</h1>
+          <p class="page-desc">浏览设备文件，支持拖拽传输到本地存储</p>
+        </div>
+      </div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">总容量</span>
+            <span class="overview-value">{{ currentDevice?.capacity || '-' }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">已用</span>
+            <span class="overview-value">{{ currentDevice?.used || '-' }}</span>
+          </div>
+        </div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:percent" style="font-size: 16px; color: #faad14;" />
+          <div class="overview-info">
+            <span class="overview-label">使用率</span>
+            <span class="overview-value">{{ currentDevice?.usedPercent ?? 0 }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════ 双栏文件管理器 ═══════ -->
     <div class="dual-panel" :class="{ 'dual-panel--single': !showLocalPanel }">
       <!-- 左侧：外接设备 -->
@@ -824,6 +860,83 @@ onMounted(() => {
   height: 100%;
   background: #f5f5f5;
   overflow: hidden;
+}
+
+/* ═══ 页面顶部概览 ═══ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-header .page-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e6f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.page-header .page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.page-header .page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
 /* ═══ 顶部工具栏 ═══ */

@@ -67,6 +67,15 @@ const routes: RouteRecordRaw[] = [
           title: '设备全部文件',
         },
       },
+      {
+        name: 'StorageRecycleBin',
+        path: '/storage/recycle-bin',
+        component: () => import('#/views/storage/recycle-bin/index.vue'),
+        meta: {
+          icon: 'lucide:trash-2',
+          title: '回收站',
+        },
+      },
     ],
   },
 ];

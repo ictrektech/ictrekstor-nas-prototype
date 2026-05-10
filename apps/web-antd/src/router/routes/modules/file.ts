@@ -48,6 +48,16 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'FileExternalDeviceManage',
+        path: '/file/external-device/:deviceId',
+        component: () => import('#/views/file/external-device/manage.vue'),
+        meta: {
+          icon: 'lucide:folder-open',
+          title: '外接设备文件管理',
+          hideInMenu: true,
+        },
+      },
+      {
         name: 'FileRecycle',
         path: '/file/recycle',
         component: () => import('#/views/storage/recycle-bin/index.vue'),

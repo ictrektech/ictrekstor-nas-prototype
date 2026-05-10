@@ -159,41 +159,37 @@ function openDeviceFiles(device: ExternalDevice) {
 
 <template>
   <div class="external-device-list">
-    <!-- ═══════ 概览区域 ═══════ -->
-    <div class="overview-section">
-      <div class="overview-header">
-        <div class="overview-title">
-          <IconifyIcon icon="lucide:usb" style="font-size: 16px; color: #1677ff;" />
-          <span>外接设备概览</span>
+    <!-- ═══════ 页面顶部概览 ═══════ -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-icon-box">
+          <IconifyIcon icon="lucide:usb" style="font-size: 20px; color: #1677ff;" />
+        </div>
+        <div class="page-title-area">
+          <h1 class="page-title">外接设备</h1>
+          <p class="page-desc">查看和管理所有通过 USB 或 SD 卡槽连接到 NAS 的外部存储设备</p>
         </div>
       </div>
-      <div class="overview-divider" />
-      <div class="overview-stats">
-        <div class="stat-item">
-          <div class="stat-icon-box" style="background: #e6f7ff;">
-            <IconifyIcon icon="lucide:usb" style="font-size: 20px; color: #1677ff;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-value">{{ overviewStats.total }}</div>
-            <div class="stat-label">设备总数</div>
+      <div class="page-header-right">
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-info">
+            <span class="overview-label">设备总数</span>
+            <span class="overview-value">{{ overviewStats.total }}</span>
           </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-icon-box" style="background: #e6f7ff;">
-            <IconifyIcon icon="lucide:usb" style="font-size: 20px; color: #1677ff;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-value" style="color: #1677ff;">{{ overviewStats.connected }}</div>
-            <div class="stat-label">已连接</div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:plug" style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-info">
+            <span class="overview-label">已连接</span>
+            <span class="overview-value">{{ overviewStats.connected }}</span>
           </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-icon-box" style="background: #e6f7ff;">
-            <IconifyIcon icon="lucide:usb" style="font-size: 20px; color: #1677ff;" />
-          </div>
-          <div class="stat-info">
-            <div class="stat-value" style="color: #1677ff;">{{ overviewStats.disconnected }}</div>
-            <div class="stat-label">未连接</div>
+        <div class="overview-card">
+          <IconifyIcon icon="lucide:unplug" style="font-size: 16px; color: #bfbfbf;" />
+          <div class="overview-info">
+            <span class="overview-label">未连接</span>
+            <span class="overview-value">{{ overviewStats.disconnected }}</span>
           </div>
         </div>
       </div>
@@ -335,93 +331,95 @@ function openDeviceFiles(device: ExternalDevice) {
 
 <style scoped>
 .external-device-list {
-  padding: 0 16px 16px;
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
 }
 
-/* ═══ 概览区域 ═══ */
-.overview-section {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e8e8e8;
-  overflow: hidden;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.overview-header {
+/* ═══ 页面顶部概览 ═══ */
+.page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-}
-
-.overview-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #262626;
-}
-
-.overview-divider {
-  height: 1px;
-  background: #f0f0f0;
-  margin: 0 20px;
-}
-
-.overview-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
   padding: 16px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 16px;
+  flex-shrink: 0;
 }
 
-.stat-item {
+.page-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
-  border-right: 1px solid #f0f0f0;
 }
 
-.stat-item:first-child {
-  padding-left: 0;
-}
-
-.stat-item:last-child {
-  border-right: none;
-  padding-right: 0;
-}
-
-.stat-icon-box {
-  width: 40px;
-  height: 40px;
+.page-icon-box {
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
+  background: #e6f4ff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.page-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.stat-value {
-  font-size: 18px;
-  font-weight: 700;
+.page-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 2px 0 0;
+}
+
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.overview-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  min-width: 90px;
+}
+
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.overview-label {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.overview-value {
+  font-size: 16px;
+  font-weight: 600;
   color: #262626;
-  line-height: 1.2;
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-.stat-label {
-  font-size: 12px;
-  color: #8c8c8c;
+/* ═══ 设备卡片网格 ═══ */
+.device-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 12px;
+  padding: 16px;
 }
 
 /* ═══ 设备卡片网格 ═══ */
