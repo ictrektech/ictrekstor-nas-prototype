@@ -25,110 +25,27 @@ interface MyFileItem extends FileItem {
 }
 
 // ─── Mock 树数据 ───
-// 结构：我的文件（根概念）→ [存储空间 / 团队文件 / 他人共享文件 / 回收站]
+// 直接展示存储空间，去除顶层"存储空间级别"
 const mockTree: FileTreeNode[] = [
   {
-    key: 'spaces',
-    title: '存储空间',
-    type: 'category',
-    path: '/spaces',
+    key: 'space-1',
+    title: '存储空间1',
+    type: 'space',
+    path: '/spaces/space-1',
     children: [
-      {
-        key: 'space-1',
-        title: '存储空间1',
-        type: 'space',
-        path: '/spaces/space-1',
-        children: [
-          { key: 'space-1/docs', title: '文档', type: 'folder', path: '/spaces/space-1/文档', isLeaf: true },
-          { key: 'space-1/images', title: '图片', type: 'folder', path: '/spaces/space-1/图片', isLeaf: true },
-          { key: 'space-1/videos', title: '视频', type: 'folder', path: '/spaces/space-1/视频', isLeaf: true },
-        ],
-      },
-      {
-        key: 'space-2',
-        title: '存储空间2',
-        type: 'space',
-        path: '/spaces/space-2',
-        children: [
-          { key: 'space-2/backup', title: '备份', type: 'folder', path: '/spaces/space-2/备份', isLeaf: true },
-          { key: 'space-2/download', title: '下载', type: 'folder', path: '/spaces/space-2/下载', isLeaf: true },
-        ],
-      },
+      { key: 'space-1/docs', title: '文档', type: 'folder', path: '/spaces/space-1/文档', isLeaf: true },
+      { key: 'space-1/images', title: '图片', type: 'folder', path: '/spaces/space-1/图片', isLeaf: true },
+      { key: 'space-1/videos', title: '视频', type: 'folder', path: '/spaces/space-1/视频', isLeaf: true },
     ],
   },
   {
-    key: 'team',
-    title: '团队文件',
-    type: 'category',
-    path: '/team',
+    key: 'space-2',
+    title: '存储空间2',
+    type: 'space',
+    path: '/spaces/space-2',
     children: [
-      {
-        key: 'tf-1',
-        title: '文档',
-        type: 'team-folder',
-        path: '/team/文档',
-        children: [
-          { key: 'tf-1/project', title: '项目文档', type: 'subfolder', path: '/team/文档/项目文档', isLeaf: true },
-          { key: 'tf-1/meeting', title: '会议纪要', type: 'subfolder', path: '/team/文档/会议纪要', isLeaf: true },
-        ],
-      },
-      {
-        key: 'tf-2',
-        title: '设计资源',
-        type: 'team-folder',
-        path: '/team/设计资源',
-        children: [
-          { key: 'tf-2/ui', title: 'UI 设计', type: 'subfolder', path: '/team/设计资源/UI', isLeaf: true },
-          { key: 'tf-2/brand', title: '品牌素材', type: 'subfolder', path: '/team/设计资源/品牌', isLeaf: true },
-        ],
-      },
-      {
-        key: 'tf-3',
-        title: '财务资料',
-        type: 'team-folder',
-        path: '/team/财务资料',
-        children: [
-          { key: 'tf-3/2024', title: '2024 年报', type: 'subfolder', path: '/team/财务资料/2024', isLeaf: true },
-          { key: 'tf-3/tax', title: '税务资料', type: 'subfolder', path: '/team/财务资料/税务', isLeaf: true },
-        ],
-      },
-    ],
-  },
-  {
-    key: 'shared-from-others',
-    title: '他人共享文件',
-    type: 'category',
-    path: '/shared-from-others',
-    children: [
-      {
-        key: 'shared-from-zhangsan',
-        title: '来自 张三',
-        type: 'shared-user',
-        path: '/shared-from-others/张三',
-        children: [
-          { key: 'zs-share1', title: '共享文档', type: 'shared-folder', path: '/shared-from-others/张三/共享文档', isLeaf: true },
-          { key: 'zs-share2', title: '共享设计', type: 'shared-folder', path: '/shared-from-others/张三/共享设计', isLeaf: true },
-        ],
-      },
-      {
-        key: 'shared-from-lisi',
-        title: '来自 李四',
-        type: 'shared-user',
-        path: '/shared-from-others/李四',
-        children: [
-          { key: 'ls-share1', title: '项目资料', type: 'shared-folder', path: '/shared-from-others/李四/项目资料', isLeaf: true },
-          { key: 'ls-share2', title: '培训视频', type: 'shared-folder', path: '/shared-from-others/李四/培训视频', isLeaf: true },
-        ],
-      },
-      {
-        key: 'shared-from-wangwu',
-        title: '来自 王五',
-        type: 'shared-user',
-        path: '/shared-from-others/王五',
-        children: [
-          { key: 'ww-share1', title: '会议录音', type: 'shared-folder', path: '/shared-from-others/王五/会议录音', isLeaf: true },
-        ],
-      },
+      { key: 'space-2/backup', title: '备份', type: 'folder', path: '/spaces/space-2/备份', isLeaf: true },
+      { key: 'space-2/download', title: '下载', type: 'folder', path: '/spaces/space-2/下载', isLeaf: true },
     ],
   },
 ];
@@ -238,8 +155,8 @@ const mockFiles: Record<string, MyFileItem[]> = {
 
 // ─── 状态 ───
 const treeData = ref<FileTreeNode[]>(mockTree);
-const selectedKeys = ref<string[]>(['spaces']);
-const expandedKeys = ref<string[]>(['spaces', 'shared-from-others']);
+const selectedKeys = ref<string[]>(['space-1']);
+const expandedKeys = ref<string[]>(['space-1']);
 const loading = ref(false);
 const searchText = ref('');
 const viewMode = ref<'list' | 'grid'>('list');
@@ -274,8 +191,8 @@ const folderOptions = computed(() => {
       if (n.children) {
         walk(n.children, label);
       }
-      // 允许作为移动目标的节点（排除分类节点本身）
-      if (n.type !== 'category' && n.type !== 'shared-user') {
+      // 允许作为移动目标的节点
+      if (n.type !== 'shared-user') {
         opts.push({ label, value: n.key });
       }
     }
@@ -320,14 +237,13 @@ const breadcrumbPath = computed(() => {
 
 /** 概览统计 */
 const overviewStats = computed(() => {
-  const spaces = treeData.value.find(n => n.key === 'spaces')?.children?.length || 0;
-  const teamFolders = treeData.value.find(n => n.key === 'team')?.children?.length || 0;
-  const sharedUsers = treeData.value.find(n => n.key === 'shared-from-others')?.children?.length || 0;
+  const spaces = treeData.value.length;
+  const folders = treeData.value.reduce((sum, s) => sum + (s.children?.length || 0), 0);
   let fileCount = 0;
   Object.values(mockFiles).forEach(list => {
     list.forEach(f => { if (f.type === 'file') fileCount++; });
   });
-  return { spaces, teamFolders, sharedUsers, files: fileCount };
+  return { spaces, folders, files: fileCount };
 });
 
 /** 当前是否为回收站 */
@@ -368,9 +284,9 @@ function onSelectTree(key: string) {
 
 function onBreadcrumbClick(item: { key: string }) {
   if (item.key === 'root') {
-    selectedKeys.value = ['spaces'];
-    expandedKeys.value = ['spaces'];
-    loadFiles('spaces');
+    selectedKeys.value = ['space-1'];
+    expandedKeys.value = ['space-1'];
+    loadFiles('space-1');
     return;
   }
   selectedKeys.value = [item.key];
@@ -486,7 +402,7 @@ function nodeIconResolver(node: FileTreeNode) {
 }
 
 onMounted(() => {
-  loadFiles('spaces');
+  loadFiles('space-1');
 });
 </script>
 
@@ -512,17 +428,10 @@ onMounted(() => {
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-heart" style="font-size: 16px; color: #faad14;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
           <div class="overview-info">
-            <span class="overview-label">团队文件夹</span>
-            <span class="overview-value">{{ overviewStats.teamFolders }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #722ed1;" />
-          <div class="overview-info">
-            <span class="overview-label">他人共享</span>
-            <span class="overview-value">{{ overviewStats.sharedUsers }}</span>
+            <span class="overview-label">文件夹</span>
+            <span class="overview-value">{{ overviewStats.folders }}</span>
           </div>
         </div>
         <div class="overview-card">

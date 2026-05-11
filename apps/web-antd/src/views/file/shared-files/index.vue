@@ -396,7 +396,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
           <Link style="font-size: 20px; color: #722ed1;" />
         </div>
         <div class="page-title-area">
-          <h1 class="page-title">我的共享</h1>
+          <h1 class="page-title">我的分享</h1>
           <p class="page-desc">管理当前用户对外分享的文件夹和链接</p>
         </div>
       </div>

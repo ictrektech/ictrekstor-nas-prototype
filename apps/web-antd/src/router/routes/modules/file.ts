@@ -21,12 +21,30 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        name: 'FilePublicFiles',
+        path: '/file/public-files',
+        component: () => import('#/views/file/public-files/index.vue'),
+        meta: {
+          icon: 'lucide:folder-heart',
+          title: '公共文件',
+        },
+      },
+      {
+        name: 'FileSharedFromOthers',
+        path: '/file/shared-from-others',
+        component: () => import('#/views/file/shared-from-others/index.vue'),
+        meta: {
+          icon: 'lucide:share-2',
+          title: '他人分享',
+        },
+      },
+      {
         name: 'FileShared',
         path: '/file/shared',
         component: () => import('#/views/file/shared-files/index.vue'),
         meta: {
           icon: 'lucide:link',
-          title: '我的共享',
+          title: '我的分享',
         },
       },
       {
