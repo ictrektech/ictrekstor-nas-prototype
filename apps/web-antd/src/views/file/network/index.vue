@@ -505,13 +505,7 @@ function copyAccessUrl(protocol: NetworkProtocol) {
               </div>
             </div>
 
-            <!-- 彩色分隔线 -->
-            <div
-              class="card-divider"
-              :style="{ background: getProtocolGradient(protocol.protocol) }"
-            />
-
-            <!-- 第二行：访问地址 + 配置 + 操作 -->
+            <!-- 卡片体 -->
             <div class="card-body-row">
               <!-- 左侧：访问地址 -->
               <div class="access-url-section">
@@ -836,19 +830,26 @@ function copyAccessUrl(protocol: NetworkProtocol) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+.protocol-card-disabled .card-header-row {
+  background: #f5f5f5;
+  border-bottom-color: #e8e8e8;
+}
+
 /* ==================== 启用状态：紧凑上下布局 ==================== */
 .card-body-active {
   display: flex;
   flex-direction: column;
 }
 
-/* 第一行：头部 + 操作按钮 + Switch */
+/* 卡片头：头部 + 操作按钮 + Switch */
 .card-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px 10px;
+  padding: 14px 20px;
   gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
 }
 
 .header-actions {
@@ -911,20 +912,12 @@ function copyAccessUrl(protocol: NetworkProtocol) {
   line-height: 1.4;
 }
 
-/* 彩色分隔线 */
-.card-divider {
-  height: 3px;
-  transition: all 0.3s ease;
-  margin: 0 20px;
-  border-radius: 2px;
-}
-
-/* 第二行：内容区 + 操作区 */
+/* 卡片体：内容区 */
 .card-body-row {
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 10px 20px 14px;
+  padding: 14px 20px;
 }
 
 /* 访问地址 - 固定宽度 */
