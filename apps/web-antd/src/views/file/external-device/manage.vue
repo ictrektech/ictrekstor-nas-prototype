@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   Tag,
   Tooltip,
-  Switch,
   message,
   Modal,
   Form,
@@ -387,6 +386,10 @@ const localSearchText = ref('');
 const localViewMode = ref<'list' | 'grid'>('list');
 const localLoading = ref(false);
 
+// 树状面板引用（用于外部控制收起/展开）
+const deviceTreeRef = ref<InstanceType<typeof FileTreePanel> | null>(null);
+const localTreeRef = ref<InstanceType<typeof FileTreePanel> | null>(null);
+
 // 传输弹窗
 const transferModalVisible = ref(false);
 const transferFileName = ref('');
@@ -639,6 +642,30 @@ function goBack() {
   router.push('/file/external-device');
 }
 
+// ═══ 拷贝模式切换 ═══
+
+/** 切换双栏拷贝模式 */
+function toggleCopyMode() {
+  showLocalPanel.value = !showLocalPanel.value;
+}
+
+// 监听拷贝模式变化，自动切换树状视图侧边栏状态
+watch(showLocalPanel, (val) => {
+  if (val) {
+    // 进入拷贝模式：两侧树状视图切换为悬浮收起模式
+    deviceTreeRef.value?.setPin?.(false);
+    deviceTreeRef.value?.collapse?.();
+    localTreeRef.value?.setPin?.(false);
+    localTreeRef.value?.collapse?.();
+  } else {
+    // 退出拷贝模式：恢复为固定展开模式
+    deviceTreeRef.value?.setPin?.(true);
+    deviceTreeRef.value?.expand?.();
+    localTreeRef.value?.setPin?.(true);
+    localTreeRef.value?.expand?.();
+  }
+});
+
 // ═══════════════════════════════════════════════════════════
 // 初始化
 // ═══════════════════════════════════════════════════════════
@@ -651,81 +678,86 @@ onMounted(() => {
 
 <template>
   <div class="external-device-manage">
-    <!-- ═══════ 顶部工具栏 ═══════ -->
-    <div class="top-toolbar">
-      <div class="top-toolbar__left">
+    <!-- ═══════ 统一头部栏（两行布局） ═══════ -->
+    <div class="unified-header">
+      <!-- 第一行：页面描述与状态信息 -->
+      <div class="unified-header__row">
+        <div class="unified-header__left">
+          <div class="device-info">
+            <div class="device-info__icon">
+              <IconifyIcon
+                :icon="getDeviceIcon(currentDevice?.type || 'usb')"
+                style="font-size: 18px;"
+                :style="{ color: getDeviceIconColor(currentDevice?.type || 'usb') }"
+              />
+            </div>
+            <div class="device-info__text">
+              <div class="device-info__name">{{ currentDevice?.name || '外接设备' }}</div>
+              <div class="device-info__meta">
+                <span class="meta-tag">{{ getDeviceTypeLabel(currentDevice?.type || 'usb') }}</span>
+                <span class="meta-sep">·</span>
+                <span>{{ currentDevice?.fileSystem }}</span>
+                <span class="meta-sep">·</span>
+                <span>{{ currentDevice?.capacity }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="header-divider" />
+          <div
+            class="connection-badge"
+            :class="{ 'connection-badge--connected': currentDevice?.status === 'connected' }"
+          >
+            <span class="connection-badge__dot" />
+            <span class="connection-badge__text">
+              {{ currentDevice?.status === 'connected' ? '已连接' : '未连接' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 右侧：容量概览 -->
+        <div class="unified-header__right-stats">
+          <div class="stat-chip">
+            <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
+            <div class="stat-chip__content">
+              <span class="stat-chip__label">总容量</span>
+              <span class="stat-chip__value">{{ currentDevice?.capacity || '-' }}</span>
+            </div>
+          </div>
+          <div class="stat-chip">
+            <IconifyIcon icon="lucide:database" style="font-size: 14px; color: #52c41a;" />
+            <div class="stat-chip__content">
+              <span class="stat-chip__label">已用</span>
+              <span class="stat-chip__value">{{ currentDevice?.used || '-' }}</span>
+            </div>
+          </div>
+          <div class="stat-chip">
+            <IconifyIcon icon="lucide:percent" style="font-size: 14px; color: #faad14;" />
+            <div class="stat-chip__content">
+              <span class="stat-chip__label">使用率</span>
+              <span class="stat-chip__value">{{ currentDevice?.usedPercent ?? 0 }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二行：操作按钮 -->
+      <div class="unified-header__row">
         <Button size="small" class="back-btn" @click="goBack">
           <IconifyIcon icon="lucide:arrow-left" style="font-size: 14px;" />
-          返回
+          返回外接设备列表
         </Button>
-        <div class="toolbar-divider" />
-        <div class="page-icon-box">
-          <IconifyIcon
-            :icon="getDeviceIcon(currentDevice?.type || 'usb')"
-            style="font-size: 20px;"
-            :style="{ color: getDeviceIconColor(currentDevice?.type || 'usb') }"
-          />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">{{ currentDevice?.name || '外接设备' }}</h1>
-          <p class="page-desc">
-            {{ getDeviceTypeLabel(currentDevice?.type || 'usb') }} · {{ currentDevice?.fileSystem }} · {{ currentDevice?.capacity }}
-            <span v-if="currentDevice?.status === 'connected'" class="cap-hint">
-              · 已用 {{ currentDevice?.used }} ({{ currentDevice?.usedPercent }}%)
-            </span>
-          </p>
-        </div>
-      </div>
-      <div class="top-toolbar__right">
-        <div v-if="currentDevice?.status === 'connected'" class="toolbar-stat">
-          <IconifyIcon icon="lucide:plug" style="font-size: 14px; color: #52c41a;" />
-          <span>已连接</span>
-        </div>
-        <div v-else class="toolbar-stat">
-          <IconifyIcon icon="lucide:unplug" style="font-size: 14px; color: #bfbfbf;" />
-          <span>未连接</span>
-        </div>
-        <div class="toolbar-divider" />
-        <div class="local-toggle">
-          <span class="local-toggle__label">本地文件管理器</span>
-          <Switch v-model:checked="showLocalPanel" size="small" />
-        </div>
-      </div>
-    </div>
 
-    <!-- ═══════ 页面顶部概览 ═══════ -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">文件管理</h1>
-          <p class="page-desc">浏览设备文件，支持拖拽传输到本地存储</p>
-        </div>
-      </div>
-      <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
-          <div class="overview-info">
-            <span class="overview-label">总容量</span>
-            <span class="overview-value">{{ currentDevice?.capacity || '-' }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #52c41a;" />
-          <div class="overview-info">
-            <span class="overview-label">已用</span>
-            <span class="overview-value">{{ currentDevice?.used || '-' }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:percent" style="font-size: 16px; color: #faad14;" />
-          <div class="overview-info">
-            <span class="overview-label">使用率</span>
-            <span class="overview-value">{{ currentDevice?.usedPercent ?? 0 }}%</span>
-          </div>
-        </div>
+        <button
+          class="copy-mode-toggle"
+          :class="{ 'copy-mode-toggle--active': showLocalPanel }"
+          @click="toggleCopyMode"
+        >
+          <IconifyIcon
+            :icon="showLocalPanel ? 'lucide:folder-x' : 'lucide:folder-sync'"
+            style="font-size: 14px;"
+          />
+          <span>{{ showLocalPanel ? '退出拷贝' : '文件拷贝' }}</span>
+        </button>
       </div>
     </div>
 
@@ -735,6 +767,7 @@ onMounted(() => {
       <div class="panel-wrapper panel-wrapper--device">
         <div class="panel-content">
           <FileTreePanel
+            ref="deviceTreeRef"
             :tree-data="treeData"
             v-model:selected-keys="selectedKeys"
             v-model:expanded-keys="expandedKeys"
@@ -762,18 +795,16 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- 中间拖拽提示 -->
+      <!-- 中间拖拽分隔线 -->
       <div v-if="showLocalPanel" class="drag-divider">
-        <div class="drag-divider__icon">
-          <IconifyIcon icon="lucide:arrow-left-right" style="font-size: 18px; color: #bfbfbf;" />
-        </div>
-        <div class="drag-divider__text">双向拖拽传输</div>
+        <div class="drag-divider__inner" />
       </div>
 
       <!-- 右侧：本地存储 -->
-      <div v-if="showLocalPanel" class="panel-wrapper panel-wrapper--local">
+      <div v-show="showLocalPanel" class="panel-wrapper panel-wrapper--local">
         <div class="panel-content">
           <FileTreePanel
+            ref="localTreeRef"
             :tree-data="localTreeData"
             v-model:selected-keys="localSelectedKeys"
             v-model:expanded-keys="localExpandedKeys"
@@ -862,99 +893,33 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* ═══ 页面顶部概览 ═══ */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.page-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.page-header .page-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #e6f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.page-header .page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.page-header .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin: 2px 0 0;
-}
-
-.page-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
+/* ═══════════════════════════════════════════════════════════
+   统一头部栏（两行布局）
+   ═══════════════════════════════════════════════════════════ */
+.unified-header {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
-.overview-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-/* ═══ 顶部工具栏 ═══ */
-.top-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 12px 20px;
   background: #fff;
   border-bottom: 1px solid #f0f0f0;
-  gap: 16px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
-.top-toolbar__left {
+.unified-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 左侧：设备信息 + 连接状态 */
+.unified-header__left {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .back-btn {
@@ -964,79 +929,195 @@ onMounted(() => {
   border-radius: 6px;
 }
 
-.page-icon-box {
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background: #e8e8e8;
+  flex-shrink: 0;
+}
+
+.device-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.device-info__icon {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #e6f4ff;
+  background: linear-gradient(135deg, #e6f4ff 0%, #d6e8ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.page-title {
-  font-size: 16px;
+.device-info__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.device-info__name {
+  font-size: 15px;
   font-weight: 600;
   color: #262626;
-  margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
-.page-desc {
+.device-info__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   color: #8c8c8c;
-  margin: 2px 0 0;
 }
 
-.cap-hint {
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  background: #f0f5ff;
+  border-radius: 10px;
+  font-size: 11px;
   color: #1677ff;
   font-weight: 500;
 }
 
-.top-toolbar__right {
+.meta-sep {
+  color: #d9d9d9;
+}
+
+/* 右侧：容量概览统计 */
+.unified-header__right-stats {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.toolbar-stat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #595959;
-}
-
-.toolbar-stat strong {
-  color: #262626;
-  font-weight: 600;
-}
-
-.toolbar-divider {
-  width: 1px;
-  height: 20px;
-  background: #e8e8e8;
-}
-
-.local-toggle {
+.stat-chip {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-.local-toggle__label {
+.stat-chip:hover {
+  background: #f0f5ff;
+  border-color: #bae0ff;
+}
+
+.stat-chip__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.stat-chip__label {
+  font-size: 10px;
+  color: #8c8c8c;
+  line-height: 1.3;
+}
+
+.stat-chip__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  line-height: 1.3;
+}
+
+
+/* 右侧：连接状态 + 拷贝模式 */
+.unified-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.connection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: #f5f5f5;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #8c8c8c;
+  transition: all 0.2s ease;
+}
+
+.connection-badge--connected {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.connection-badge__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #bfbfbf;
+  flex-shrink: 0;
+}
+
+.connection-badge--connected .connection-badge__dot {
+  background: #52c41a;
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
+}
+
+/* 拷贝模式切换按钮 */
+.copy-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
   font-size: 13px;
   color: #595959;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  outline: none;
 }
 
-/* ═══ 双栏布局 ═══ */
+.copy-mode-toggle:hover {
+  background: #f0f5ff;
+  border-color: #bae0ff;
+  color: #1677ff;
+}
+
+.copy-mode-toggle--active {
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+  border-color: #1677ff;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
+}
+
+.copy-mode-toggle--active:hover {
+  background: linear-gradient(135deg, #0958d9 0%, #1677ff 100%);
+  border-color: #0958d9;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   双栏布局
+   ═══════════════════════════════════════════════════════════ */
 .dual-panel {
   display: flex;
   flex: 1;
   overflow: hidden;
-  padding: 12px;
-  gap: 12px;
+  padding: 10px;
+  gap: 4px;
 }
 
 .dual-panel--single .panel-wrapper--device {
@@ -1051,61 +1132,35 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.panel-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-bottom: none;
-  border-radius: 10px 10px 0 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: #262626;
-  flex-shrink: 0;
-}
-
 .panel-content {
   display: flex;
   flex: 1;
   overflow: hidden;
-  gap: 12px;
+  gap: 4px;
 }
 
-/* 中间拖拽分隔 */
+/* 中间拖拽分隔：短竖线 */
 .drag-divider {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 48px;
+  width: 4px;
   flex-shrink: 0;
   align-self: center;
 }
 
-.drag-divider__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid #e8e8e8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+.drag-divider__inner {
+  width: 2px;
+  height: 64px;
+  border-radius: 2px;
+  background: #d9d9d9;
+  display: block;
 }
 
-.drag-divider__text {
-  font-size: 10px;
-  color: #bfbfbf;
-  text-align: center;
-  writing-mode: vertical-rl;
-  letter-spacing: 2px;
-}
-
-/* ═══ 传输弹窗 ═══ */
+/* ═══════════════════════════════════════════════════════════
+   传输弹窗
+   ═══════════════════════════════════════════════════════════ */
 .transfer-modal-content {
   display: flex;
   flex-direction: column;
@@ -1149,35 +1204,49 @@ onMounted(() => {
   color: #1677ff;
 }
 
-/* ═══ 响应式 ═══ */
+/* ═══════════════════════════════════════════════════════════
+   响应式
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 1200px) {
+  .unified-header__center {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .dual-panel {
     flex-direction: column;
   }
+
   .drag-divider {
     flex-direction: row;
     width: auto;
-    height: 40px;
+    height: 32px;
   }
-  .drag-divider__text {
-    writing-mode: horizontal-tb;
-  }
-}
 
-@media (max-width: 768px) {
-  .top-toolbar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
   .panel-content {
     flex-direction: column;
   }
+
   .panel-content :deep(.file-tree-panel) {
     width: 100% !important;
     min-width: auto !important;
     max-height: 200px;
     border-radius: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .unified-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .unified-header__right {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 </style>

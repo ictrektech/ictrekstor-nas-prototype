@@ -169,7 +169,19 @@ function onExpand(keys: string[]) {
   emit('update:expandedKeys', keys);
 }
 
-function defaultIconResolver(node: FileTreeNode): { icon: string; color: string } {
+  function setPin(value: boolean) {
+    isPinned.value = value;
+  }
+
+  // ═══ 暴露方法给父组件 ═══
+  defineExpose({
+    collapse,
+    expand,
+    togglePin,
+    setPin,
+  });
+
+  function defaultIconResolver(node: FileTreeNode): { icon: string; color: string } {
   if (node.type === 'space') {
     return { icon: 'lucide:hard-drive', color: '#1677ff' };
   }
