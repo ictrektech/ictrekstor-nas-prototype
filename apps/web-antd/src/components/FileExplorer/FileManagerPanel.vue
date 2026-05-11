@@ -241,65 +241,79 @@ import { ref } from 'vue';
   >
     <!-- 工具栏 -->
     <div class="file-manager-panel__toolbar">
-      <div class="file-manager-panel__breadcrumb-wrap">
+      <!-- 第一行：文件路径 -->
+      <div class="file-manager-panel__path-row">
         <div v-if="panelTitle" class="file-manager-panel__panel-title">
           <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
           <span>{{ panelTitle }}</span>
         </div>
-        <Breadcrumb class="file-manager-panel__breadcrumb">
-          <Breadcrumb.Item
-            v-for="(item, idx) in breadcrumbPath"
-            :key="item.key"
-          >
-            <a
-              v-if="idx < breadcrumbPath.length - 1"
-              class="file-manager-panel__breadcrumb-link"
-              @click="onBreadcrumbClick(item)"
-            >
-              {{ item.title }}
-            </a>
-            <span v-else class="file-manager-panel__breadcrumb-current">{{ item.title }}</span>
-          </Breadcrumb.Item>
-        </Breadcrumb>
+        <div class="file-manager-panel__breadcrumb-scroll">
+          <div class="file-manager-panel__breadcrumb-inner">
+            <Breadcrumb class="file-manager-panel__breadcrumb">
+              <Breadcrumb.Item
+                v-for="(item, idx) in breadcrumbPath"
+                :key="item.key"
+              >
+                <a
+                  v-if="idx < breadcrumbPath.length - 1"
+                  class="file-manager-panel__breadcrumb-link"
+                  @click="onBreadcrumbClick(item)"
+                >
+                  {{ item.title }}
+                </a>
+                <span v-else class="file-manager-panel__breadcrumb-current">{{ item.title }}</span>
+              </Breadcrumb.Item>
+            </Breadcrumb>
+          </div>
+        </div>
       </div>
-      <div class="file-manager-panel__actions">
-        <Input
-          v-model:value="internalSearch"
-          placeholder="搜索文件"
-          class="file-manager-panel__search"
-          allow-clear
-        >
-          <template #prefix>
-            <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
-          </template>
-        </Input>
-        <Radio.Group v-model:value="internalViewMode" size="small" class="file-manager-panel__view-toggle">
-          <Radio.Button value="list">
-            <IconifyIcon icon="lucide:list" style="font-size: 13px;" />
-          </Radio.Button>
-          <Radio.Button value="grid">
-            <IconifyIcon icon="lucide:layout-grid" style="font-size: 13px;" />
-          </Radio.Button>
-        </Radio.Group>
-        <Tooltip title="刷新">
-          <Button size="small" class="file-manager-panel__refresh" @click="onRefresh">
-            <IconifyIcon icon="lucide:refresh-cw" style="font-size: 13px;" />
-          </Button>
-        </Tooltip>
-        <Button
-          v-if="showNewFolder && mode !== 'recycle'"
-          type="primary"
-          size="small"
-          class="file-manager-panel__new-folder"
-          @click="onNewFolder"
-        >
-          <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
-          新建文件夹
-        </Button>
-        <Button v-if="mode !== 'recycle'" size="small" class="file-manager-panel__upload" @click="onUpload">
-          <IconifyIcon icon="lucide:upload" style="font-size: 13px;" />
-          上传
-        </Button>
+      <!-- 第二行：搜索与操作 -->
+      <div class="file-manager-panel__actions-row">
+        <div class="file-manager-panel__actions">
+          <Input
+            v-model:value="internalSearch"
+            placeholder="搜索文件"
+            class="file-manager-panel__search"
+            allow-clear
+          >
+            <template #prefix>
+              <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+            </template>
+          </Input>
+          <Radio.Group v-model:value="internalViewMode" size="small" class="file-manager-panel__view-toggle">
+            <Radio.Button value="list">
+              <IconifyIcon icon="lucide:list" style="font-size: 13px;" />
+            </Radio.Button>
+            <Radio.Button value="grid">
+              <IconifyIcon icon="lucide:layout-grid" style="font-size: 13px;" />
+            </Radio.Button>
+          </Radio.Group>
+          <Tooltip title="刷新">
+            <Button size="small" class="file-manager-panel__refresh" @click="onRefresh">
+              <IconifyIcon icon="lucide:refresh-cw" style="font-size: 13px;" />
+            </Button>
+          </Tooltip>
+          <Tooltip title="新建文件夹">
+            <Button
+              v-if="showNewFolder && mode !== 'recycle'"
+              size="small"
+              class="file-manager-panel__new-folder"
+              @click="onNewFolder"
+            >
+              <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
+            </Button>
+          </Tooltip>
+          <Tooltip title="上传">
+            <Button
+              v-if="mode !== 'recycle'"
+              size="small"
+              class="file-manager-panel__upload"
+              @click="onUpload"
+            >
+              <IconifyIcon icon="lucide:upload" style="font-size: 13px;" />
+            </Button>
+          </Tooltip>
+        </div>
       </div>
     </div>
 
@@ -569,21 +583,20 @@ import { ref } from 'vue';
 /* ═══ 工具栏 ═══ */
 .file-manager-panel__toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 10px 14px;
   border-bottom: 1px solid #f5f5f5;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
-.file-manager-panel__breadcrumb-wrap {
+/* 第一行：文件路径 */
+.file-manager-panel__path-row {
   display: flex;
   align-items: center;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
 }
 
 .file-manager-panel__panel-title {
@@ -600,29 +613,89 @@ import { ref } from 'vue';
   white-space: nowrap;
 }
 
+/* 路径横向滚动容器 */
+.file-manager-panel__breadcrumb-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* 隐藏滚动条但保留滚动能力 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.file-manager-panel__breadcrumb-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.file-manager-panel__breadcrumb-inner {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  /* 给面包屑整体一个现代感的胶囊背景 */
+  background: linear-gradient(135deg, #f6f8fb 0%, #f0f3f8 100%);
+  border: 1px solid #e8ecf2;
+  border-radius: 20px;
+  padding: 3px 14px;
+  gap: 2px;
+}
+
 .file-manager-panel__breadcrumb {
-  font-size: 13px;
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .file-manager-panel__breadcrumb :deep(.ant-breadcrumb-link) {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
+}
+
+/* 覆盖 ant-breadcrumb 默认分隔符样式 */
+.file-manager-panel__breadcrumb :deep(.ant-breadcrumb-separator) {
+  color: #c0c8d5;
+  margin: 0 4px;
+  font-size: 11px;
+}
+
+/* 每个面包屑项的通用样式 */
+.file-manager-panel__breadcrumb :deep(.ant-breadcrumb-item) {
+  display: inline-flex;
+  align-items: center;
 }
 
 .file-manager-panel__breadcrumb-link {
-  color: #1677ff;
+  color: #4e7ac8;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
 }
 
 .file-manager-panel__breadcrumb-link:hover {
-  color: #4096ff;
-  text-decoration: underline;
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  text-decoration: none;
 }
 
+/* 当前项（最后一级） */
 .file-manager-panel__breadcrumb-current {
-  color: #262626;
-  font-weight: 600;
+  color: #1a2b4c;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(22, 119, 255, 0.1);
+  border: 1px solid rgba(22, 119, 255, 0.15);
+}
+
+/* 第二行：搜索与操作 */
+.file-manager-panel__actions-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .file-manager-panel__actions {
