@@ -45,6 +45,7 @@ interface SharedDir {
   linkUrl: string;
   linkAccessCount: number;
   linkStatus: 'active' | 'expired';
+  linkPassword?: string;
 }
 
 /* ═══════ 共享文件夹数据 ═══════ */
@@ -373,7 +374,7 @@ function openLinkModal(dir: SharedDir) {
     expireType: 'preset',
     expirePreset: '7',
     expireCustomDate: '',
-    password: '',
+    password: dir.linkPassword || '',
   };
   linkModalVisible.value = true;
 }
@@ -381,12 +382,13 @@ function openLinkModal(dir: SharedDir) {
 function handleSaveLink() {
   if (editingDir.value) {
     editingDir.value.linkEnabled = linkForm.value.enabled;
+    editingDir.value.linkPassword = linkForm.value.password || undefined;
     if (linkForm.value.enabled) {
       editingDir.value.linkStatus = 'active';
       if (!editingDir.value.linkUrl) {
         editingDir.value.linkUrl = `https://d.vivibit.com/s/${Date.now().toString(36)}`;
       }
-      message.success('外链已启用');
+      message.success('外链设置已保存');
     } else {
       editingDir.value.linkStatus = 'expired';
       message.success('外链已关闭');
@@ -799,7 +801,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       </Form>
     </Modal>
 
-    <!-- ═══════ 外链管理弹窗 ═══════ -->
+    <!-- ═══════ 外链管理弹窗（简约现代风格）═══════ -->
     <Modal
       v-model:open="linkModalVisible"
       :title="`外链管理 - ${editingDir?.name}`"
@@ -807,40 +809,88 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       ok-text="保存"
       cancel-text="取消"
       @ok="handleSaveLink"
+      class="link-manage-modal"
     >
-      <Form ref="linkFormRef" :model="linkForm" layout="vertical">
-        <Form.Item label="外链开关">
-          <Switch v-model:checked="linkForm.enabled" />
-        </Form.Item>
+      <div class="link-modal-body">
+        <!-- 文件夹信息卡片 -->
+        <div class="link-folder-card">
+          <IconifyIcon
+            icon="lucide:folder-open"
+            style="font-size: 18px; color: #d48806; flex-shrink: 0;"
+          />
+          <span class="link-folder-name">{{ editingDir?.name }}</span>
+        </div>
+
+        <!-- 启用外链开关 -->
+        <div class="link-enable-row">
+          <Checkbox v-model:checked="linkForm.enabled">
+            <span class="link-enable-label">启用外链分享</span>
+          </Checkbox>
+          <Tooltip title="开启后，任何人可通过链接访问此文件夹">
+            <IconifyIcon
+              icon="lucide:circle-help"
+              style="font-size: 13px; color: #bfbfbf; cursor: help;"
+            />
+          </Tooltip>
+        </div>
 
         <template v-if="linkForm.enabled">
-          <Form.Item label="共享链接">
-            <div class="share-link-row">
-              <Input v-model:value="editingDir!.linkUrl" readonly />
-              <Button @click="handleCopyLink(editingDir!.linkUrl)">复制</Button>
+          <!-- 共享链接 -->
+          <div class="link-section">
+            <div class="link-section-title">共享链接</div>
+            <div class="link-url-row">
+              <Input
+                v-model:value="editingDir!.linkUrl"
+                readonly
+                class="link-url-input"
+              />
+              <Button
+                type="primary"
+                size="small"
+                @click="handleCopyLink(editingDir!.linkUrl)"
+              >
+                复制
+              </Button>
             </div>
-          </Form.Item>
+          </div>
 
-          <Form.Item label="访问次数">
-            <span style="font-size: 14px; font-weight: 600; color: #262626;">
+          <!-- 访问次数 -->
+          <div class="link-section">
+            <div class="link-section-title">访问次数</div>
+            <span class="link-stat-num">
               {{ editingDir?.linkAccessCount || 0 }}
             </span>
-          </Form.Item>
+          </div>
 
-          <Form.Item label="外链有效期">
-            <Radio.Group v-model:value="linkForm.expireType" size="small">
+          <!-- 有效期 -->
+          <div class="link-section">
+            <div class="link-section-title">有效期</div>
+            <Radio.Group
+              v-model:value="linkForm.expireType"
+              size="small"
+              class="link-expire-radio"
+            >
               <Radio.Button value="preset">预设</Radio.Button>
               <Radio.Button value="custom">自定义</Radio.Button>
               <Radio.Button value="forever">永久</Radio.Button>
             </Radio.Group>
-            <div v-if="linkForm.expireType === 'preset'" style="margin-top: 8px;">
-              <Radio.Group v-model:value="linkForm.expirePreset" size="small">
+            <div
+              v-if="linkForm.expireType === 'preset'"
+              class="link-preset-days"
+            >
+              <Radio.Group
+                v-model:value="linkForm.expirePreset"
+                size="small"
+              >
                 <Radio.Button value="1">1天</Radio.Button>
                 <Radio.Button value="7">7天</Radio.Button>
                 <Radio.Button value="30">30天</Radio.Button>
               </Radio.Group>
             </div>
-            <div v-else-if="linkForm.expireType === 'custom'" style="margin-top: 8px;">
+            <div
+              v-else-if="linkForm.expireType === 'custom'"
+              class="link-custom-date"
+            >
               <DatePicker
                 v-model:value="linkForm.expireCustomDate"
                 placeholder="选择到期日期"
@@ -848,13 +898,23 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                 style="width: 100%;"
               />
             </div>
-          </Form.Item>
+          </div>
 
-          <Form.Item label="访问密码（选填）">
-            <Input v-model:value="linkForm.password" placeholder="不设置密码则公开访问" />
-          </Form.Item>
+          <!-- 访问密码 -->
+          <div class="link-section">
+            <div class="link-section-title">访问密码（选填）</div>
+            <Input
+              v-model:value="linkForm.password"
+              placeholder="不设置密码则公开访问"
+            />
+          </div>
         </template>
-      </Form>
+
+        <!-- 关闭状态提示 -->
+        <div v-else class="link-disabled-hint">
+          外链分享已关闭，开启后将生成共享链接
+        </div>
+      </div>
     </Modal>
   </div>
 </template>
@@ -1503,17 +1563,116 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   font-size: 12px;
 }
 
-/* 共享链接行 */
-.share-link-row {
-  display: flex;
-  gap: 8px;
-}
+  /* 共享链接行 */
+  .share-link-row {
+    display: flex;
+    gap: 8px;
+  }
 
-.share-link-row :deep(.ant-input) {
-  flex: 1;
-}
+  .share-link-row :deep(.ant-input) {
+    flex: 1;
+  }
 
-/* ═══ 响应式 ═══ */
+  /* ═══ 外链管理弹窗（简约现代风格）═══ */
+  .link-manage-modal :deep(.ant-modal-content) {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .link-modal-body {
+    padding: 4px 4px 12px;
+  }
+
+  /* 文件夹信息卡片 */
+  .link-folder-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+    border: 1px solid #ffd591;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+
+  .link-folder-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #262626;
+  }
+
+  /* 启用外链开关 */
+  .link-enable-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .link-enable-label {
+    font-size: 14px;
+    color: #262626;
+  }
+
+  /* 各区块 */
+  .link-section {
+    margin-bottom: 14px;
+  }
+
+  .link-section:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .link-section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #262626;
+    margin-bottom: 6px;
+  }
+
+  /* 链接URL行 */
+  .link-url-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .link-url-input {
+    flex: 1;
+  }
+
+  .link-url-input :deep(.ant-input) {
+    background: #fafafa;
+    color: #595959;
+  }
+
+  /* 访问次数 */
+  .link-stat-num {
+    font-size: 20px;
+    font-weight: 700;
+    color: #262626;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* 有效期选择 */
+  .link-expire-radio {
+    margin-bottom: 6px;
+  }
+
+  .link-preset-days {
+    margin-top: 6px;
+  }
+
+  /* 关闭状态提示 */
+  .link-disabled-hint {
+    padding: 24px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #8c8c8c;
+  }
+
+  /* ═══ 响应式 ═══ */
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
