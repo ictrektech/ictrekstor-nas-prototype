@@ -14,15 +14,6 @@ const routes: RouteRecordRaw[] = [
     redirect: '/storage/disks',
     children: [
       {
-        name: 'StorageDisks',
-        path: '/storage/disks',
-        component: () => import('#/views/storage/disks/index.vue'),
-        meta: {
-          icon: 'lucide:disc',
-          title: $t('page.storage.disks'),
-        },
-      },
-      {
         name: 'StorageDiskDetail',
         path: '/storage/disks/detail/:deviceName',
         component: () => import('#/views/storage/disks/detail.vue'),

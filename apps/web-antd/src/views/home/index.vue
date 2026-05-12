@@ -28,7 +28,7 @@ const quickEntries = [
   { icon: '🗑️', title: '回收站', desc: '恢复或删除文件', path: '/file/recycle', color: '#ff4d4f' },
   { icon: '🌐', title: '网络访问', desc: 'SMB/NFS/WebDAV', path: '/file/network', color: '#13c2c2' },
   { icon: '💾', title: '存储池', desc: 'RAID 和磁盘管理', path: '/storage/pools', color: '#eb2f96' },
-  { icon: '⚙️', title: '系统设置', desc: '设备和网络配置', path: '/system/device', color: '#595959' },
+  { icon: '⚙️', title: '设备管理', desc: '硬盘、网卡、CPU、内存等硬件统一管理', path: '/system/device', color: '#595959' },
 ];
 
 const systemAlerts = [

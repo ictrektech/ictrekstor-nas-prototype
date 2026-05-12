@@ -19,16 +19,16 @@ const routes: RouteRecordRaw[] = [
         component: () => import('#/views/system/device/index.vue'),
         meta: {
           icon: 'lucide:monitor',
-          title: $t('page.system.device'),
+          title: '设备管理',
         },
       },
       {
-        name: 'SystemNetwork',
-        path: '/system/network',
-        component: () => import('#/views/system/network/index.vue'),
+        name: 'SystemNetworkDetail',
+        path: '/system/device/network/:name',
+        component: () => import('#/views/system/device/network-detail.vue'),
         meta: {
-          icon: 'lucide:network',
-          title: $t('page.system.network'),
+          hideInMenu: true,
+          title: '网卡详情',
         },
       },
       {
