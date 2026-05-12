@@ -298,20 +298,6 @@ onMounted(() => {
             <span class="overview-value">{{ overviewStats.teamFolders }}</span>
           </div>
         </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
-          <div class="overview-info">
-            <span class="overview-label">子目录</span>
-            <span class="overview-value">{{ overviewStats.subFolders }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:file" style="font-size: 16px; color: #52c41a;" />
-          <div class="overview-info">
-            <span class="overview-label">文件</span>
-            <span class="overview-value">{{ overviewStats.files }}</span>
-          </div>
-        </div>
       </div>
     </div>
 

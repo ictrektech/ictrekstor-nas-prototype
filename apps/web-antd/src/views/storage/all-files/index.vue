@@ -261,29 +261,6 @@ onMounted(() => {
           <p class="page-desc">管理存储空间中挂载目录下的所有文件</p>
         </div>
       </div>
-      <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
-          <div class="overview-info">
-            <span class="overview-label">存储空间</span>
-            <span class="overview-value">{{ overviewStats.spaces }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:folder" style="font-size: 16px; color: #faad14;" />
-          <div class="overview-info">
-            <span class="overview-label">文件夹</span>
-            <span class="overview-value">{{ overviewStats.folders }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:file" style="font-size: 16px; color: #52c41a;" />
-          <div class="overview-info">
-            <span class="overview-label">文件</span>
-            <span class="overview-value">{{ overviewStats.files }}</span>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ═══════ 主体区域 ═══════ -->

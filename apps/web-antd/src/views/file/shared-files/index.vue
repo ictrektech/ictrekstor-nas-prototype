@@ -18,7 +18,11 @@ import {
   Switch,
   Divider,
   Checkbox,
+  Tree,
+  DatePicker,
 } from 'ant-design-vue';
+import type { FileTreeNode } from '#/components/FileExplorer';
+import { findNodeInTree } from '#/components/FileExplorer';
 import { IconifyIcon } from '@vben/icons';
 
 interface SharedDir {
@@ -106,18 +110,74 @@ const shareDirs = ref<SharedDir[]>([
   },
 ]);
 
+/* ═══════ 目录树数据（复用 my-files 的树结构）═══════ */
+const myFilesTreeData: FileTreeNode[] = [
+  {
+    key: 'space-1',
+    title: '存储空间1',
+    type: 'space',
+    children: [
+      {
+        key: 'space-1/docs',
+        title: '文档',
+        type: 'folder',
+        children: [
+          {
+            key: 'space-1/docs/2024',
+            title: '2024年度',
+            type: 'folder',
+            children: [
+              { key: 'space-1/docs/2024/q1', title: '第一季度', type: 'folder', isLeaf: true },
+              { key: 'space-1/docs/2024/q2', title: '第二季度', type: 'folder', isLeaf: true },
+            ],
+          },
+          { key: 'space-1/docs/archive', title: '历史归档', type: 'folder', isLeaf: true },
+        ],
+      },
+      { key: 'space-1/images', title: '图片', type: 'folder', isLeaf: true },
+      { key: 'space-1/videos', title: '视频', type: 'folder', isLeaf: true },
+    ],
+  },
+  {
+    key: 'space-2',
+    title: '存储空间2',
+    type: 'space',
+    children: [
+      { key: 'space-2/backup', title: '备份', type: 'folder', isLeaf: true },
+      { key: 'space-2/download', title: '下载', type: 'folder', isLeaf: true },
+    ],
+  },
+];
+
+function treeNodeIconResolver(node: FileTreeNode) {
+  switch (node.type) {
+    case 'space':
+      return { icon: 'lucide:hard-drive', color: '#1677ff' };
+    case 'folder':
+      return { icon: 'lucide:folder-open', color: '#faad14' };
+    default:
+      return { icon: 'lucide:folder', color: '#faad14' };
+  }
+}
+
 /* ═══════ 弹窗状态 ═══════ */
 const createModalVisible = ref(false);
 const createFormRef = ref();
 const createForm = ref({
   name: '',
   sourcePath: '',
+  sourceTreeKey: '',
   shareUsers: [] as string[],
-  expireTime: '7',
+  expireType: 'preset',
+  expirePreset: '7',
+  expireCustomDate: '',
+  permission: 'readonly' as 'readonly' | 'readwrite',
   linkEnabled: false,
   linkExpireTime: '7',
   linkPassword: '',
 });
+const createTreeExpandedKeys = ref<string[]>(['space-1']);
+const createTreeSelectedKeys = ref<string[]>([]);
 
 const editUsersModalVisible = ref(false);
 const editUsersFormRef = ref();
@@ -205,12 +265,18 @@ function openCreateModal() {
   createForm.value = {
     name: '',
     sourcePath: '',
+    sourceTreeKey: '',
     shareUsers: [],
-    expireTime: '7',
+    expireType: 'preset',
+    expirePreset: '7',
+    expireCustomDate: '',
+    permission: 'readonly',
     linkEnabled: false,
     linkExpireTime: '7',
     linkPassword: '',
   };
+  createTreeSelectedKeys.value = [];
+  createTreeExpandedKeys.value = ['space-1'];
   createModalVisible.value = true;
 }
 
@@ -218,16 +284,30 @@ function handleCreate() {
   createFormRef.value
     .validate()
     .then(() => {
+      if (!createForm.value.sourceTreeKey) {
+        message.warning('请从目录树中选择要共享的文件夹');
+        return;
+      }
+      const node = findNodeInTree(myFilesTreeData, createForm.value.sourceTreeKey);
+      const displayPath = node
+        ? buildPathFromTree(myFilesTreeData, createForm.value.sourceTreeKey)
+        : createForm.value.sourceTreeKey;
+
+      const expireText = createForm.value.expireType === '0'
+        ? '永久'
+        : createForm.value.expireType === 'preset'
+          ? `${createForm.value.expirePreset}天后`
+          : createForm.value.expireCustomDate
+            ? new Date(createForm.value.expireCustomDate as any).toLocaleDateString('zh-CN')
+            : '永久';
+
       const newDir: SharedDir = {
         id: `sd-${Date.now()}`,
         name: createForm.value.name,
-        sourcePath: createForm.value.sourcePath,
+        sourcePath: displayPath,
         shareUsers: createForm.value.shareUsers,
         shareTime: new Date().toLocaleString(),
-        expireTime:
-          createForm.value.expireTime === '0'
-            ? '永久'
-            : `${createForm.value.expireTime}天后`,
+        expireTime: expireText,
         status: 'active',
         linkEnabled: createForm.value.linkEnabled,
         linkUrl: createForm.value.linkEnabled
@@ -241,6 +321,28 @@ function handleCreate() {
       createModalVisible.value = false;
     })
     .catch(() => {});
+}
+
+/** 从树节点构建路径字符串 */
+function buildPathFromTree(nodes: FileTreeNode[], targetKey: string): string {
+  for (const node of nodes) {
+    if (node.key === targetKey) return node.title;
+    if (node.children) {
+      const childPath = buildPathFromTree(node.children, targetKey);
+      if (childPath) return `${node.title} / ${childPath}`;
+    }
+  }
+  return '';
+}
+
+/** 树节点选择回调 */
+function onCreateTreeSelect(keys: string[]) {
+  createTreeSelectedKeys.value = keys;
+  const key = keys[0];
+  if (key) {
+    createForm.value.sourceTreeKey = key;
+    createForm.value.sourcePath = buildPathFromTree(myFilesTreeData, key);
+  }
 }
 
 function openEditUsersModal(dir: SharedDir) {
@@ -607,11 +709,11 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       </Card>
     </div>
 
-    <!-- ═══════ 创建共享弹窗 ═══════ -->
+    <!-- ═══════ 创建共享弹窗（入口二：我的分享 → 创建分享）═══════ -->
     <Modal
       v-model:open="createModalVisible"
       title="创建共享"
-      width="520px"
+      width="560px"
       ok-text="创建"
       cancel-text="取消"
       @ok="handleCreate"
@@ -632,13 +734,37 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
             </template>
           </Input>
         </Form.Item>
-        <Form.Item label="原文件夹" name="sourcePath">
-          <Select
-            v-model:value="createForm.sourcePath"
-            placeholder="请选择要共享的文件夹"
-            :options="folderOptions"
-          />
+
+        <!-- 目录树选择 -->
+        <Form.Item label="选择要共享的目录" required>
+          <div class="create-tree-wrap">
+            <Tree
+              :tree-data="myFilesTreeData"
+              :selected-keys="createTreeSelectedKeys"
+              :expanded-keys="createTreeExpandedKeys"
+              :field-names="{ title: 'title', key: 'key', children: 'children' }"
+              @update:selected-keys="onCreateTreeSelect"
+              @update:expanded-keys="createTreeExpandedKeys = $event"
+              class="create-dir-tree"
+              :show-line="{ showLeafIcon: false }"
+            >
+              <template #title="node">
+                <span class="tree-node-title">
+                  <IconifyIcon
+                    :icon="treeNodeIconResolver(node).icon"
+                    :style="{ fontSize: '14px', color: treeNodeIconResolver(node).color, marginRight: '6px', flexShrink: 0 }"
+                  />
+                  <span class="tree-node-text" :title="node.title">{{ node.title }}</span>
+                </span>
+              </template>
+            </Tree>
+          </div>
+          <div v-if="createForm.sourcePath" class="selected-dir-path">
+            <IconifyIcon icon="lucide:map-pin" style="font-size: 12px; color: #52c41a;" />
+            <span>已选：{{ createForm.sourcePath }}</span>
+          </div>
         </Form.Item>
+
         <Form.Item label="共享用户">
           <Select
             v-model:value="createForm.shareUsers"
@@ -647,12 +773,47 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
             :options="userOptions"
           />
         </Form.Item>
+
+        <!-- 有效期（同入口一） -->
         <Form.Item label="有效期">
-          <Radio.Group v-model:value="createForm.expireTime">
-            <Radio value="1">1天</Radio>
-            <Radio value="7">7天</Radio>
-            <Radio value="30">30天</Radio>
-            <Radio value="0">永久</Radio>
+          <div class="share-expire-row">
+            <Radio.Group v-model:value="createForm.expireType" style="display: flex; gap: 8px;">
+              <Radio value="preset">预设</Radio>
+              <Radio value="custom">自定义</Radio>
+            </Radio.Group>
+          </div>
+          <div v-if="createForm.expireType === 'preset'" style="margin-top: 8px;">
+            <Radio.Group v-model:value="createForm.expirePreset">
+              <Radio value="1">1天</Radio>
+              <Radio value="7">7天</Radio>
+              <Radio value="30">30天</Radio>
+              <Radio value="0">永久</Radio>
+            </Radio.Group>
+          </div>
+          <div v-else style="margin-top: 8px;">
+            <DatePicker
+              v-model:value="createForm.expireCustomDate"
+              placeholder="选择到期日期"
+              style="width: 100%;"
+            />
+          </div>
+        </Form.Item>
+
+        <!-- 权限 -->
+        <Form.Item label="权限">
+          <Radio.Group v-model:value="createForm.permission">
+            <Radio value="readonly">
+              <span class="radio-with-icon">
+                <IconifyIcon icon="lucide:eye" style="font-size: 12px; margin-right: 4px;" />
+                只读
+              </span>
+            </Radio>
+            <Radio value="readwrite">
+              <span class="radio-with-icon">
+                <IconifyIcon icon="lucide:pencil" style="font-size: 12px; margin-right: 4px;" />
+                读写
+              </span>
+            </Radio>
           </Radio.Group>
         </Form.Item>
 
@@ -660,7 +821,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 
         <Form.Item>
           <Checkbox v-model:checked="createForm.linkEnabled">
-            <span style="font-weight: 500;">同时开启外链分享</span>
+            <span style="font-weight: 500;">启用外链分享</span>
           </Checkbox>
         </Form.Item>
 
@@ -673,7 +834,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
               <Radio value="0">永久</Radio>
             </Radio.Group>
           </Form.Item>
-          <Form.Item label="访问密码（选填）">
+          <Form.Item label="外链访问密码（选填）">
             <Input v-model:value="createForm.linkPassword" placeholder="不设置密码则公开访问" />
           </Form.Item>
         </template>
@@ -1105,6 +1266,74 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   display: flex;
   justify-content: center;
   margin-bottom: 16px;
+}
+
+/* ═══ 创建共享弹窗目录树 ═══ */
+.create-tree-wrap {
+  max-height: 240px;
+  overflow: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.create-dir-tree :deep(.ant-tree-treenode) {
+  padding: 2px 0;
+}
+
+.create-dir-tree :deep(.ant-tree-node-content-wrapper) {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  padding: 4px 8px;
+}
+
+.create-dir-tree :deep(.ant-tree-node-content-wrapper:hover) {
+  background: #f0f5ff;
+}
+
+.create-dir-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
+  background: #e6f4ff !important;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.create-dir-tree .tree-node-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.create-dir-tree .tree-node-text {
+  white-space: nowrap;
+}
+
+.selected-dir-path {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radio-with-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.share-expire-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ═══ 共享链接行 ═══ */

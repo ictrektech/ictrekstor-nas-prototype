@@ -258,13 +258,6 @@ onMounted(() => {
             <span class="overview-value">{{ overviewStats.folders }}</span>
           </div>
         </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:file" style="font-size: 16px; color: #52c41a;" />
-          <div class="overview-info">
-            <span class="overview-label">文件总数</span>
-            <span class="overview-value">{{ overviewStats.files }}</span>
-          </div>
-        </div>
       </div>
     </div>
 

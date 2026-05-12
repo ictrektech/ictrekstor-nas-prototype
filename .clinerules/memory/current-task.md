@@ -1,34 +1,29 @@
-# 当前任务：文件管理组件批量操作栏优化 — 已完成
+# 当前任务：优化分享逻辑
 
 ## 任务来源
 - 触发方式：用户指令
 
-## 已完成修改
+## 目标与范围
+- [x] 入口一（我的文件-选中文件夹-分享）：优化分享弹窗
+  - [x] 支持选择分享时间（含自定义时间）
+  - [x] 支持选择用户
+  - [x] 支持选择权限（只读、读写）
+  - [x] 支持启用外链
+  - [x] 支持设置外链有效时间
+- [x] 入口二（我的分享-创建分享）：优化创建分享弹窗
+  - [x] 包含目录管理树状视图
+  - [x] 展示"我的文件"及其子目录
+  - [x] 用户选择要分享的目录
+  - [x] 其余字段与入口一保持一致
 
-### 1. 类型定义 (types.ts)
-- `FileItem` 接口新增 `isShared?: boolean` 字段
+## 关键上下文
+- my-files/index.vue：新增分享弹窗（共享用户Select、有效期预设/自定义Radio+DatePicker、权限Radio只读/读写、外链Checkbox+有效期+密码）
+- shared-files/index.vue：新增创建分享弹窗（目录树Tree选择"我的文件"、共享用户、有效期预设/自定义、权限、外链），替换原有Select下拉选择为树状视图
 
-### 2. FileManagerPanel.vue 核心改造
-- **新增全选/反全选按钮**：根据当前是否全选，显示"全选"或"反全选"
-- **危险操作下沉到二级菜单**：批量删除等危险操作移入 Dropdown > Menu 中
-- **状态区分动作**：
-  - 选中单个项时，显示"重命名"按钮
-  - 选中单个目录项时，显示"分享"按钮（蓝色主按钮）
-- **已分享标识**：列表视图和网格视图图标右下角添加蓝色圆形 link 图标标识
-- **新增 share 事件**：`share: [file: FileItem]`
-- **新增 computed 属性**：`selectionCount`, `isSingleSelection`, `singleSelectedFile`, `canShare`, `isAllSelected`
-- **回收站模式**：也新增了全选/反全选，危险操作同样下沉
+## 实施文件
+- apps/web-antd/src/views/file/my-files/index.vue
+- apps/web-antd/src/views/file/shared-files/index.vue
 
-### 3. 所有使用页面统一绑定 selected-file-ids
-| 页面 | 绑定状态 |
-|------|---------|
-| my-files/index.vue | 已有，新增 @share="openShareModal" |
-| public-files/index.vue | 新增 selectedFileIds + 绑定 |
-| team-files/index.vue | 新增 selectedFileIds + 绑定 |
-| recycle-bin/index.vue | 新增 selectedFileIds + 绑定 |
-| shared-from-others/index.vue | 新增 selectedFileIds + 绑定 |
-| storage/all-files/index.vue | 新增 selectedFileIds + 绑定 |
-
-## 验证状态
-- 代码修改完成，待本地开发服务器验证
-- 如遇到编译错误，可能需要重启 `pnpm run dev:antd --port 5666`
+## 上下文恢复检查点
+- 最后修改的文件：apps/web-antd/src/views/file/shared-files/index.vue
+- 当前确认的状态：两个入口的分享弹窗均已优化完成

@@ -442,15 +442,8 @@ function copyAccessUrl(protocol: NetworkProtocol) {
         <div class="overview-card">
           <IconifyIcon icon="lucide:activity" style="font-size: 16px; color: #52c41a;" />
           <div class="overview-info">
-            <span class="overview-label">运行中协议</span>
-            <span class="overview-value">{{ activeCount }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:network" style="font-size: 16px; color: #1677ff;" />
-          <div class="overview-info">
-            <span class="overview-label">总协议数</span>
-            <span class="overview-value">{{ protocols.length }}</span>
+            <span class="overview-label">在线协议</span>
+            <span class="overview-value">{{ protocols.filter(p => p.status === 'active').length }}</span>
           </div>
         </div>
       </div>

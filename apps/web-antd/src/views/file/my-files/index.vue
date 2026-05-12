@@ -10,6 +10,10 @@ import {
   Menu,
   Checkbox,
   Radio as AntRadio,
+  Tree,
+  DatePicker,
+  Select,
+  Divider,
 } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import {
@@ -303,14 +307,151 @@ const editingFile = ref<MyFileItem | null>(null);
 const moveModalVisible = ref(false);
 const moveTarget = ref('');
 
-// 共享设置
+// ═══ 新建文件夹 ═══
+const newFolderModalVisible = ref(false);
+const newFolderFormRef = ref();
+const newFolderForm = ref({ name: '' });
+
+// ═══ 上传文件 ═══
+const uploadInputRef = ref<HTMLInputElement | null>(null);
+
+// ═══ 目标目录选择弹窗（复制/移动共用）═══
+const targetDirModalVisible = ref(false);
+const targetDirModalTitle = ref('选择目标目录');
+const targetDirAction = ref<'copy' | 'move'>('copy');
+const targetDirSelectedKeys = ref<string[]>([]);
+const targetDirExpandedKeys = ref<string[]>([]);
+const targetDirPendingFiles = ref<MyFileItem[]>([]);
+
+// 统一的目标目录树数据（我的文件 + 公共文件 + 他人分享）
+const targetDirTreeData = computed<FileTreeNode[]>(() => {
+  // 复用 mockTree（我的文件）作为基础，添加顶层分类
+  const myFilesNodes = mockTree.map(n => ({ ...n }));
+  // 公共文件 mock 数据
+  const publicFilesNodes: FileTreeNode[] = [
+    {
+      key: 'pub-docs',
+      title: '公共文档',
+      type: 'public-folder',
+      children: [
+        { key: 'pub-docs/制度', title: '公司制度', type: 'folder', isLeaf: true },
+        { key: 'pub-docs/流程', title: '工作流程', type: 'folder', isLeaf: true },
+      ],
+    },
+    {
+      key: 'pub-design',
+      title: '设计资源',
+      type: 'public-folder',
+      children: [
+        { key: 'pub-design/素材', title: '通用素材', type: 'folder', isLeaf: true },
+      ],
+    },
+    {
+      key: 'pub-finance',
+      title: '财务公开',
+      type: 'public-folder',
+      isLeaf: true,
+    },
+  ];
+  // 他人分享 mock 数据
+  const sharedFromOthersNodes: FileTreeNode[] = [
+    {
+      key: 'zs-share',
+      title: '张三',
+      type: 'shared-user',
+      children: [
+        { key: 'zs-share1', title: '项目资料', type: 'shared-folder', isLeaf: true },
+        { key: 'zs-share2', title: '参考资料', type: 'shared-folder', isLeaf: true },
+      ],
+    },
+    {
+      key: 'ls-share',
+      title: '李四',
+      type: 'shared-user',
+      children: [
+        { key: 'ls-share1', title: '技术文档', type: 'shared-folder', isLeaf: true },
+        { key: 'ls-share2', title: '培训视频', type: 'shared-folder', isLeaf: true },
+      ],
+    },
+    {
+      key: 'ww-share',
+      title: '王五',
+      type: 'shared-user',
+      children: [
+        { key: 'ww-share1', title: '会议录音', type: 'shared-folder', isLeaf: true },
+      ],
+    },
+  ];
+  return [
+    {
+      key: 'root-my-files',
+      title: '我的文件',
+      type: 'category',
+      children: myFilesNodes,
+    },
+    {
+      key: 'root-public',
+      title: '公共文件',
+      type: 'category',
+      children: publicFilesNodes,
+    },
+    {
+      key: 'root-shared',
+      title: '他人分享',
+      type: 'category',
+      children: sharedFromOthersNodes,
+    },
+  ];
+});
+
+// 目标目录树节点图标解析
+function targetDirIconResolver(node: FileTreeNode) {
+  switch (node.type) {
+    case 'category':
+      if (node.key === 'root-my-files') return { icon: 'lucide:user', color: '#1677ff' };
+      if (node.key === 'root-public') return { icon: 'lucide:folder-heart', color: '#fa8c16' };
+      if (node.key === 'root-shared') return { icon: 'lucide:share-2', color: '#722ed1' };
+      return { icon: 'lucide:folder-kanban', color: '#595959' };
+    case 'space':
+      return { icon: 'lucide:hard-drive', color: '#1677ff' };
+    case 'public-folder':
+      return { icon: 'lucide:folder-heart', color: '#fa8c16' };
+    case 'shared-user':
+      return { icon: 'lucide:user-circle', color: '#722ed1' };
+    case 'shared-folder':
+      return { icon: 'lucide:folder-symlink', color: '#a855f7' };
+    case 'folder':
+    case 'subfolder':
+      return { icon: 'lucide:folder-open', color: '#faad14' };
+    default:
+      return { icon: 'lucide:folder', color: '#faad14' };
+  }
+}
+
+// 用户选项（MOCK）
+const userOptions = [
+  { label: 'zhangsan', value: 'zhangsan' },
+  { label: 'lisi', value: 'lisi' },
+  { label: 'wangwu', value: 'wangwu' },
+  { label: 'admin', value: 'admin' },
+];
+
+// 共享设置（入口一：选中文件夹后分享）
 const shareModalVisible = ref(false);
 const shareFormRef = ref();
 const shareForm = ref({
-  enableShare: true,
-  shareLink: 'https://nas.example.com/s/abc123',
-  expireDays: '7',
-  password: '',
+  // 分享时间
+  expireType: 'preset', // 'preset' | 'custom'
+  expirePreset: '7',    // 预设天数
+  expireCustomDate: '', // 自定义到期日期
+  // 共享用户
+  shareUsers: [] as string[],
+  // 权限
+  permission: 'readonly' as 'readonly' | 'readwrite',
+  // 外链
+  linkEnabled: false,
+  linkExpireTime: '7',   // 外链有效期（预设天数）
+  linkPassword: '',      // 外链访问密码
 });
 
 // 移动目标选项（所有叶子/文件夹节点）
@@ -491,24 +632,90 @@ function handleBatchDelete(files: MyFileItem[]) {
 function openShareModal(file: MyFileItem) {
   editingFile.value = file;
   shareForm.value = {
-    enableShare: !!file.isShared,
-    shareLink: `https://nas.example.com/s/${file.id}`,
-    expireDays: '7',
-    password: '',
+    expireType: 'preset',
+    expirePreset: '7',
+    expireCustomDate: '',
+    shareUsers: [],
+    permission: 'readonly',
+    linkEnabled: false,
+    linkExpireTime: '7',
+    linkPassword: '',
   };
   shareModalVisible.value = true;
 }
 
 function handleSaveShare() {
-  if (editingFile.value) {
-    editingFile.value.isShared = shareForm.value.enableShare;
-    message.success(shareForm.value.enableShare ? '共享设置已启用' : '共享已关闭');
-  }
+  if (!editingFile.value) return;
+  editingFile.value.isShared = true;
+  const names = shareForm.value.shareUsers.join('、') || '无';
+  message.success(
+    `已将「${editingFile.value.name}」分享给 ${names}，权限：${shareForm.value.permission === 'readonly' ? '只读' : '读写'}`,
+  );
   shareModalVisible.value = false;
 }
 
-function copyShareLink() {
-  message.success('链接已复制到剪贴板');
+// ═══ 复制 / 移动：目标目录弹窗逻辑 ═══
+
+/** 打开目标目录选择弹窗 */
+function openTargetDirModal(action: 'copy' | 'move', files: MyFileItem[]) {
+  targetDirAction.value = action;
+  targetDirModalTitle.value = action === 'copy' ? '复制到' : '移动到';
+  targetDirPendingFiles.value = files;
+  targetDirSelectedKeys.value = [];
+  targetDirExpandedKeys.value = ['root-my-files'];
+  targetDirModalVisible.value = true;
+}
+
+/** 处理单文件右键复制/移动 */
+function handleCopyFile(file: MyFileItem) {
+  openTargetDirModal('copy', [file]);
+}
+
+function handleMoveFile(file: MyFileItem) {
+  openTargetDirModal('move', [file]);
+}
+
+/** 处理批量复制/移动 */
+function handleBatchCopy(files: MyFileItem[]) {
+  openTargetDirModal('copy', files);
+}
+
+function handleBatchMove(files: MyFileItem[]) {
+  openTargetDirModal('move', files);
+}
+
+/** 目标目录树选择事件 */
+function onTargetDirSelect(keys: string[]) {
+  targetDirSelectedKeys.value = keys;
+}
+
+function onTargetDirExpand(keys: string[]) {
+  targetDirExpandedKeys.value = keys;
+}
+
+/** 确认复制/移动 */
+function handleTargetDirConfirm() {
+  const targetKey = targetDirSelectedKeys.value[0];
+  if (!targetKey) {
+    message.warning('请选择目标目录');
+    return;
+  }
+  const action = targetDirAction.value;
+  const files = targetDirPendingFiles.value;
+  const names = files.map(f => f.name).join('、');
+  const targetNode = findNodeInTree(targetDirTreeData.value, targetKey);
+  const targetName = targetNode?.title || targetKey;
+
+  if (action === 'copy') {
+    message.success(`已将 ${files.length} 个文件复制到「${targetName}」：${names}`);
+  } else {
+    message.success(`已将 ${files.length} 个文件移动到「${targetName}」：${names}`);
+    // 从当前列表移除（移动时才移除）
+    const idsToRemove = new Set(files.map(f => f.id));
+    currentFiles.value = currentFiles.value.filter(f => !idsToRemove.has(f.id));
+    selectedFileIds.value = [];
+  }
+  targetDirModalVisible.value = false;
 }
 
 // ─── 树节点图标 ───
@@ -541,6 +748,65 @@ function nodeIconResolver(node: FileTreeNode) {
   }
 }
 
+// ═══ 新建文件夹 / 上传文件 ═══
+
+function openNewFolderModal() {
+  newFolderForm.value = { name: '' };
+  newFolderModalVisible.value = true;
+}
+
+function handleCreateFolder() {
+  newFolderFormRef.value?.validate().then(() => {
+    const name = newFolderForm.value.name.trim();
+    if (!name) {
+      message.warning('请输入文件夹名称');
+      return;
+    }
+    // 模拟创建文件夹：添加到当前文件列表
+    const newFolder: MyFileItem = {
+      id: `folder-${Date.now()}`,
+      name,
+      type: 'folder',
+      size: '--',
+      modifyTime: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
+    };
+    currentFiles.value.unshift(newFolder);
+    message.success(`文件夹「${name}」创建成功`);
+    newFolderModalVisible.value = false;
+  }).catch(() => {});
+}
+
+function handleUploadClick() {
+  uploadInputRef.value?.click();
+}
+
+function handleFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  if (!files || files.length === 0) return;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const sizeStr = file.size > 1024 * 1024
+      ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+      : `${(file.size / 1024).toFixed(1)} KB`;
+    const ext = file.name.split('.').pop() || '';
+
+    const newFile: MyFileItem = {
+      id: `upload-${Date.now()}-${i}`,
+      name: file.name,
+      type: 'file',
+      size: sizeStr,
+      modifyTime: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
+      extension: ext,
+    };
+    currentFiles.value.unshift(newFile);
+  }
+
+  message.success(`已上传 ${files.length} 个文件`);
+  input.value = ''; // 清空以便重复选择同一文件
+}
+
 onMounted(() => {
   loadFiles('space-1');
 });
@@ -565,20 +831,6 @@ onMounted(() => {
           <div class="overview-info">
             <span class="overview-label">存储空间</span>
             <span class="overview-value">{{ overviewStats.spaces }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
-          <div class="overview-info">
-            <span class="overview-label">文件夹</span>
-            <span class="overview-value">{{ overviewStats.folders }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:file" style="font-size: 16px; color: #52c41a;" />
-          <div class="overview-info">
-            <span class="overview-label">文件总数</span>
-            <span class="overview-value">{{ overviewStats.files }}</span>
           </div>
         </div>
       </div>
@@ -612,6 +864,12 @@ onMounted(() => {
         @delete-file="handleDeleteFile"
         @batch-delete="handleBatchDelete"
         @share="openShareModal"
+        @copy="handleCopyFile"
+        @move="handleMoveFile"
+        @batch-copy="handleBatchCopy"
+        @batch-move="handleBatchMove"
+        @new-folder="openNewFolderModal"
+        @upload="handleUploadClick"
       />
     </div>
 
@@ -659,11 +917,31 @@ onMounted(() => {
       </Form>
     </Modal>
 
-    <!-- ═══════ 共享设置弹窗 ═══════ -->
+    <!-- ═══════ 新建文件夹弹窗 ═══════ -->
+    <Modal
+      v-model:open="newFolderModalVisible"
+      title="新建文件夹"
+      width="400px"
+      @ok="handleCreateFolder"
+    >
+      <Form
+        ref="newFolderFormRef"
+        :model="newFolderForm"
+        layout="vertical"
+        :rules="{ name: [{ required: true, message: '请输入文件夹名称', trigger: 'blur' }] }"
+      >
+        <Form.Item label="文件夹名称" name="name">
+          <Input v-model:value="newFolderForm.name" placeholder="请输入文件夹名称" />
+        </Form.Item>
+      </Form>
+    </Modal>
+
+    <!-- ═══════ 分享弹窗（入口一：选中文件夹后分享）═══════ -->
     <Modal
       v-model:open="shareModalVisible"
-      title="共享设置"
-      width="480px"
+      :title="`分享 - ${editingFile?.name || ''}`"
+      width="520px"
+      ok-text="确认分享"
       @ok="handleSaveShare"
     >
       <Form
@@ -671,33 +949,125 @@ onMounted(() => {
         :model="shareForm"
         layout="vertical"
       >
-        <Form.Item>
-          <Checkbox v-model:checked="shareForm.enableShare">启用共享链接</Checkbox>
+        <!-- 分享对象 -->
+        <Form.Item label="共享用户">
+          <Select
+            v-model:value="shareForm.shareUsers"
+            mode="multiple"
+            placeholder="请选择共享用户"
+            :options="userOptions"
+          />
         </Form.Item>
 
-        <template v-if="shareForm.enableShare">
-          <Form.Item label="共享链接">
-            <div class="share-link-row">
-              <Input v-model:value="shareForm.shareLink" readonly />
-              <Button @click="copyShareLink">复制</Button>
-            </div>
-          </Form.Item>
+        <!-- 分享有效期 -->
+        <Form.Item label="有效期">
+          <div class="share-expire-row">
+            <AntRadio.Group v-model:value="shareForm.expireType" style="display: flex; gap: 8px;">
+              <AntRadio value="preset">预设</AntRadio>
+              <AntRadio value="custom">自定义</AntRadio>
+            </AntRadio.Group>
+          </div>
+          <div v-if="shareForm.expireType === 'preset'" style="margin-top: 8px;">
+            <AntRadio.Group v-model:value="shareForm.expirePreset">
+              <AntRadio value="1">1天</AntRadio>
+              <AntRadio value="7">7天</AntRadio>
+              <AntRadio value="30">30天</AntRadio>
+              <AntRadio value="0">永久</AntRadio>
+            </AntRadio.Group>
+          </div>
+          <div v-else style="margin-top: 8px;">
+            <DatePicker
+              v-model:value="shareForm.expireCustomDate"
+              placeholder="选择到期日期"
+              style="width: 100%;"
+            />
+          </div>
+        </Form.Item>
 
-          <Form.Item label="有效期">
-            <AntRadio.Group v-model:value="shareForm.expireDays">
+        <!-- 权限 -->
+        <Form.Item label="权限">
+          <AntRadio.Group v-model:value="shareForm.permission">
+            <AntRadio value="readonly">
+              <span class="radio-with-icon">
+                <IconifyIcon icon="lucide:eye" style="font-size: 12px; margin-right: 4px;" />
+                只读
+              </span>
+            </AntRadio>
+            <AntRadio value="readwrite">
+              <span class="radio-with-icon">
+                <IconifyIcon icon="lucide:pencil" style="font-size: 12px; margin-right: 4px;" />
+                读写
+              </span>
+            </AntRadio>
+          </AntRadio.Group>
+        </Form.Item>
+
+        <!-- 外链 -->
+        <Form.Item>
+          <Checkbox v-model:checked="shareForm.linkEnabled">
+            <span style="font-weight: 500;">启用外链分享</span>
+          </Checkbox>
+        </Form.Item>
+
+        <template v-if="shareForm.linkEnabled">
+          <Form.Item label="外链有效期">
+            <AntRadio.Group v-model:value="shareForm.linkExpireTime">
               <AntRadio value="1">1天</AntRadio>
               <AntRadio value="7">7天</AntRadio>
               <AntRadio value="30">30天</AntRadio>
               <AntRadio value="0">永久</AntRadio>
             </AntRadio.Group>
           </Form.Item>
-
-          <Form.Item label="访问密码（选填）">
-            <Input v-model:value="shareForm.password" placeholder="不设置密码则公开访问" />
+          <Form.Item label="外链访问密码（选填）">
+            <Input v-model:value="shareForm.linkPassword" placeholder="不设置密码则公开访问" />
           </Form.Item>
         </template>
       </Form>
     </Modal>
+
+    <!-- ═══════ 目标目录选择弹窗（复制/移动共用）═══════ -->
+    <Modal
+      v-model:open="targetDirModalVisible"
+      :title="targetDirModalTitle"
+      width="480px"
+      @ok="handleTargetDirConfirm"
+    >
+      <div class="target-dir-tree-wrap">
+        <Tree
+          :tree-data="targetDirTreeData"
+          :selected-keys="targetDirSelectedKeys"
+          :expanded-keys="targetDirExpandedKeys"
+          :field-names="{ title: 'title', key: 'key', children: 'children' }"
+          @update:selected-keys="onTargetDirSelect"
+          @update:expanded-keys="onTargetDirExpand"
+          class="target-dir-tree"
+          :show-line="{ showLeafIcon: false }"
+        >
+          <template #title="node">
+            <span class="tree-node-title">
+              <IconifyIcon
+                :icon="targetDirIconResolver(node).icon"
+                :style="{ fontSize: '14px', color: targetDirIconResolver(node).color, marginRight: '6px', flexShrink: 0 }"
+              />
+              <span class="tree-node-text" :title="node.title">{{ node.title }}</span>
+            </span>
+          </template>
+        </Tree>
+      </div>
+      <div v-if="targetDirPendingFiles.length > 0" class="target-dir-pending">
+        <span class="target-dir-pending-label">待{{ targetDirAction === 'copy' ? '复制' : '移动' }}文件：</span>
+        <span class="target-dir-pending-names">{{ targetDirPendingFiles.map(f => f.name).join('、') }}</span>
+      </div>
+    </Modal>
+
+    <!-- ═══════ 隐藏的文件上传 input ═══════ -->
+    <input
+      ref="uploadInputRef"
+      type="file"
+      multiple
+      style="display: none;"
+      @change="handleFileSelected"
+    />
   </div>
 </template>
 
@@ -865,6 +1235,19 @@ onMounted(() => {
   color: #1677ff;
 }
 
+/* ═══ 分享弹窗 ═══ */
+.radio-with-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.share-expire-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ═══ 共享链接 ═══ */
 .share-link-row {
   display: flex;
@@ -873,6 +1256,67 @@ onMounted(() => {
 
 .share-link-row :deep(.ant-input) {
   flex: 1;
+}
+
+/* ═══ 目标目录选择弹窗样式 ═══ */
+.target-dir-tree-wrap {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.target-dir-tree :deep(.ant-tree-treenode) {
+  padding: 2px 0;
+}
+
+.target-dir-tree :deep(.ant-tree-node-content-wrapper) {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  padding: 4px 8px;
+}
+
+.target-dir-tree :deep(.ant-tree-node-content-wrapper:hover) {
+  background: #f0f5ff;
+}
+
+.target-dir-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
+  background: #e6f4ff !important;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.target-dir-tree .tree-node-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.target-dir-tree .tree-node-text {
+  white-space: nowrap;
+}
+
+.target-dir-pending {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.target-dir-pending-label {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.target-dir-pending-names {
+  color: #262626;
 }
 
 /* ═══ 响应式 ═══ */

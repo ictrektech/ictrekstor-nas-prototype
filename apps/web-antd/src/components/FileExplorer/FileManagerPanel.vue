@@ -97,6 +97,14 @@ const emit = defineEmits<{
   batchRestore: [files: FileItem[]];
   /** 分享（选中单个文件夹时） */
   share: [file: FileItem];
+  /** 复制文件 */
+  copy: [file: FileItem];
+  /** 移动文件 */
+  move: [file: FileItem];
+  /** 批量复制 */
+  batchCopy: [files: FileItem[]];
+  /** 批量移动 */
+  batchMove: [files: FileItem[]];
 }>();
 
 const internalSearch = computed({
@@ -269,6 +277,18 @@ function handleBatchRestore() {
   emit('batchRestore', files);
 }
 
+function handleBatchCopy() {
+  const files = getSelectedFiles();
+  if (files.length === 0) return;
+  emit('batchCopy', files);
+}
+
+function handleBatchMove() {
+  const files = getSelectedFiles();
+  if (files.length === 0) return;
+  emit('batchMove', files);
+}
+
 // ═══ 右键菜单相关 ═══
 
 const contextMenuVisible = ref(false);
@@ -293,6 +313,12 @@ function handleContextMenuAction(action: string) {
   switch (action) {
     case 'rename':
       emit('rename', file);
+      break;
+    case 'copy':
+      emit('copy', file);
+      break;
+    case 'move':
+      emit('move', file);
       break;
     case 'delete':
       emit('deleteFile', file);
@@ -462,24 +488,33 @@ import { ref } from 'vue';
               <Button
                 v-if="canShare"
                 size="small"
-                type="primary"
                 @click="singleSelectedFile && emit('share', singleSelectedFile)"
               >
                 <IconifyIcon icon="lucide:share-2" style="font-size: 12px;" />
-                分享
+                <span class="batch-btn-text">分享</span>
               </Button>
-              <!-- 危险操作下沉到二级菜单 -->
+              <!-- 复制 -->
+              <Button size="small" @click="handleBatchCopy">
+                <IconifyIcon icon="lucide:copy" style="font-size: 12px;" />
+                <span class="batch-btn-text">复制</span>
+              </Button>
+              <!-- 移动 -->
+              <Button size="small" @click="handleBatchMove">
+                <IconifyIcon icon="lucide:move" style="font-size: 12px;" />
+                <span class="batch-btn-text">移动</span>
+              </Button>
+              <!-- 更多操作 -->
               <Dropdown placement="bottomRight">
-                <Button size="small" danger ghost>
+                <Button size="small">
                   <IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" />
-                  更多
+                  <span class="batch-btn-text">更多</span>
                 </Button>
                 <template #overlay>
                   <Menu>
                     <Menu.Item key="batch-delete" danger @click="handleBatchDelete">
                       <span class="batch-menu-item batch-menu-item--danger">
                         <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                        批量删除
+                        <span class="batch-btn-text">批量删除</span>
                       </span>
                     </Menu.Item>
                   </Menu>
@@ -515,7 +550,7 @@ import { ref } from 'vue';
           </Tooltip>
           <Tooltip title="新建文件夹">
             <Button
-              v-if="showNewFolder && mode !== 'recycle'"
+              v-if="mode !== 'recycle'"
               size="small"
               class="file-manager-panel__new-folder"
               @click="onNewFolder"
@@ -743,10 +778,16 @@ import { ref } from 'vue';
                   重命名
                 </span>
               </Menu.Item>
-              <Menu.Item key="delete" danger @click="handleContextMenuAction('delete')">
-                <span class="context-menu-item context-menu-item--danger">
-                  <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                  删除
+              <Menu.Item key="copy" @click="handleContextMenuAction('copy')">
+                <span class="context-menu-item">
+                  <IconifyIcon icon="lucide:copy" style="font-size: 13px; color: #1677ff;" />
+                  复制
+                </span>
+              </Menu.Item>
+              <Menu.Item key="move" @click="handleContextMenuAction('move')">
+                <span class="context-menu-item">
+                  <IconifyIcon icon="lucide:move" style="font-size: 13px; color: #52c41a;" />
+                  移动
                 </span>
               </Menu.Item>
             </template>
@@ -1315,6 +1356,18 @@ import { ref } from 'vue';
 
 .context-menu-item--danger {
   color: #ff4d4f;
+}
+
+.batch-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.batch-btn-text {
+  white-space: nowrap;
+  display: inline-block;
 }
 
 /* ═══ 响应式 ═══ */
