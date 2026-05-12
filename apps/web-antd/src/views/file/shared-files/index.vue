@@ -24,12 +24,19 @@ import {
 import type { FileTreeNode } from '#/components/FileExplorer';
 import { findNodeInTree } from '#/components/FileExplorer';
 import { IconifyIcon } from '@vben/icons';
+import { ShareConfigModal } from '#/components/ShareConfigModal';
+import type { ShareFormData } from '#/components/ShareConfigModal';
+
+interface ShareUser {
+  user: string;
+  permission: 'readonly' | 'readwrite';
+}
 
 interface SharedDir {
   id: string;
   name: string;
   sourcePath: string;
-  shareUsers: string[];
+  shareUsers: ShareUser[];
   shareTime: string;
   expireTime: string;
   status: 'active' | 'expired';
@@ -47,7 +54,10 @@ const shareDirs = ref<SharedDir[]>([
     id: 'sd-1',
     name: 'test',
     sourcePath: '存储空间1 / 我的文件 / test',
-    shareUsers: ['zhangsan', 'lisi'],
+    shareUsers: [
+      { user: 'zhangsan', permission: 'readonly' },
+      { user: 'lisi', permission: 'readwrite' },
+    ],
     shareTime: '2024-05-06 10:30:00',
     expireTime: '2024-06-06 10:30:00',
     status: 'active',
@@ -60,7 +70,7 @@ const shareDirs = ref<SharedDir[]>([
     id: 'sd-2',
     name: 'test4',
     sourcePath: '存储空间1 / 我的文件 / test4',
-    shareUsers: ['wangwu'],
+    shareUsers: [{ user: 'wangwu', permission: 'readonly' }],
     shareTime: '2024-05-05 14:20:00',
     expireTime: '永久',
     status: 'active',
@@ -73,7 +83,11 @@ const shareDirs = ref<SharedDir[]>([
     id: 'sd-3',
     name: '项目资料',
     sourcePath: '存储空间2 / 团队文件 / 项目资料',
-    shareUsers: ['zhangsan', 'lisi', 'wangwu'],
+    shareUsers: [
+      { user: 'zhangsan', permission: 'readwrite' },
+      { user: 'lisi', permission: 'readonly' },
+      { user: 'wangwu', permission: 'readonly' },
+    ],
     shareTime: '2024-04-20 09:15:00',
     expireTime: '2024-05-20 09:15:00',
     status: 'expired',
@@ -86,7 +100,7 @@ const shareDirs = ref<SharedDir[]>([
     id: 'sd-4',
     name: '设计资源',
     sourcePath: '存储空间1 / 图片 / 设计资源',
-    shareUsers: ['admin'],
+    shareUsers: [{ user: 'admin', permission: 'readwrite' }],
     shareTime: '2024-05-08 11:00:00',
     expireTime: '2024-08-08 11:00:00',
     status: 'active',
@@ -99,7 +113,10 @@ const shareDirs = ref<SharedDir[]>([
     id: 'sd-5',
     name: 'Q2 报表',
     sourcePath: '存储空间2 / 备份 / Q2 报表',
-    shareUsers: ['zhangsan', 'wangwu'],
+    shareUsers: [
+      { user: 'zhangsan', permission: 'readonly' },
+      { user: 'wangwu', permission: 'readwrite' },
+    ],
     shareTime: '2024-05-01 09:00:00',
     expireTime: '永久',
     status: 'active',
@@ -162,19 +179,8 @@ function treeNodeIconResolver(node: FileTreeNode) {
 
 /* ═══════ 弹窗状态 ═══════ */
 const createModalVisible = ref(false);
-const createFormRef = ref();
 const createForm = ref({
-  name: '',
-  sourcePath: '',
   sourceTreeKey: '',
-  shareUsers: [] as string[],
-  expireType: 'preset',
-  expirePreset: '7',
-  expireCustomDate: '',
-  permission: 'readonly' as 'readonly' | 'readwrite',
-  linkEnabled: false,
-  linkExpireTime: '7',
-  linkPassword: '',
 });
 const createTreeExpandedKeys = ref<string[]>(['space-1']);
 const createTreeSelectedKeys = ref<string[]>([]);
@@ -183,14 +189,16 @@ const editUsersModalVisible = ref(false);
 const editUsersFormRef = ref();
 const editingDir = ref<SharedDir | null>(null);
 const editUsersForm = ref({
-  shareUsers: [] as string[],
+  shareUsers: [] as ShareUser[],
 });
 
 const linkModalVisible = ref(false);
 const linkFormRef = ref();
 const linkForm = ref({
   enabled: false,
-  expireTime: '7',
+  expireType: 'preset' as 'preset' | 'custom' | 'forever',
+  expirePreset: '7',
+  expireCustomDate: '',
   password: '',
 });
 
@@ -199,19 +207,6 @@ const userOptions = [
   { label: 'lisi', value: 'lisi' },
   { label: 'wangwu', value: 'wangwu' },
   { label: 'admin', value: 'admin' },
-];
-
-const folderOptions = [
-  { label: '存储空间1 / 我的文件 / test', value: '存储空间1 / 我的文件 / test' },
-  { label: '存储空间1 / 我的文件 / test4', value: '存储空间1 / 我的文件 / test4' },
-  { label: '存储空间1 / 文档', value: '存储空间1 / 文档' },
-  { label: '存储空间1 / 图片', value: '存储空间1 / 图片' },
-  { label: '存储空间1 / 设计资源', value: '存储空间1 / 设计资源' },
-  { label: '存储空间2 / 备份', value: '存储空间2 / 备份' },
-  { label: '存储空间2 / 下载', value: '存储空间2 / 下载' },
-  { label: '团队文件 / 文档', value: '团队文件 / 文档' },
-  { label: '团队文件 / 设计资源', value: '团队文件 / 设计资源' },
-  { label: '团队文件 / 财务资料', value: '团队文件 / 财务资料' },
 ];
 
 /* ═══════ 计算属性 ═══════ */
@@ -223,7 +218,7 @@ const filteredDirs = computed(() => {
       (d) =>
         d.name.toLowerCase().includes(kw) ||
         d.sourcePath.toLowerCase().includes(kw) ||
-        d.shareUsers.some((u) => u.toLowerCase().includes(kw)) ||
+        d.shareUsers.some((u) => u.user.toLowerCase().includes(kw)) ||
         (d.linkUrl && d.linkUrl.toLowerCase().includes(kw)),
     );
   }
@@ -236,7 +231,7 @@ const overviewStats = computed(() => {
   const activeLinks = shareDirs.value.filter((d) => d.linkEnabled && d.linkStatus === 'active').length;
   const expiredLinks = shareDirs.value.filter((d) => d.linkEnabled && d.linkStatus === 'expired').length;
   const userSet = new Set<string>();
-  shareDirs.value.forEach((d) => d.shareUsers.forEach((u) => userSet.add(u)));
+  shareDirs.value.forEach((d) => d.shareUsers.forEach((u) => userSet.add(u.user)));
   return {
     activeDirs,
     expiredDirs,
@@ -252,7 +247,7 @@ const overviewStats = computed(() => {
 const dirColumns = [
   { title: '共享名称', dataIndex: 'name', key: 'name', width: 150 },
   { title: '原文件夹', dataIndex: 'sourcePath', key: 'sourcePath', ellipsis: true },
-  { title: '共享用户', key: 'shareUsers', width: 160 },
+  { title: '共享用户', key: 'shareUsers', width: 200 },
   { title: '创建时间', key: 'shareTime', width: 110 },
   { title: '有效期', dataIndex: 'expireTime', key: 'expireTime', width: 110 },
   { title: '状态', key: 'status', width: 90, align: 'center' as const },
@@ -262,65 +257,51 @@ const dirColumns = [
 
 /* ═══════ 方法 ═══════ */
 function openCreateModal() {
-  createForm.value = {
-    name: '',
-    sourcePath: '',
-    sourceTreeKey: '',
-    shareUsers: [],
-    expireType: 'preset',
-    expirePreset: '7',
-    expireCustomDate: '',
-    permission: 'readonly',
-    linkEnabled: false,
-    linkExpireTime: '7',
-    linkPassword: '',
-  };
+  createForm.value = { sourceTreeKey: '' };
   createTreeSelectedKeys.value = [];
   createTreeExpandedKeys.value = ['space-1'];
   createModalVisible.value = true;
 }
 
-function handleCreate() {
-  createFormRef.value
-    .validate()
-    .then(() => {
-      if (!createForm.value.sourceTreeKey) {
-        message.warning('请从目录树中选择要共享的文件夹');
-        return;
-      }
-      const node = findNodeInTree(myFilesTreeData, createForm.value.sourceTreeKey);
-      const displayPath = node
-        ? buildPathFromTree(myFilesTreeData, createForm.value.sourceTreeKey)
-        : createForm.value.sourceTreeKey;
+function handleCreateFromModal(data: ShareFormData) {
+  if (!data.sourceTreeKey) {
+    message.warning('请从目录树中选择要共享的文件夹');
+    return;
+  }
+  const node = findNodeInTree(myFilesTreeData, data.sourceTreeKey);
+  const displayPath = node
+    ? buildPathFromTree(myFilesTreeData, data.sourceTreeKey)
+    : data.sourceTreeKey;
 
-      const expireText = createForm.value.expireType === '0'
-        ? '永久'
-        : createForm.value.expireType === 'preset'
-          ? `${createForm.value.expirePreset}天后`
-          : createForm.value.expireCustomDate
-            ? new Date(createForm.value.expireCustomDate as any).toLocaleDateString('zh-CN')
-            : '永久';
+  // 以选中文件夹名称作为共享名称
+  const shareName = node ? node.title : data.sourceTreeKey;
 
-      const newDir: SharedDir = {
-        id: `sd-${Date.now()}`,
-        name: createForm.value.name,
-        sourcePath: displayPath,
-        shareUsers: createForm.value.shareUsers,
-        shareTime: new Date().toLocaleString(),
-        expireTime: expireText,
-        status: 'active',
-        linkEnabled: createForm.value.linkEnabled,
-        linkUrl: createForm.value.linkEnabled
-          ? `https://d.vivibit.com/s/${Date.now().toString(36)}`
-          : '',
-        linkAccessCount: 0,
-        linkStatus: createForm.value.linkEnabled ? 'active' : 'expired',
-      };
-      shareDirs.value.push(newDir);
-      message.success('共享目录创建成功');
-      createModalVisible.value = false;
-    })
-    .catch(() => {});
+  const expireText = data.expireType === 'forever'
+    ? '永久'
+    : data.expireType === 'preset'
+      ? `${data.expirePreset}天后`
+      : data.expireCustomDate
+        ? new Date(data.expireCustomDate as any).toLocaleDateString('zh-CN')
+        : '永久';
+
+  const newDir: SharedDir = {
+    id: `sd-${Date.now()}`,
+    name: shareName,
+    sourcePath: displayPath,
+    shareUsers: data.shareUsers,
+    shareTime: new Date().toLocaleString(),
+    expireTime: expireText,
+    status: 'active',
+    linkEnabled: data.linkEnabled,
+    linkUrl: data.linkEnabled
+      ? `https://d.vivibit.com/s/${Date.now().toString(36)}`
+      : '',
+    linkAccessCount: 0,
+    linkStatus: data.linkEnabled ? 'active' : 'expired',
+  };
+  shareDirs.value.push(newDir);
+  message.success('分享创建成功');
+  createModalVisible.value = false;
 }
 
 /** 从树节点构建路径字符串 */
@@ -335,16 +316,6 @@ function buildPathFromTree(nodes: FileTreeNode[], targetKey: string): string {
   return '';
 }
 
-/** 树节点选择回调 */
-function onCreateTreeSelect(keys: string[]) {
-  createTreeSelectedKeys.value = keys;
-  const key = keys[0];
-  if (key) {
-    createForm.value.sourceTreeKey = key;
-    createForm.value.sourcePath = buildPathFromTree(myFilesTreeData, key);
-  }
-}
-
 function openEditUsersModal(dir: SharedDir) {
   editingDir.value = dir;
   editUsersForm.value = {
@@ -352,6 +323,29 @@ function openEditUsersModal(dir: SharedDir) {
   };
   editUsersModalVisible.value = true;
 }
+
+/** 编辑弹窗：添加共享用户 */
+function editAddShareUser(userValue: string) {
+  if (!editUsersForm.value.shareUsers.find((u) => u.user === userValue)) {
+    editUsersForm.value.shareUsers.push({ user: userValue, permission: 'readonly' });
+  }
+}
+
+/** 编辑弹窗：移除共享用户 */
+function editRemoveShareUser(userValue: string) {
+  editUsersForm.value.shareUsers = editUsersForm.value.shareUsers.filter((u) => u.user !== userValue);
+}
+
+/** 编辑弹窗：切换用户权限 */
+function editToggleUserPermission(userValue: string) {
+  const user = editUsersForm.value.shareUsers.find((u) => u.user === userValue);
+  if (user) {
+    user.permission = user.permission === 'readonly' ? 'readwrite' : 'readonly';
+  }
+}
+
+/** 编辑弹窗：已选用户 keys */
+const editSelectedUserKeys = computed(() => editUsersForm.value.shareUsers.map((u) => u.user));
 
 function handleSaveUsers() {
   if (editingDir.value) {
@@ -376,7 +370,9 @@ function openLinkModal(dir: SharedDir) {
   editingDir.value = dir;
   linkForm.value = {
     enabled: dir.linkEnabled,
-    expireTime: '7',
+    expireType: 'preset',
+    expirePreset: '7',
+    expireCustomDate: '',
     password: '',
   };
   linkModalVisible.value = true;
@@ -520,7 +516,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       <div class="action-bar-left">
         <Button type="primary" class="create-btn" @click="openCreateModal">
           <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
-          创建共享
+          创建分享
         </Button>
       </div>
       <div class="action-bar-right">
@@ -581,19 +577,25 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                 </div>
               </template>
 
-              <!-- 共享用户 -->
+              <!-- 共享用户（带权限标识） -->
               <template v-if="column.key === 'shareUsers'">
                 <div class="user-cell">
                   <Tooltip
-                    v-for="user in record.shareUsers"
-                    :key="user"
-                    :title="user"
+                    v-for="su in record.shareUsers"
+                    :key="su.user"
+                    :title="`${su.user} — ${su.permission === 'readonly' ? '只读' : '读写'}`"
                   >
-                    <div
-                      class="user-avatar"
-                      :style="{ backgroundColor: getUserColor(user) + '18', color: getUserColor(user), borderColor: getUserColor(user) + '40' }"
-                    >
-                      {{ getUserInitial(user) }}
+                    <div class="user-perm-tag">
+                      <div
+                        class="user-avatar"
+                        :style="{ backgroundColor: getUserColor(su.user) + '18', color: getUserColor(su.user), borderColor: getUserColor(su.user) + '40' }"
+                      >
+                        {{ getUserInitial(su.user) }}
+                      </div>
+                      <span
+                        class="perm-dot"
+                        :class="su.permission === 'readonly' ? 'perm-dot--ro' : 'perm-dot--rw'"
+                      />
                     </div>
                   </Tooltip>
                   <span v-if="record.shareUsers.length === 0" class="no-users">无</span>
@@ -709,143 +711,26 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       </Card>
     </div>
 
-    <!-- ═══════ 创建共享弹窗（入口二：我的分享 → 创建分享）═══════ -->
-    <Modal
-      v-model:open="createModalVisible"
-      title="创建共享"
-      width="560px"
-      ok-text="创建"
-      cancel-text="取消"
-      @ok="handleCreate"
-    >
-      <Form
-        ref="createFormRef"
-        :model="createForm"
-        layout="vertical"
-        :rules="{
-          name: [{ required: true, message: '请输入共享名称', trigger: 'blur' }],
-          sourcePath: [{ required: true, message: '请选择原文件夹', trigger: 'change' }],
-        }"
-      >
-        <Form.Item label="共享名称" name="name">
-          <Input v-model:value="createForm.name" placeholder="请输入共享名称">
-            <template #prefix>
-              <IconifyIcon icon="lucide:folder-open" style="font-size: 14px; color: #bfbfbf;" />
-            </template>
-          </Input>
-        </Form.Item>
-
-        <!-- 目录树选择 -->
-        <Form.Item label="选择要共享的目录" required>
-          <div class="create-tree-wrap">
-            <Tree
-              :tree-data="myFilesTreeData"
-              :selected-keys="createTreeSelectedKeys"
-              :expanded-keys="createTreeExpandedKeys"
-              :field-names="{ title: 'title', key: 'key', children: 'children' }"
-              @update:selected-keys="onCreateTreeSelect"
-              @update:expanded-keys="createTreeExpandedKeys = $event"
-              class="create-dir-tree"
-              :show-line="{ showLeafIcon: false }"
-            >
-              <template #title="node">
-                <span class="tree-node-title">
-                  <IconifyIcon
-                    :icon="treeNodeIconResolver(node).icon"
-                    :style="{ fontSize: '14px', color: treeNodeIconResolver(node).color, marginRight: '6px', flexShrink: 0 }"
-                  />
-                  <span class="tree-node-text" :title="node.title">{{ node.title }}</span>
-                </span>
-              </template>
-            </Tree>
-          </div>
-          <div v-if="createForm.sourcePath" class="selected-dir-path">
-            <IconifyIcon icon="lucide:map-pin" style="font-size: 12px; color: #52c41a;" />
-            <span>已选：{{ createForm.sourcePath }}</span>
-          </div>
-        </Form.Item>
-
-        <Form.Item label="共享用户">
-          <Select
-            v-model:value="createForm.shareUsers"
-            mode="multiple"
-            placeholder="请选择共享用户"
-            :options="userOptions"
-          />
-        </Form.Item>
-
-        <!-- 有效期（同入口一） -->
-        <Form.Item label="有效期">
-          <div class="share-expire-row">
-            <Radio.Group v-model:value="createForm.expireType" style="display: flex; gap: 8px;">
-              <Radio value="preset">预设</Radio>
-              <Radio value="custom">自定义</Radio>
-            </Radio.Group>
-          </div>
-          <div v-if="createForm.expireType === 'preset'" style="margin-top: 8px;">
-            <Radio.Group v-model:value="createForm.expirePreset">
-              <Radio value="1">1天</Radio>
-              <Radio value="7">7天</Radio>
-              <Radio value="30">30天</Radio>
-              <Radio value="0">永久</Radio>
-            </Radio.Group>
-          </div>
-          <div v-else style="margin-top: 8px;">
-            <DatePicker
-              v-model:value="createForm.expireCustomDate"
-              placeholder="选择到期日期"
-              style="width: 100%;"
-            />
-          </div>
-        </Form.Item>
-
-        <!-- 权限 -->
-        <Form.Item label="权限">
-          <Radio.Group v-model:value="createForm.permission">
-            <Radio value="readonly">
-              <span class="radio-with-icon">
-                <IconifyIcon icon="lucide:eye" style="font-size: 12px; margin-right: 4px;" />
-                只读
-              </span>
-            </Radio>
-            <Radio value="readwrite">
-              <span class="radio-with-icon">
-                <IconifyIcon icon="lucide:pencil" style="font-size: 12px; margin-right: 4px;" />
-                读写
-              </span>
-            </Radio>
-          </Radio.Group>
-        </Form.Item>
-
-        <Divider />
-
-        <Form.Item>
-          <Checkbox v-model:checked="createForm.linkEnabled">
-            <span style="font-weight: 500;">启用外链分享</span>
-          </Checkbox>
-        </Form.Item>
-
-        <template v-if="createForm.linkEnabled">
-          <Form.Item label="外链有效期">
-            <Radio.Group v-model:value="createForm.linkExpireTime">
-              <Radio value="1">1天</Radio>
-              <Radio value="7">7天</Radio>
-              <Radio value="30">30天</Radio>
-              <Radio value="0">永久</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="外链访问密码（选填）">
-            <Input v-model:value="createForm.linkPassword" placeholder="不设置密码则公开访问" />
-          </Form.Item>
-        </template>
-      </Form>
-    </Modal>
+    <!-- ═══════ 创建分享弹窗（使用复用组件）═══════ -->
+    <ShareConfigModal
+      v-model:visible="createModalVisible"
+      title="创建分享"
+      :show-tree="true"
+      :tree-data="myFilesTreeData"
+      :tree-expanded-keys="createTreeExpandedKeys"
+      :tree-selected-key="createForm.sourceTreeKey"
+      confirm-text="创建"
+      :user-options="userOptions"
+      @update:tree-expanded-keys="createTreeExpandedKeys = $event"
+      @update:tree-selected-key="(k) => { createForm.sourceTreeKey = k; createTreeSelectedKeys = k ? [k] : []; }"
+      @ok="handleCreateFromModal"
+    />
 
     <!-- ═══════ 编辑共享用户弹窗 ═══════ -->
     <Modal
       v-model:open="editUsersModalVisible"
       :title="`共享用户 - ${editingDir?.name}`"
-      width="480px"
+      width="520px"
       ok-text="保存"
       cancel-text="取消"
       @ok="handleSaveUsers"
@@ -853,11 +738,63 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       <Form ref="editUsersFormRef" :model="editUsersForm" layout="vertical">
         <Form.Item label="共享用户">
           <Select
-            v-model:value="editUsersForm.shareUsers"
+            :value="editSelectedUserKeys"
             mode="multiple"
-            placeholder="请选择共享用户"
+            placeholder="选择用户并为其设置权限"
             :options="userOptions"
+            @change="(vals: string[]) => {
+              editUsersForm.shareUsers = editUsersForm.shareUsers.filter(u => vals.includes(u.user));
+              vals.forEach(v => editAddShareUser(v));
+            }"
           />
+          <!-- 已选用户权限列表 -->
+          <div v-if="editUsersForm.shareUsers.length > 0" class="user-perm-list">
+            <div
+              v-for="su in editUsersForm.shareUsers"
+              :key="su.user"
+              class="user-perm-row"
+            >
+              <div class="user-perm-info">
+                <div
+                  class="user-avatar-small"
+                  :style="{ backgroundColor: getUserColor(su.user) + '18', color: getUserColor(su.user), borderColor: getUserColor(su.user) + '40' }"
+                >
+                  {{ getUserInitial(su.user) }}
+                </div>
+                <span class="user-perm-name">{{ su.user }}</span>
+              </div>
+              <Radio.Group
+                :value="su.permission"
+                size="small"
+                @change="(e: any) => {
+                  const u = editUsersForm.shareUsers.find(x => x.user === su.user);
+                  if (u) u.permission = e.target.value;
+                }"
+              >
+                <Radio.Button value="readonly">
+                  <span class="radio-with-icon">
+                    <IconifyIcon icon="lucide:eye" style="font-size: 10px; margin-right: 2px;" />
+                    只读
+                  </span>
+                </Radio.Button>
+                <Radio.Button value="readwrite">
+                  <span class="radio-with-icon">
+                    <IconifyIcon icon="lucide:pencil" style="font-size: 10px; margin-right: 2px;" />
+                    读写
+                  </span>
+                </Radio.Button>
+              </Radio.Group>
+              <Button
+                type="text"
+                size="small"
+                danger
+                class="user-remove-btn"
+                @click="editRemoveShareUser(su.user)"
+              >
+                <IconifyIcon icon="lucide:x" style="font-size: 12px;" />
+              </Button>
+            </div>
+          </div>
         </Form.Item>
       </Form>
     </Modal>
@@ -891,12 +828,26 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
           </Form.Item>
 
           <Form.Item label="外链有效期">
-            <Radio.Group v-model:value="linkForm.expireTime">
-              <Radio value="1">1天</Radio>
-              <Radio value="7">7天</Radio>
-              <Radio value="30">30天</Radio>
-              <Radio value="0">永久</Radio>
+            <Radio.Group v-model:value="linkForm.expireType" size="small">
+              <Radio.Button value="preset">预设</Radio.Button>
+              <Radio.Button value="custom">自定义</Radio.Button>
+              <Radio.Button value="forever">永久</Radio.Button>
             </Radio.Group>
+            <div v-if="linkForm.expireType === 'preset'" style="margin-top: 8px;">
+              <Radio.Group v-model:value="linkForm.expirePreset" size="small">
+                <Radio.Button value="1">1天</Radio.Button>
+                <Radio.Button value="7">7天</Radio.Button>
+                <Radio.Button value="30">30天</Radio.Button>
+              </Radio.Group>
+            </div>
+            <div v-else-if="linkForm.expireType === 'custom'" style="margin-top: 8px;">
+              <DatePicker
+                v-model:value="linkForm.expireCustomDate"
+                placeholder="选择到期日期"
+                size="small"
+                style="width: 100%;"
+              />
+            </div>
           </Form.Item>
 
           <Form.Item label="访问密码（选填）">
@@ -1154,12 +1105,18 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   white-space: nowrap;
 }
 
-/* ═══ 用户列 ═══ */
+/* ═══ 用户列（带权限标识）═══ */
 .user-cell {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+}
+
+.user-perm-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .user-avatar {
@@ -1173,6 +1130,24 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   font-weight: 600;
   border: 1.5px solid;
   cursor: default;
+}
+
+.perm-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+}
+
+.perm-dot--ro {
+  background: #8c8c8c;
+}
+
+.perm-dot--rw {
+  background: #52c41a;
 }
 
 .no-users {
@@ -1268,17 +1243,90 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   margin-bottom: 16px;
 }
 
-/* ═══ 创建共享弹窗目录树 ═══ */
+/* ═══ 创建分享弹窗 ═══ */
+.create-share-modal :deep(.ant-modal-body) {
+  padding: 16px 20px;
+}
+
+/* 选中的文件夹信息 */
+.selected-folder-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+  border: 1px solid #ffd591;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.selected-folder-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.selected-folder-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.selected-folder-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.selected-folder-path {
+  font-size: 12px;
+  color: #8c8c8c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-folder-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  color: #8c8c8c;
+  font-size: 13px;
+}
+
+/* 目录树 */
+.tree-form-item {
+  margin-bottom: 8px;
+}
+
+.tree-form-item :deep(.ant-form-item-label) {
+  padding-bottom: 4px;
+}
+
 .create-tree-wrap {
-  max-height: 240px;
+  max-height: 180px;
   overflow: auto;
   border: 1px solid #f0f0f0;
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fafafa;
 }
 
 .create-dir-tree :deep(.ant-tree-treenode) {
-  padding: 2px 0;
+  padding: 1px 0;
 }
 
 .create-dir-tree :deep(.ant-tree-node-content-wrapper) {
@@ -1286,7 +1334,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   align-items: center;
   border-radius: 6px;
   transition: all 0.2s;
-  padding: 4px 8px;
+  padding: 3px 8px;
 }
 
 .create-dir-tree :deep(.ant-tree-node-content-wrapper:hover) {
@@ -1311,32 +1359,151 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   white-space: nowrap;
 }
 
-.selected-dir-path {
+/* 共享用户（带权限） */
+.share-users-form-item {
+  margin-bottom: 8px;
+}
+
+.share-users-form-item :deep(.ant-form-item-label) {
+  padding-bottom: 4px;
+  font-size: 12px;
+}
+
+.share-users-form-item :deep(.ant-form-item-label > label) {
+  font-size: 12px;
+}
+
+.user-perm-list {
   margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 6px 10px;
   background: #f6ffed;
   border: 1px solid #b7eb8f;
-  border-radius: 6px;
+  border-radius: 8px;
+}
+
+.user-perm-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-avatar-small {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1.5px solid;
+  flex-shrink: 0;
+}
+
+.user-perm-name {
   font-size: 13px;
   color: #262626;
+  font-weight: 500;
+}
+
+.user-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+}
+
+/* 有效期紧凑布局 */
+.expire-form-item {
+  margin-bottom: 8px;
+}
+
+.expire-form-item :deep(.ant-form-item-label) {
+  padding-bottom: 4px;
+  font-size: 12px;
+}
+
+.expire-form-item :deep(.ant-form-item-label > label) {
+  font-size: 12px;
+}
+
+.expire-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.expire-preset {
+  display: flex;
+  gap: 6px;
+}
+
+.expire-custom {
+  width: 100%;
+}
+
+/* 外链区域 */
+.link-section {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.link-section-header {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+.link-config {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* 紧凑配置网格 */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.config-item {
+  margin-bottom: 8px;
+}
+
+.config-item :deep(.ant-form-item-label) {
+  padding-bottom: 4px;
+  font-size: 12px;
+}
+
+.config-item :deep(.ant-form-item-label > label) {
+  font-size: 12px;
+}
+
+/* radio with icon */
 .radio-with-icon {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
 }
 
-.share-expire-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ═══ 共享链接行 ═══ */
+/* 共享链接行 */
 .share-link-row {
   display: flex;
   gap: 8px;
@@ -1361,6 +1528,10 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 
   .search-input {
     width: 200px;
+  }
+
+  .config-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

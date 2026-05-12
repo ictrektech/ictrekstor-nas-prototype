@@ -1,5 +1,13 @@
 # ictrekstor NAS 前端原型项目规则
 
+## 重要提示，务必遵守
+
+- 绝对不要自动执行 `pnpm run dev:antd --port 5666` 启动服务，该服务默认已经在后台启动，
+  如果你发现没有启动，那就暂停并通知我；
+- 绝对不要让 subagent 执行**修改文件**任务，如果你发现上下文不够了，不用着急结束，请继续
+  实施你的任务，agent 会自动进行上下文管理和压缩；如果你实在任务任务在当前上下文已经无法
+  继续，那就输出总结然后等待我处理；
+
 ## 项目概述
 
 本项目是基于 [Vben Admin](https://github.com/vbenjs/vue-vben-admin) `5.x` 的**前端原型项目**，用于快速构建 ictrekstor NAS 管理界面的可交互原型。项目采用 Vue 3 + Vite + TypeScript 技术栈，使用 pnpm Monorepo 管理。

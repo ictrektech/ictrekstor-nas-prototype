@@ -1,29 +1,33 @@
-# 当前任务：优化分享逻辑
+# 当前任务：优化"我的分享"创建分享弹窗 + 复用组件替换两个入口
 
 ## 任务来源
 - 触发方式：用户指令
+- 需求：
+  1. "我的分享"页面中"创建共享"按钮改为"创建分享"
+  2. 去掉共享名称输入，以选中文件夹名称作为共享名称
+  3. 优化弹窗布局，减少纵向空间，更现代美观
+  4. 外链支持自定义有效期（非仅预设）
 
-## 目标与范围
-- [x] 入口一（我的文件-选中文件夹-分享）：优化分享弹窗
-  - [x] 支持选择分享时间（含自定义时间）
-  - [x] 支持选择用户
-  - [x] 支持选择权限（只读、读写）
-  - [x] 支持启用外链
-  - [x] 支持设置外链有效时间
-- [x] 入口二（我的分享-创建分享）：优化创建分享弹窗
-  - [x] 包含目录管理树状视图
-  - [x] 展示"我的文件"及其子目录
-  - [x] 用户选择要分享的目录
-  - [x] 其余字段与入口一保持一致
+## 当前进度
 
-## 关键上下文
-- my-files/index.vue：新增分享弹窗（共享用户Select、有效期预设/自定义Radio+DatePicker、权限Radio只读/读写、外链Checkbox+有效期+密码）
-- shared-files/index.vue：新增创建分享弹窗（目录树Tree选择"我的文件"、共享用户、有效期预设/自定义、权限、外链），替换原有Select下拉选择为树状视图
+### ✅ 已完成
+1. **创建复用组件** `apps/web-antd/src/components/ShareConfigModal/index.vue`
+2. **`shared-files/index.vue` 已替换完成**（带目录树选择的创建分享入口）
+3. **`my-files/index.vue` 已替换完成**（选中文件夹后分享的入口一）
 
-## 实施文件
-- apps/web-antd/src/views/file/my-files/index.vue
-- apps/web-antd/src/views/file/shared-files/index.vue
+### ✅ 验证中
+- 两个入口均使用 ShareConfigModal 复用组件
+- 弹窗包含：选中文件夹信息卡片、共享用户（带独立权限）、有效期（预设/自定义/永久）、外链（预设/自定义/永久 + 密码）
 
-## 上下文恢复检查点
-- 最后修改的文件：apps/web-antd/src/views/file/shared-files/index.vue
-- 当前确认的状态：两个入口的分享弹窗均已优化完成
+## 关键文件
+
+| 文件 | 状态 | 说明 |
+|------|------|------|
+| `apps/web-antd/src/components/ShareConfigModal/index.vue` | ✅ 完成 | 复用组件 |
+| `apps/web-antd/src/views/file/shared-files/index.vue` | ✅ 完成 | 已使用组件 |
+| `apps/web-antd/src/views/file/my-files/index.vue` | ✅ 完成 | 已使用组件 |
+
+## 后续规划
+1. 截图验证 my-files 入口的分享弹窗
+2. 截图验证 shared-files 入口的分享弹窗
+3. 确认无误后建议用户提交代码

@@ -22,6 +22,8 @@ import {
 } from '#/components/FileExplorer';
 import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
 import { findParentKeys, findNodeInTree } from '#/components/FileExplorer';
+import { ShareConfigModal } from '#/components/ShareConfigModal';
+import type { ShareFormData } from '#/components/ShareConfigModal';
 
 // ─── 页面级扩展类型 ───
 interface MyFileItem extends FileItem {
@@ -438,21 +440,6 @@ const userOptions = [
 
 // 共享设置（入口一：选中文件夹后分享）
 const shareModalVisible = ref(false);
-const shareFormRef = ref();
-const shareForm = ref({
-  // 分享时间
-  expireType: 'preset', // 'preset' | 'custom'
-  expirePreset: '7',    // 预设天数
-  expireCustomDate: '', // 自定义到期日期
-  // 共享用户
-  shareUsers: [] as string[],
-  // 权限
-  permission: 'readonly' as 'readonly' | 'readwrite',
-  // 外链
-  linkEnabled: false,
-  linkExpireTime: '7',   // 外链有效期（预设天数）
-  linkPassword: '',      // 外链访问密码
-});
 
 // 移动目标选项（所有叶子/文件夹节点）
 const folderOptions = computed(() => {
@@ -631,25 +618,22 @@ function handleBatchDelete(files: MyFileItem[]) {
 
 function openShareModal(file: MyFileItem) {
   editingFile.value = file;
-  shareForm.value = {
-    expireType: 'preset',
-    expirePreset: '7',
-    expireCustomDate: '',
-    shareUsers: [],
-    permission: 'readonly',
-    linkEnabled: false,
-    linkExpireTime: '7',
-    linkPassword: '',
-  };
   shareModalVisible.value = true;
 }
 
-function handleSaveShare() {
+function handleSaveShare(data: ShareFormData) {
   if (!editingFile.value) return;
   editingFile.value.isShared = true;
-  const names = shareForm.value.shareUsers.join('、') || '无';
+  const names = data.shareUsers.map((u) => u.user).join('、') || '无';
+  const permissions = data.shareUsers.map((u) =>
+    u.permission === 'readonly' ? '只读' : '读写'
+  );
+  // 如果有多个用户且权限一致，简写；否则列出每个用户的权限
+  const permText = permissions.length > 0
+    ? (new Set(permissions).size === 1 ? permissions[0] : permissions.join('、'))
+    : '只读';
   message.success(
-    `已将「${editingFile.value.name}」分享给 ${names}，权限：${shareForm.value.permission === 'readonly' ? '只读' : '读写'}`,
+    `已将「${editingFile.value.name}」分享给 ${names}，权限：${permText}`,
   );
   shareModalVisible.value = false;
 }
@@ -937,93 +921,14 @@ onMounted(() => {
     </Modal>
 
     <!-- ═══════ 分享弹窗（入口一：选中文件夹后分享）═══════ -->
-    <Modal
-      v-model:open="shareModalVisible"
+    <ShareConfigModal
+      v-model:visible="shareModalVisible"
       :title="`分享 - ${editingFile?.name || ''}`"
-      width="520px"
-      ok-text="确认分享"
+      :folder-name="editingFile?.name || ''"
+      confirm-text="确认分享"
+      :user-options="userOptions"
       @ok="handleSaveShare"
-    >
-      <Form
-        ref="shareFormRef"
-        :model="shareForm"
-        layout="vertical"
-      >
-        <!-- 分享对象 -->
-        <Form.Item label="共享用户">
-          <Select
-            v-model:value="shareForm.shareUsers"
-            mode="multiple"
-            placeholder="请选择共享用户"
-            :options="userOptions"
-          />
-        </Form.Item>
-
-        <!-- 分享有效期 -->
-        <Form.Item label="有效期">
-          <div class="share-expire-row">
-            <AntRadio.Group v-model:value="shareForm.expireType" style="display: flex; gap: 8px;">
-              <AntRadio value="preset">预设</AntRadio>
-              <AntRadio value="custom">自定义</AntRadio>
-            </AntRadio.Group>
-          </div>
-          <div v-if="shareForm.expireType === 'preset'" style="margin-top: 8px;">
-            <AntRadio.Group v-model:value="shareForm.expirePreset">
-              <AntRadio value="1">1天</AntRadio>
-              <AntRadio value="7">7天</AntRadio>
-              <AntRadio value="30">30天</AntRadio>
-              <AntRadio value="0">永久</AntRadio>
-            </AntRadio.Group>
-          </div>
-          <div v-else style="margin-top: 8px;">
-            <DatePicker
-              v-model:value="shareForm.expireCustomDate"
-              placeholder="选择到期日期"
-              style="width: 100%;"
-            />
-          </div>
-        </Form.Item>
-
-        <!-- 权限 -->
-        <Form.Item label="权限">
-          <AntRadio.Group v-model:value="shareForm.permission">
-            <AntRadio value="readonly">
-              <span class="radio-with-icon">
-                <IconifyIcon icon="lucide:eye" style="font-size: 12px; margin-right: 4px;" />
-                只读
-              </span>
-            </AntRadio>
-            <AntRadio value="readwrite">
-              <span class="radio-with-icon">
-                <IconifyIcon icon="lucide:pencil" style="font-size: 12px; margin-right: 4px;" />
-                读写
-              </span>
-            </AntRadio>
-          </AntRadio.Group>
-        </Form.Item>
-
-        <!-- 外链 -->
-        <Form.Item>
-          <Checkbox v-model:checked="shareForm.linkEnabled">
-            <span style="font-weight: 500;">启用外链分享</span>
-          </Checkbox>
-        </Form.Item>
-
-        <template v-if="shareForm.linkEnabled">
-          <Form.Item label="外链有效期">
-            <AntRadio.Group v-model:value="shareForm.linkExpireTime">
-              <AntRadio value="1">1天</AntRadio>
-              <AntRadio value="7">7天</AntRadio>
-              <AntRadio value="30">30天</AntRadio>
-              <AntRadio value="0">永久</AntRadio>
-            </AntRadio.Group>
-          </Form.Item>
-          <Form.Item label="外链访问密码（选填）">
-            <Input v-model:value="shareForm.linkPassword" placeholder="不设置密码则公开访问" />
-          </Form.Item>
-        </template>
-      </Form>
-    </Modal>
+    />
 
     <!-- ═══════ 目标目录选择弹窗（复制/移动共用）═══════ -->
     <Modal
