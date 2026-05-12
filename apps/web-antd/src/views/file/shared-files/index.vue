@@ -20,18 +20,6 @@ import {
   Checkbox,
 } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
-import {
-  Copy,
-  ExternalLink,
-  FolderHeart,
-  FolderOpen,
-  FolderPlus,
-  FolderSymlink,
-  Link,
-  Search,
-  Trash2,
-  Users,
-} from 'lucide-vue-next';
 
 interface SharedDir {
   id: string;
@@ -202,14 +190,14 @@ const overviewStats = computed(() => {
 
 /* ═══════ 表格列定义 ═══════ */
 const dirColumns = [
-  { title: '共享名称', dataIndex: 'name', key: 'name', width: 140 },
+  { title: '共享名称', dataIndex: 'name', key: 'name', width: 150 },
   { title: '原文件夹', dataIndex: 'sourcePath', key: 'sourcePath', ellipsis: true },
   { title: '共享用户', key: 'shareUsers', width: 160 },
-  { title: '创建时间', key: 'shareTime', width: 120 },
-  { title: '有效期', dataIndex: 'expireTime', key: 'expireTime', width: 120 },
+  { title: '创建时间', key: 'shareTime', width: 110 },
+  { title: '有效期', dataIndex: 'expireTime', key: 'expireTime', width: 110 },
   { title: '状态', key: 'status', width: 90, align: 'center' as const },
   { title: '外链', key: 'link', width: 100, align: 'center' as const },
-  { title: '操作', key: 'action', width: 160, align: 'center' as const },
+  { title: '操作', key: 'action', width: 140, align: 'center' as const },
 ];
 
 /* ═══════ 方法 ═══════ */
@@ -378,7 +366,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <Link style="font-size: 20px; color: #722ed1;" />
+          <IconifyIcon icon="lucide:link" style="font-size: 20px; color: #722ed1;" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">我的分享</h1>
@@ -387,28 +375,36 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       </div>
       <div class="page-header-right">
         <div class="overview-card">
-          <FolderHeart style="font-size: 16px; color: #52c41a;" />
+          <div class="overview-icon-wrap" style="background: #f6ffed;">
+            <IconifyIcon icon="lucide:folder-heart" style="font-size: 16px; color: #52c41a;" />
+          </div>
           <div class="overview-info">
             <span class="overview-label">有效共享</span>
             <span class="overview-value">{{ overviewStats.activeDirs }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <Link style="font-size: 16px; color: #1677ff;" />
+          <div class="overview-icon-wrap" style="background: #e6f7ff;">
+            <IconifyIcon icon="lucide:link" style="font-size: 16px; color: #1677ff;" />
+          </div>
           <div class="overview-info">
             <span class="overview-label">有效外链</span>
             <span class="overview-value">{{ overviewStats.activeLinks }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <Users style="font-size: 16px; color: #722ed1;" />
+          <div class="overview-icon-wrap" style="background: #f9f0ff;">
+            <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #722ed1;" />
+          </div>
           <div class="overview-info">
             <span class="overview-label">共享用户</span>
             <span class="overview-value">{{ overviewStats.userCount }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <FolderOpen style="font-size: 16px; color: #faad14;" />
+          <div class="overview-icon-wrap" style="background: #fff7e6;">
+            <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #fa8c16;" />
+          </div>
           <div class="overview-info">
             <span class="overview-label">共享总数</span>
             <span class="overview-value">{{ overviewStats.totalDirs }}</span>
@@ -417,31 +413,31 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
       </div>
     </div>
 
+    <!-- ═══════ 第二行动作栏 ═══════ -->
+    <div class="action-bar">
+      <div class="action-bar-left">
+        <Button type="primary" class="create-btn" @click="openCreateModal">
+          <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
+          创建共享
+        </Button>
+      </div>
+      <div class="action-bar-right">
+        <Input
+          v-model:value="dirSearchText"
+          placeholder="搜索共享名称、路径或用户"
+          class="search-input"
+          allow-clear
+        >
+          <template #prefix>
+            <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+          </template>
+        </Input>
+      </div>
+    </div>
+
     <!-- ═══════ 主体内容 ═══════ -->
     <div class="page-body">
       <Card class="shared-card" :bordered="false">
-        <!-- 工具栏 -->
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <Button type="primary" class="create-btn" @click="openCreateModal">
-              <FolderPlus style="font-size: 13px;" />
-              创建共享
-            </Button>
-          </div>
-          <div class="toolbar-right">
-            <Input
-              v-model:value="dirSearchText"
-              placeholder="搜索共享名称、路径或用户"
-              class="search-input"
-              allow-clear
-            >
-              <template #prefix>
-                <Search style="font-size: 14px; color: #bfbfbf;" />
-              </template>
-            </Input>
-          </div>
-        </div>
-
         <!-- 表格卡片 -->
         <div class="table-card">
           <Table
@@ -460,7 +456,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                     class="name-icon-box"
                     :class="{ 'name-icon-box--expired': record.status === 'expired' }"
                   >
-                    <FolderOpen style="font-size: 18px;" />
+                    <IconifyIcon icon="lucide:folder-open" style="font-size: 16px;" />
                   </div>
                   <div class="name-text-area">
                     <div class="name-title">{{ record.name }}</div>
@@ -478,6 +474,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
               <!-- 原文件夹 -->
               <template v-if="column.key === 'sourcePath'">
                 <div class="path-cell">
+                  <IconifyIcon icon="lucide:folder" style="font-size: 12px; color: #bfbfbf; flex-shrink: 0;" />
                   <span class="path-text" :title="record.sourcePath">{{ record.sourcePath }}</span>
                 </div>
               </template>
@@ -492,7 +489,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                   >
                     <div
                       class="user-avatar"
-                      :style="{ backgroundColor: getUserColor(user) + '20', color: getUserColor(user), borderColor: getUserColor(user) + '40' }"
+                      :style="{ backgroundColor: getUserColor(user) + '18', color: getUserColor(user), borderColor: getUserColor(user) + '40' }"
                     >
                       {{ getUserInitial(user) }}
                     </div>
@@ -512,40 +509,47 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 
               <!-- 状态 -->
               <template v-if="column.key === 'status'">
-                <Tag
-                  :color="record.status === 'active' ? 'success' : 'default'"
-                  size="small"
-                  class="status-tag"
-                >
-                  <Badge
-                    :color="record.status === 'active' ? '#52c41a' : '#8c8c8c'"
-                    style="margin-right: 4px;"
+                <div class="status-cell">
+                  <span
+                    class="status-dot"
+                    :style="{ background: record.status === 'active' ? '#52c41a' : '#8c8c8c' }"
                   />
-                  {{ record.status === 'active' ? '有效' : '已过期' }}
-                </Tag>
+                  <span class="status-text" :class="{ 'status-text--expired': record.status === 'expired' }">
+                    {{ record.status === 'active' ? '有效' : '已过期' }}
+                  </span>
+                </div>
               </template>
 
               <!-- 外链 -->
               <template v-if="column.key === 'link'">
                 <div class="link-cell">
-                  <Tag
-                    v-if="record.linkEnabled && record.linkStatus === 'active'"
-                    color="blue"
-                    size="small"
-                    class="link-tag"
-                  >
-                    <Link style="font-size: 11px; margin-right: 2px;" />
-                    已开启
-                  </Tag>
-                  <Tag
-                    v-else-if="record.linkEnabled && record.linkStatus === 'expired'"
-                    color="default"
-                    size="small"
-                    class="link-tag"
-                  >
-                    已过期
-                  </Tag>
-                  <span v-else class="link-none">未开启</span>
+                  <template v-if="record.linkEnabled && record.linkStatus === 'active'">
+                    <Tooltip title="点击复制外链">
+                      <Tag
+                        color="blue"
+                        size="small"
+                        class="link-tag link-tag--clickable"
+                        @click="handleCopyLink(record.linkUrl)"
+                      >
+                        <IconifyIcon icon="lucide:link" style="font-size: 11px; margin-right: 2px;" />
+                        已开启
+                      </Tag>
+                    </Tooltip>
+                  </template>
+                  <template v-else-if="record.linkEnabled && record.linkStatus === 'expired'">
+                    <Tag
+                      color="default"
+                      size="small"
+                      class="link-tag"
+                    >
+                      <IconifyIcon icon="lucide:link-break" style="font-size: 11px; margin-right: 2px;" />
+                      已过期
+                    </Tag>
+                  </template>
+                  <span v-else class="link-none">
+                    <IconifyIcon icon="lucide:link-off" style="font-size: 11px; margin-right: 2px;" />
+                    未开启
+                  </span>
                 </div>
               </template>
 
@@ -559,7 +563,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                       class="action-icon-btn"
                       @click="openEditUsersModal(record)"
                     >
-                      <Users style="font-size: 14px;" />
+                      <IconifyIcon icon="lucide:users" style="font-size: 14px; color: #595959;" />
                     </Button>
                   </Tooltip>
                   <Tooltip title="外链管理">
@@ -569,7 +573,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                       class="action-icon-btn"
                       @click="openLinkModal(record)"
                     >
-                      <Link style="font-size: 14px;" />
+                      <IconifyIcon icon="lucide:link" style="font-size: 14px; color: #595959;" />
                     </Button>
                   </Tooltip>
                   <Tooltip title="删除共享">
@@ -581,7 +585,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
                       @confirm="handleDeleteDir(record)"
                     >
                       <Button size="small" type="text" danger class="action-icon-btn">
-                        <Trash2 style="font-size: 14px;" />
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: 14px; color: #ff4d4f;" />
                       </Button>
                     </Popconfirm>
                   </Tooltip>
@@ -593,7 +597,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
               <Empty description="暂无共享目录" class="table-empty">
                 <template #image>
                   <div class="empty-image">
-                    <FolderSymlink style="font-size: 48px; color: #d9d9d9;" />
+                    <IconifyIcon icon="lucide:folder-symlink" style="font-size: 48px; color: #d9d9d9;" />
                   </div>
                 </template>
               </Empty>
@@ -624,7 +628,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
         <Form.Item label="共享名称" name="name">
           <Input v-model:value="createForm.name" placeholder="请输入共享名称">
             <template #prefix>
-              <FolderOpen style="font-size: 14px; color: #bfbfbf;" />
+              <IconifyIcon icon="lucide:folder-open" style="font-size: 14px; color: #bfbfbf;" />
             </template>
           </Input>
         </Form.Item>
@@ -803,11 +807,29 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 .overview-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: #f5f5f5;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  min-width: 100px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.overview-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.overview-icon-wrap {
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
-  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .overview-info {
@@ -828,6 +850,39 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
+/* ═══ 第二行动作栏 ═══ */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.action-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.action-bar-right {
+  display: flex;
+  align-items: center;
+}
+
+.create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.search-input {
+  width: 280px;
+}
+
 /* ═══ 主体内容 ═══ */
 .page-body {
   flex: 1;
@@ -844,43 +899,13 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 }
 
 .shared-card :deep(.ant-card-body) {
-  padding: 16px;
-}
-
-/* ═══ 工具栏 ═══ */
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  gap: 12px;
-}
-
-.toolbar-left {
-  display: flex;
-  align-items: center;
-}
-
-.create-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.toolbar-right {
-  display: flex;
-  align-items: center;
-}
-
-.search-input {
-  width: 260px;
+  padding: 0;
 }
 
 /* ═══ 表格卡片 ═══ */
 .table-card {
   background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -889,11 +914,11 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   font-weight: 600;
   font-size: 12px;
   color: #595959;
-  padding: 10px 14px;
+  padding: 10px 16px;
 }
 
 .shared-table :deep(.ant-table-tbody > tr > td) {
-  padding: 12px 14px;
+  padding: 12px 16px;
   font-size: 13px;
 }
 
@@ -912,7 +937,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 }
 
 .time-text {
-  color: #595959;
+  color: #8c8c8c;
   font-size: 12px;
 }
 
@@ -927,7 +952,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: #f0f5ff;
+  background: linear-gradient(135deg, #e6f4ff 0%, #f0f5ff 100%);
   color: #1677ff;
   display: flex;
   align-items: center;
@@ -936,7 +961,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 }
 
 .name-icon-box--expired {
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f5f5f5 0%, #f0f0f0 100%);
   color: #8c8c8c;
 }
 
@@ -995,9 +1020,28 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
 }
 
 /* ═══ 状态列 ═══ */
-.status-tag {
+.status-cell {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #52c41a;
+}
+
+.status-text--expired {
+  color: #8c8c8c;
 }
 
 /* ═══ 外链列 ═══ */
@@ -1012,7 +1056,19 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   align-items: center;
 }
 
+.link-tag--clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.link-tag--clickable:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
 .link-none {
+  display: inline-flex;
+  align-items: center;
   color: #bfbfbf;
   font-size: 12px;
 }
@@ -1022,16 +1078,22 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .action-icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 6px;
+  padding: 0;
   width: 28px;
   height: 28px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.action-icon-btn:hover {
+  background: #f0f0f0 !important;
 }
 
 /* ═══ 空状态 ═══ */
@@ -1062,7 +1124,7 @@ function formatExpireTime(expireTime: string, status: string): { text: string; c
     align-items: flex-start;
   }
 
-  .toolbar {
+  .action-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
