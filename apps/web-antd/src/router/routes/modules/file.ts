@@ -84,6 +84,15 @@ const routes: RouteRecordRaw[] = [
           title: '回收站',
         },
       },
+      {
+        name: 'FileAllFiles',
+        path: '/file/all-files',
+        component: () => import('#/views/storage/all-files/index.vue'),
+        meta: {
+          icon: 'lucide:hard-drive',
+          title: '设备全部文件',
+        },
+      },
     ],
   },
 ];

@@ -40,6 +40,24 @@ const routes: RouteRecordRaw[] = [
           title: $t('page.system.users'),
         },
       },
+      {
+        name: 'SystemVolumes',
+        path: '/system/volumes',
+        component: () => import('#/views/storage/volumes/index.vue'),
+        meta: {
+          icon: 'lucide:box',
+          title: '存储空间管理',
+        },
+      },
+      {
+        name: 'SystemPublicFiles',
+        path: '/system/public-files',
+        component: () => import('#/views/storage/team-files/index.vue'),
+        meta: {
+          icon: 'lucide:folder-heart',
+          title: '公共文件管理',
+        },
+      },
     ],
   },
 ];
