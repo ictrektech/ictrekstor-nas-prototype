@@ -137,6 +137,7 @@ const loading = ref(false);
 const searchText = ref('');
 const viewMode = ref<'list' | 'grid'>('list');
 const currentFiles = ref<FileItem[]>([]);
+const selectedFileIds = ref<string[]>([]);
 
 // 重命名
 const renameModalVisible = ref(false);
@@ -303,6 +304,7 @@ onMounted(() => {
         :loading="loading"
         v-model:search-text="searchText"
         v-model:view-mode="viewMode"
+        v-model:selected-file-ids="selectedFileIds"
         @breadcrumb-click="onBreadcrumbClick"
         @refresh="refresh"
         @open-folder="handleOpenFolder"

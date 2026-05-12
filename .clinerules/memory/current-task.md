@@ -1,29 +1,34 @@
-# 当前任务：网卡管理功能增强
+# 当前任务：文件管理组件批量操作栏优化 — 已完成
 
 ## 任务来源
 - 触发方式：用户指令
-- 关联页面：http://localhost:5666/system/device
 
-## 目标与范围
-- [x] 1. 扩展 NetworkConfig 接口，增加带宽和历史数据字段
-- [x] 2. 更新 API mock 数据，添加网卡详情和历史带宽数据
-- [x] 3. 创建网卡详情页面（参考磁盘详情页设计）
-- [x] 4. 添加网卡详情路由
-- [x] 5. 修改设备管理页面网卡卡片（配置弹窗+详情按钮+实时带宽）
-- [x] 6. 优化网卡卡片布局，降低信息密度
-- [x] 7. 提交代码
+## 已完成修改
 
-## 关键上下文
-- 设备管理页面：`apps/web-antd/src/views/system/device/index.vue`
-- 网卡详情页：`apps/web-antd/src/views/system/device/network-detail.vue`
-- 系统API：`apps/web-antd/src/api/system.ts`
-- 系统路由：`apps/web-antd/src/router/routes/modules/system.ts`
+### 1. 类型定义 (types.ts)
+- `FileItem` 接口新增 `isShared?: boolean` 字段
 
-## 设计方向
-1. 网卡卡片新增：上传/下载带宽 Pill 展示、配置按钮（弹窗）、详情按钮（跳转）
-2. 网卡配置弹窗：表单编辑 IP、子网掩码、网关、DNS、MTU
-3. 网卡详情页：顶部概览（带宽/状态/MAC）+ 信息卡片（Descriptions）+ 历史带宽图表（echarts）
+### 2. FileManagerPanel.vue 核心改造
+- **新增全选/反全选按钮**：根据当前是否全选，显示"全选"或"反全选"
+- **危险操作下沉到二级菜单**：批量删除等危险操作移入 Dropdown > Menu 中
+- **状态区分动作**：
+  - 选中单个项时，显示"重命名"按钮
+  - 选中单个目录项时，显示"分享"按钮（蓝色主按钮）
+- **已分享标识**：列表视图和网格视图图标右下角添加蓝色圆形 link 图标标识
+- **新增 share 事件**：`share: [file: FileItem]`
+- **新增 computed 属性**：`selectionCount`, `isSingleSelection`, `singleSelectedFile`, `canShare`, `isAllSelected`
+- **回收站模式**：也新增了全选/反全选，危险操作同样下沉
 
-## 提交记录
-- commit: `2b0582626`
-- message: `feat(page): 增强设备管理页网卡功能`
+### 3. 所有使用页面统一绑定 selected-file-ids
+| 页面 | 绑定状态 |
+|------|---------|
+| my-files/index.vue | 已有，新增 @share="openShareModal" |
+| public-files/index.vue | 新增 selectedFileIds + 绑定 |
+| team-files/index.vue | 新增 selectedFileIds + 绑定 |
+| recycle-bin/index.vue | 新增 selectedFileIds + 绑定 |
+| shared-from-others/index.vue | 新增 selectedFileIds + 绑定 |
+| storage/all-files/index.vue | 新增 selectedFileIds + 绑定 |
+
+## 验证状态
+- 代码修改完成，待本地开发服务器验证
+- 如遇到编译错误，可能需要重启 `pnpm run dev:antd --port 5666`

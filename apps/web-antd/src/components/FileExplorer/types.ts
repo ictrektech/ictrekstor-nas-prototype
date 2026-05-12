@@ -27,6 +27,8 @@ export interface FileItem {
   deletedTime?: string;
   /** 回收站：原路径 */
   originalPath?: string;
+  /** 是否已共享 */
+  isShared?: boolean;
 }
 
 /** 文件图标配置 */

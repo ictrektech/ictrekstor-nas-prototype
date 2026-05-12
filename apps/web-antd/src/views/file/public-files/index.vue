@@ -127,6 +127,7 @@ const loading = ref(false);
 const searchText = ref('');
 const viewMode = ref<'list' | 'grid'>('list');
 const currentFiles = ref<FileItem[]>([]);
+const selectedFileIds = ref<string[]>([]);
 
 // ─── 计算属性 ───
 const breadcrumbPath = computed(() => {
@@ -285,6 +286,7 @@ onMounted(() => {
         :loading="loading"
         v-model:search-text="searchText"
         v-model:view-mode="viewMode"
+        v-model:selected-file-ids="selectedFileIds"
         :show-new-folder="false"
         empty-description="暂无文件"
         @breadcrumb-click="onBreadcrumbClick"

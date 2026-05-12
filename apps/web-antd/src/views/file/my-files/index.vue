@@ -291,6 +291,7 @@ const loading = ref(false);
 const searchText = ref('');
 const viewMode = ref<'list' | 'grid'>('list');
 const currentFiles = ref<MyFileItem[]>([]);
+const selectedFileIds = ref<string[]>([]);
 
 // 重命名
 const renameModalVisible = ref(false);
@@ -476,6 +477,15 @@ function handleMove() {
 function handleDeleteFile(file: MyFileItem) {
   message.success(`"${file.name}" 已删除`);
   currentFiles.value = currentFiles.value.filter(f => f.id !== file.id);
+  selectedFileIds.value = selectedFileIds.value.filter(id => id !== file.id);
+}
+
+function handleBatchDelete(files: MyFileItem[]) {
+  const names = files.map(f => f.name).join('、');
+  message.success(`已删除 ${files.length} 个文件：${names}`);
+  const idsToRemove = new Set(files.map(f => f.id));
+  currentFiles.value = currentFiles.value.filter(f => !idsToRemove.has(f.id));
+  selectedFileIds.value = [];
 }
 
 function openShareModal(file: MyFileItem) {
@@ -592,6 +602,7 @@ onMounted(() => {
         :loading="loading"
         v-model:search-text="searchText"
         v-model:view-mode="viewMode"
+        v-model:selected-file-ids="selectedFileIds"
         :show-new-folder="!isTrash"
         :empty-description="isTrash ? '回收站为空' : '暂无文件'"
         @breadcrumb-click="onBreadcrumbClick"
@@ -599,50 +610,9 @@ onMounted(() => {
         @open-folder="handleOpenFolder"
         @rename="openRenameModal"
         @delete-file="handleDeleteFile"
-      >
-        <!-- 自定义操作列：下载 / 重命名 / 更多 -->
-        <template #action-cell="{ file }">
-          <div class="custom-actions">
-            <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
-              <IconifyIcon icon="lucide:download" style="font-size: 13px;" />
-              下载
-            </Button>
-            <Button size="small" type="link" class="action-link" @click="openRenameModal(file)">
-              <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
-              重命名
-            </Button>
-            <Dropdown :trigger="['click']">
-              <Button size="small" type="link" class="action-link">
-                <IconifyIcon icon="lucide:more-horizontal" style="font-size: 13px;" />
-                更多
-              </Button>
-              <template #overlay>
-                <Menu>
-                  <Menu.Item key="move" @click="openMoveModal(file)">
-                    <span class="menu-item-inner">
-                      <IconifyIcon icon="lucide:folder-input" style="font-size: 13px;" />
-                      移动
-                    </span>
-                  </Menu.Item>
-                  <Menu.Item v-if="file.type === 'folder' && !isTrash" key="share" @click="openShareModal(file)">
-                    <span class="menu-item-inner">
-                      <IconifyIcon icon="lucide:share-2" style="font-size: 13px;" />
-                      共享设置
-                    </span>
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Item key="delete" danger @click="handleDeleteFile(file)">
-                    <span class="menu-item-danger">
-                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      删除
-                    </span>
-                  </Menu.Item>
-                </Menu>
-              </template>
-            </Dropdown>
-          </div>
-        </template>
-      </FileManagerPanel>
+        @batch-delete="handleBatchDelete"
+        @share="openShareModal"
+      />
     </div>
 
     <!-- ═══════ 重命名弹窗 ═══════ -->

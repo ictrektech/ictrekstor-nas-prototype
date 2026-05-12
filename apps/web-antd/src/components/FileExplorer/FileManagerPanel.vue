@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import {
   Button,
   Input,
@@ -10,6 +10,8 @@ import {
   Tooltip,
   Breadcrumb,
   Popconfirm,
+  Menu,
+  Dropdown,
 } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import type { FileItem, BreadcrumbItem } from './types';
@@ -43,6 +45,8 @@ interface Props {
   panelTitle?: string;
   /** 操作模式：normal 普通文件管理 / recycle 回收站 */
   mode?: 'normal' | 'recycle';
+  /** 当前选中的文件 ID 列表 */
+  selectedFileIds?: string[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -58,11 +62,13 @@ const props = withDefaults(defineProps<Props>(), {
   dropHint: '释放以传输到此处',
   panelTitle: '',
   mode: 'normal',
+  selectedFileIds: () => [],
 });
 
 const emit = defineEmits<{
   'update:searchText': [value: string];
   'update:viewMode': [mode: 'list' | 'grid'];
+  'update:selectedFileIds': [ids: string[]];
   /** 面包屑点击 */
   breadcrumbClick: [item: BreadcrumbItem];
   /** 刷新 */
@@ -85,6 +91,12 @@ const emit = defineEmits<{
   drop: [files: FileItem[], event: DragEvent];
   /** 拖拽悬停状态变化 */
   dragOverChange: [isOver: boolean];
+  /** 批量删除 */
+  batchDelete: [files: FileItem[]];
+  /** 批量还原 */
+  batchRestore: [files: FileItem[]];
+  /** 分享（选中单个文件夹时） */
+  share: [file: FileItem];
 }>();
 
 const internalSearch = computed({
@@ -119,7 +131,7 @@ const tableColumns = computed(() => {
       { title: '大小', dataIndex: 'size', key: 'size', width: 90, align: 'right' as const },
       { title: '删除时间', dataIndex: 'deletedTime', key: 'deletedTime', width: 150 },
       { title: '原路径', dataIndex: 'originalPath', key: 'originalPath', width: 220, ellipsis: true },
-      { title: '操作', key: 'action', width: 130, align: 'center' as const },
+      { title: '操作', key: 'action', width: 140, align: 'center' as const },
     ];
   }
   return [
@@ -167,6 +179,129 @@ function onRename(file: FileItem) {
 
 function onDelete(file: FileItem) {
   emit('deleteFile', file);
+}
+
+// ═══ 多选相关 ═══
+
+const internalSelectedIds = computed({
+  get: () => props.selectedFileIds,
+  set: (val) => emit('update:selectedFileIds', val),
+});
+
+const hasSelection = computed(() => internalSelectedIds.value.length > 0);
+const selectionCount = computed(() => internalSelectedIds.value.length);
+const isSingleSelection = computed(() => selectionCount.value === 1);
+const singleSelectedFile = computed(() => {
+  if (!isSingleSelection.value) return null;
+  return sortedFiles.value.find((f) => internalSelectedIds.value.includes(f.id)) || null;
+});
+const canShare = computed(() => {
+  if (!singleSelectedFile.value) return false;
+  return singleSelectedFile.value.type === 'folder';
+});
+const isAllSelected = computed(() => {
+  return sortedFiles.value.length > 0 && sortedFiles.value.every((f) => internalSelectedIds.value.includes(f.id));
+});
+
+function isSelected(file: FileItem) {
+  return internalSelectedIds.value.includes(file.id);
+}
+
+/** 点击文件/文件夹名称时的统一处理 */
+function handleItemClick(file: FileItem, event: MouseEvent) {
+  if (file.type === 'folder') {
+    onOpenFolder(file);
+  } else {
+    toggleSelect(file, event);
+  }
+}
+
+function toggleSelect(file: FileItem, event?: MouseEvent) {
+  const ids = [...internalSelectedIds.value];
+  const idx = ids.indexOf(file.id);
+  if (event?.ctrlKey || event?.metaKey) {
+    // Ctrl/Cmd 点击：切换单个
+    if (idx > -1) ids.splice(idx, 1);
+    else ids.push(file.id);
+  } else if (event?.shiftKey && ids.length > 0) {
+    // Shift 点击：范围选择
+    const currentIdx = sortedFiles.value.findIndex((f) => f.id === file.id);
+    const lastId = ids[ids.length - 1];
+    const lastIdx = sortedFiles.value.findIndex((f) => f.id === lastId);
+    const start = Math.min(currentIdx, lastIdx);
+    const end = Math.max(currentIdx, lastIdx);
+    const rangeIds = sortedFiles.value
+      .slice(start, end + 1)
+      .map((f) => f.id);
+    // 合并已有选中与范围，去重
+    const newSet = new Set([...ids, ...rangeIds]);
+    internalSelectedIds.value = [...newSet];
+    return;
+  } else {
+    // 普通点击：多选默认——切换当前项
+    if (idx > -1) ids.splice(idx, 1);
+    else ids.push(file.id);
+  }
+  internalSelectedIds.value = ids;
+}
+
+function clearSelection() {
+  internalSelectedIds.value = [];
+}
+
+function selectAll() {
+  internalSelectedIds.value = sortedFiles.value.map((f) => f.id);
+}
+
+function getSelectedFiles() {
+  return sortedFiles.value.filter((f) => internalSelectedIds.value.includes(f.id));
+}
+
+function handleBatchDelete() {
+  const files = getSelectedFiles();
+  if (files.length === 0) return;
+  emit('batchDelete', files);
+}
+
+function handleBatchRestore() {
+  const files = getSelectedFiles();
+  if (files.length === 0) return;
+  emit('batchRestore', files);
+}
+
+// ═══ 右键菜单相关 ═══
+
+const contextMenuVisible = ref(false);
+const contextMenuPos = ref({ x: 0, y: 0 });
+const contextMenuFile = ref<FileItem | null>(null);
+
+function onRowContextMenu(file: FileItem, event: MouseEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+  contextMenuFile.value = file;
+  contextMenuPos.value = { x: event.clientX, y: event.clientY };
+  contextMenuVisible.value = true;
+}
+
+function closeContextMenu() {
+  contextMenuVisible.value = false;
+}
+
+function handleContextMenuAction(action: string) {
+  const file = contextMenuFile.value;
+  if (!file) return;
+  switch (action) {
+    case 'rename':
+      emit('rename', file);
+      break;
+    case 'delete':
+      emit('deleteFile', file);
+      break;
+    case 'restore':
+      emit('restore', file);
+      break;
+  }
+  closeContextMenu();
 }
 
 // ═══ 拖拽相关 ═══
@@ -238,6 +373,7 @@ import { ref } from 'vue';
     @dragover="onPanelDragOver"
     @dragleave="onPanelDragLeave"
     @drop="onPanelDrop"
+    @click="clearSelection"
   >
     <!-- 工具栏 -->
     <div class="file-manager-panel__toolbar">
@@ -269,7 +405,91 @@ import { ref } from 'vue';
       </div>
       <!-- 第二行：搜索与操作 -->
       <div class="file-manager-panel__actions-row">
-        <div class="file-manager-panel__actions">
+        <!-- 批量操作栏（有选中时显示） -->
+        <div v-if="hasSelection" class="file-manager-panel__batch-bar" @click.stop>
+          <span class="batch-bar__text">
+            已选中 <strong>{{ selectionCount }}</strong> 项
+          </span>
+          <div class="batch-bar__actions">
+            <template v-if="mode === 'recycle'">
+              <!-- 全选/反全选 -->
+              <Button size="small" @click="selectAll">
+                <IconifyIcon icon="lucide:check-square" style="font-size: 12px;" />
+                {{ isAllSelected ? '反全选' : '全选' }}
+              </Button>
+              <Button size="small" @click="handleBatchRestore">
+                <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px;" />
+                批量还原
+              </Button>
+              <!-- 危险操作下沉到二级菜单 -->
+              <Dropdown placement="bottomRight">
+                <Button size="small">
+                  <IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" />
+                  更多
+                </Button>
+                <template #overlay>
+                  <Menu>
+                    <Menu.Item key="batch-delete" danger @click="handleBatchDelete">
+                      <span class="batch-menu-item batch-menu-item--danger">
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                        彻底删除
+                      </span>
+                    </Menu.Item>
+                  </Menu>
+                </template>
+              </Dropdown>
+            </template>
+            <template v-else>
+              <!-- 全选/反全选 -->
+              <Button size="small" @click="isAllSelected ? clearSelection() : selectAll()">
+                <IconifyIcon icon="lucide:check-square" style="font-size: 12px;" />
+                {{ isAllSelected ? '反全选' : '全选' }}
+              </Button>
+              <Button size="small" @click="clearSelection">
+                <IconifyIcon icon="lucide:x" style="font-size: 12px;" />
+                取消选择
+              </Button>
+              <!-- 单选时：重命名 -->
+              <Button
+                v-if="isSingleSelection"
+                size="small"
+                @click="singleSelectedFile && onRename(singleSelectedFile)"
+              >
+                <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
+                重命名
+              </Button>
+              <!-- 单选文件夹时：分享 -->
+              <Button
+                v-if="canShare"
+                size="small"
+                type="primary"
+                @click="singleSelectedFile && emit('share', singleSelectedFile)"
+              >
+                <IconifyIcon icon="lucide:share-2" style="font-size: 12px;" />
+                分享
+              </Button>
+              <!-- 危险操作下沉到二级菜单 -->
+              <Dropdown placement="bottomRight">
+                <Button size="small" danger ghost>
+                  <IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" />
+                  更多
+                </Button>
+                <template #overlay>
+                  <Menu>
+                    <Menu.Item key="batch-delete" danger @click="handleBatchDelete">
+                      <span class="batch-menu-item batch-menu-item--danger">
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                        批量删除
+                      </span>
+                    </Menu.Item>
+                  </Menu>
+                </template>
+              </Dropdown>
+            </template>
+          </div>
+        </div>
+        <!-- 常规工具栏 -->
+        <div class="file-manager-panel__actions" @click.stop>
           <Input
             v-model:value="internalSearch"
             placeholder="搜索文件"
@@ -326,7 +546,7 @@ import { ref } from 'vue';
     </div>
 
     <!-- 文件内容区 -->
-    <div class="file-manager-panel__body">
+    <div class="file-manager-panel__body" @click.stop>
       <!-- 列表视图 -->
       <Table
         v-if="viewMode === 'list'"
@@ -336,25 +556,51 @@ import { ref } from 'vue';
         row-key="id"
         size="small"
         :pagination="false"
+        :row-class-name="(record: any) => isSelected(record) ? 'file-manager-panel__row--selected' : ''"
+        :customRow="(record: any) => ({ onContextmenu: (e: MouseEvent) => onRowContextMenu(record as FileItem, e) })"
         class="file-manager-panel__table"
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'name'">
             <div
               class="file-manager-panel__name-cell"
-              :class="{ 'file-manager-panel__name-cell--folder': record.type === 'folder', 'file-manager-panel__name-cell--draggable': draggable }"
+              :class="{
+                'file-manager-panel__name-cell--folder': record.type === 'folder',
+                'file-manager-panel__name-cell--draggable': draggable,
+              }"
               :draggable="draggable && record.type === 'file'"
-              @click="onOpenFolder(record as FileItem)"
+              @click.stop="handleItemClick(record as FileItem, $event)"
               @dragstart="onRowDragStart(record as FileItem, $event)"
             >
               <div
-                class="file-manager-panel__icon-box"
-                :style="{ background: getFileIconClass(record).bg }"
+                class="file-manager-panel__checkbox"
+                :class="{ 'file-manager-panel__checkbox--checked': isSelected(record) }"
+                @click.stop="toggleSelect(record as FileItem, $event)"
               >
                 <IconifyIcon
-                  :icon="getFileIconClass(record).icon"
-                  :style="{ fontSize: '16px', color: getFileIconClass(record).color }"
+                  v-if="isSelected(record)"
+                  icon="lucide:check"
+                  style="font-size: 10px; color: #fff;"
                 />
+              </div>
+              <div class="file-manager-panel__icon-wrap">
+                <div
+                  class="file-manager-panel__icon-box"
+                  :style="{ background: getFileIconClass(record).bg }"
+                >
+                  <IconifyIcon
+                    :icon="getFileIconClass(record).icon"
+                    :style="{ fontSize: '16px', color: getFileIconClass(record).color }"
+                  />
+                </div>
+                <!-- 已分享标识 -->
+                <div
+                  v-if="record.isShared"
+                  class="file-manager-panel__shared-badge"
+                  title="已分享"
+                >
+                  <IconifyIcon icon="lucide:link" style="font-size: 9px; color: #fff;" />
+                </div>
               </div>
               <span class="file-manager-panel__name-text" :title="record.name">{{ record.name }}</span>
             </div>
@@ -376,53 +622,6 @@ import { ref } from 'vue';
           <template v-if="column.key === 'originalPath'">
             <span class="file-manager-panel__path" :title="record.originalPath">{{ record.originalPath || '--' }}</span>
           </template>
-          <template v-if="column.key === 'action'">
-            <slot name="action-cell" :file="record">
-              <div class="file-manager-panel__actions-cell">
-                <template v-if="mode === 'recycle'">
-                  <Tooltip title="还原">
-                    <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRestore(record as FileItem)">
-                      <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 13px; color: #1677ff;" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="彻底删除">
-                    <Popconfirm
-                      title="确认彻底删除"
-                      description="此操作不可恢复，确定要彻底删除吗？"
-                      ok-text="确认"
-                      cancel-text="取消"
-                      ok-type="danger"
-                      @confirm="onDelete(record as FileItem)"
-                    >
-                      <Button size="small" type="text" danger class="file-manager-panel__action-btn">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
-                </template>
-                <template v-else>
-                  <Tooltip title="重命名">
-                    <Button size="small" type="text" class="file-manager-panel__action-btn" @click="onRename(record as FileItem)">
-                      <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="删除">
-                    <Popconfirm
-                      title="确认删除"
-                      description="确定要删除该文件吗？"
-                      ok-text="确认"
-                      cancel-text="取消"
-                      @confirm="onDelete(record as FileItem)"
-                    >
-                      <Button size="small" type="text" danger class="file-manager-panel__action-btn">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      </Button>
-                    </Popconfirm>
-                  </Tooltip>
-                </template>
-              </div>
-            </slot>
-          </template>
         </template>
         <template #emptyText>
           <Empty :description="emptyDescription" class="file-manager-panel__empty">
@@ -436,24 +635,51 @@ import { ref } from 'vue';
       </Table>
 
       <!-- 网格视图 -->
-      <div v-else class="file-manager-panel__grid">
+      <div v-else class="file-manager-panel__grid" @click.stop>
         <div
           v-for="file in sortedFiles"
           :key="file.id"
           class="file-manager-panel__grid-item"
-          :class="{ 'file-manager-panel__grid-item--folder': file.type === 'folder', 'file-manager-panel__grid-item--draggable': draggable }"
+          :class="{
+            'file-manager-panel__grid-item--folder': file.type === 'folder',
+            'file-manager-panel__grid-item--draggable': draggable,
+            'file-manager-panel__grid-item--selected': isSelected(file),
+          }"
           :draggable="draggable && file.type === 'file'"
-          @click="onOpenFolder(file as FileItem)"
+          @click.stop="handleItemClick(file as FileItem, $event)"
+          @contextmenu.stop="onRowContextMenu(file as FileItem, $event)"
           @dragstart="onRowDragStart(file as FileItem, $event)"
         >
+          <!-- 复选框 -->
           <div
-            class="file-manager-panel__grid-icon-box"
-            :style="{ background: getFileIconClass(file).bg }"
+            class="file-manager-panel__grid-checkbox"
+            :class="{ 'file-manager-panel__grid-checkbox--checked': isSelected(file) }"
+            @click.stop="toggleSelect(file as FileItem, $event)"
           >
             <IconifyIcon
-              :icon="getFileIconClass(file).icon"
-              :style="{ fontSize: '32px', color: getFileIconClass(file).color }"
+              v-if="isSelected(file)"
+              icon="lucide:check"
+              style="font-size: 10px; color: #fff;"
             />
+          </div>
+          <div class="file-manager-panel__grid-icon-wrap">
+            <div
+              class="file-manager-panel__grid-icon-box"
+              :style="{ background: getFileIconClass(file).bg }"
+            >
+              <IconifyIcon
+                :icon="getFileIconClass(file).icon"
+                :style="{ fontSize: '32px', color: getFileIconClass(file).color }"
+              />
+            </div>
+            <!-- 已分享标识 -->
+            <div
+              v-if="file.isShared"
+              class="file-manager-panel__grid-shared-badge"
+              title="已分享"
+            >
+              <IconifyIcon icon="lucide:link" style="font-size: 10px; color: #fff;" />
+            </div>
           </div>
           <div class="file-manager-panel__grid-name" :title="file.name">{{ file.name }}</div>
           <div class="file-manager-panel__grid-meta">
@@ -465,49 +691,6 @@ import { ref } from 'vue';
           </div>
           <div v-if="mode === 'recycle'" class="file-manager-panel__grid-meta file-manager-panel__grid-path">
             {{ file.deletedTime || '--' }}
-          </div>
-          <div class="file-manager-panel__grid-actions">
-            <template v-if="mode === 'recycle'">
-              <Tooltip title="还原">
-                <Button size="small" type="text" @click.stop="onRestore(file as FileItem)">
-                  <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px; color: #1677ff;" />
-                </Button>
-              </Tooltip>
-              <Tooltip title="彻底删除">
-                <Popconfirm
-                  title="确认彻底删除"
-                  description="此操作不可恢复，确定要彻底删除吗？"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  ok-type="danger"
-                  @confirm.stop="onDelete(file as FileItem)"
-                >
-                  <Button size="small" type="text" danger @click.stop>
-                    <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            </template>
-            <template v-else>
-              <Tooltip title="重命名">
-                <Button size="small" type="text" @click.stop="onRename(file as FileItem)">
-                  <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
-                </Button>
-              </Tooltip>
-              <Tooltip title="删除">
-                <Popconfirm
-                  title="确认删除"
-                  description="确定要删除该文件吗？"
-                  ok-text="确认"
-                  cancel-text="取消"
-                  @confirm.stop="onDelete(file as FileItem)"
-                >
-                  <Button size="small" type="text" danger @click.stop>
-                    <IconifyIcon icon="lucide:trash-2" style="font-size: 12px;" />
-                  </Button>
-                </Popconfirm>
-              </Tooltip>
-            </template>
           </div>
         </div>
         <Empty
@@ -523,6 +706,54 @@ import { ref } from 'vue';
         </Empty>
       </div>
     </div>
+
+    <!-- 右键菜单 -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenuVisible"
+        class="file-manager-panel__context-menu-overlay"
+        @click="closeContextMenu"
+        @contextmenu.prevent="closeContextMenu"
+      >
+        <div
+          class="file-manager-panel__context-menu"
+          :style="{ left: `${contextMenuPos.x}px`, top: `${contextMenuPos.y}px` }"
+          @click.stop
+        >
+          <Menu>
+            <template v-if="mode === 'recycle' && contextMenuFile">
+              <Menu.Item key="restore" @click="handleContextMenuAction('restore')">
+                <span class="context-menu-item">
+                  <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 13px; color: #1677ff;" />
+                  还原
+                </span>
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item key="delete" danger @click="handleContextMenuAction('delete')">
+                <span class="context-menu-item context-menu-item--danger">
+                  <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                  彻底删除
+                </span>
+              </Menu.Item>
+            </template>
+            <template v-else-if="contextMenuFile">
+              <Menu.Item key="rename" @click="handleContextMenuAction('rename')">
+                <span class="context-menu-item">
+                  <IconifyIcon icon="lucide:pencil" style="font-size: 13px;" />
+                  重命名
+                </span>
+              </Menu.Item>
+              <Menu.Item key="delete" danger @click="handleContextMenuAction('delete')">
+                <span class="context-menu-item context-menu-item--danger">
+                  <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                  删除
+                </span>
+              </Menu.Item>
+            </template>
+          </Menu>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -540,7 +771,6 @@ import { ref } from 'vue';
 }
 
 .file-manager-panel--drop-zone {
-  /* 默认状态下与其他页面保持一致（实线边框），仅在拖拽悬停时显示虚线高亮 */
   border: 1px solid #f0f0f0;
 }
 
@@ -619,20 +849,18 @@ import { ref } from 'vue';
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  /* 隐藏滚动条但保留滚动能力 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE 10+ */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .file-manager-panel__breadcrumb-scroll::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .file-manager-panel__breadcrumb-inner {
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  /* 给面包屑整体一个现代感的胶囊背景 */
   background: linear-gradient(135deg, #f6f8fb 0%, #f0f3f8 100%);
   border: 1px solid #e8ecf2;
   border-radius: 20px;
@@ -651,14 +879,12 @@ import { ref } from 'vue';
   white-space: nowrap;
 }
 
-/* 覆盖 ant-breadcrumb 默认分隔符样式 */
 .file-manager-panel__breadcrumb :deep(.ant-breadcrumb-separator) {
   color: #c0c8d5;
   margin: 0 4px;
   font-size: 11px;
 }
 
-/* 每个面包屑项的通用样式 */
 .file-manager-panel__breadcrumb :deep(.ant-breadcrumb-item) {
   display: inline-flex;
   align-items: center;
@@ -680,7 +906,6 @@ import { ref } from 'vue';
   text-decoration: none;
 }
 
-/* 当前项（最后一级） */
 .file-manager-panel__breadcrumb-current {
   color: #1a2b4c;
   font-weight: 700;
@@ -695,7 +920,35 @@ import { ref } from 'vue';
 .file-manager-panel__actions-row {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   width: 100%;
+  gap: 12px;
+}
+
+/* 批量操作栏 */
+.file-manager-panel__batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.batch-bar__text {
+  font-size: 13px;
+  color: #595959;
+  white-space: nowrap;
+}
+
+.batch-bar__text strong {
+  color: #1677ff;
+  font-weight: 600;
+}
+
+.batch-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .file-manager-panel__actions {
@@ -755,11 +1008,17 @@ import { ref } from 'vue';
   background: #f5f5f5;
 }
 
+/* 选中行样式 */
+.file-manager-panel__table :deep(.file-manager-panel__row--selected > td) {
+  background: #e6f4ff !important;
+}
+
 .file-manager-panel__name-cell {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: default;
+  user-select: none;
 }
 
 .file-manager-panel__name-cell--folder {
@@ -778,6 +1037,31 @@ import { ref } from 'vue';
   color: #1677ff;
 }
 
+/* 行内复选框 */
+.file-manager-panel__checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  background: #fff;
+  margin-right: 2px;
+}
+
+.file-manager-panel__checkbox:hover {
+  border-color: #1677ff;
+}
+
+.file-manager-panel__checkbox--checked {
+  background: #1677ff;
+  border-color: #1677ff;
+}
+
 .file-manager-panel__icon-box {
   width: 32px;
   height: 32px;
@@ -786,6 +1070,29 @@ import { ref } from 'vue';
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* 图标包装器（列表视图） */
+.file-manager-panel__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* 列表视图已分享标识 */
+.file-manager-panel__shared-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #1677ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .file-manager-panel__name-text {
@@ -808,26 +1115,9 @@ import { ref } from 'vue';
   font-family: 'SF Mono', 'Fira Code', monospace;
 }
 
-.file-manager-panel__actions-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.file-manager-panel__table :deep(.ant-table-tbody > tr:hover) .file-manager-panel__actions-cell {
-  opacity: 1;
-}
-
-.file-manager-panel__action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  width: 28px;
-  height: 28px;
+.file-manager-panel__path {
+  color: #8c8c8c;
+  font-size: 12px;
 }
 
 .file-manager-panel__empty {
@@ -851,6 +1141,7 @@ import { ref } from 'vue';
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
   position: relative;
+  user-select: none;
 }
 
 .file-manager-panel__grid-item--folder {
@@ -876,6 +1167,40 @@ import { ref } from 'vue';
   border-color: #bae0ff;
 }
 
+/* 网格选中态 */
+.file-manager-panel__grid-item--selected {
+  background: #e6f4ff !important;
+  border-color: #1677ff !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+}
+
+/* 网格复选框 */
+.file-manager-panel__grid-checkbox {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 2;
+}
+
+.file-manager-panel__grid-checkbox:hover {
+  border-color: #1677ff;
+}
+
+.file-manager-panel__grid-checkbox--checked {
+  background: #1677ff;
+  border-color: #1677ff;
+}
+
 .file-manager-panel__grid-icon-box {
   width: 52px;
   height: 52px;
@@ -889,6 +1214,30 @@ import { ref } from 'vue';
 
 .file-manager-panel__grid-item:hover .file-manager-panel__grid-icon-box {
   transform: scale(1.05);
+}
+
+/* 网格图标包装器 */
+.file-manager-panel__grid-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: 10px;
+}
+
+/* 网格视图已分享标识 */
+.file-manager-panel__grid-shared-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1677ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  z-index: 2;
 }
 
 .file-manager-panel__grid-name {
@@ -909,17 +1258,6 @@ import { ref } from 'vue';
   margin-bottom: 6px;
 }
 
-.file-manager-panel__grid-actions {
-  display: flex;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.file-manager-panel__grid-item:hover .file-manager-panel__grid-actions {
-  opacity: 1;
-}
-
 .file-manager-panel__grid-empty {
   grid-column: 1 / -1;
   padding: 48px 0;
@@ -934,6 +1272,51 @@ import { ref } from 'vue';
   white-space: nowrap;
 }
 
+/* ═══ 右键菜单 ═══ */
+.file-manager-panel__context-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.file-manager-panel__context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f0f0f0;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.file-manager-panel__context-menu :deep(.ant-menu) {
+  border-inline-end: none !important;
+  box-shadow: none;
+}
+
+.file-manager-panel__context-menu :deep(.ant-menu-item) {
+  height: 36px;
+  line-height: 36px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  font-size: 13px;
+}
+
+.file-manager-panel__context-menu :deep(.ant-menu-item-divider) {
+  margin: 4px 0;
+}
+
+.context-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.context-menu-item--danger {
+  color: #ff4d4f;
+}
+
 /* ═══ 响应式 ═══ */
 @media (max-width: 768px) {
   .file-manager-panel__toolbar {
@@ -942,6 +1325,10 @@ import { ref } from 'vue';
 
   .file-manager-panel__search {
     width: 160px;
+  }
+
+  .file-manager-panel__batch-bar {
+    flex-wrap: wrap;
   }
 }
 </style>
