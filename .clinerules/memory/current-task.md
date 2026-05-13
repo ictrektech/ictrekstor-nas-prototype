@@ -20,27 +20,37 @@
 - [x] 设备管理页面修复完成，已截图验证
 - [x] 存储空间管理页面修复完成，已截图验证
 
-## 已修复问题（存储空间管理）
+## 已修复问题（存储空间管理）— 最终修复
 
-**根因**：组件拆分后 Vue API 导入丢失，导致运行时 `ReferenceError`，整个页面渲染失败。
+**第一次修复根因**：组件拆分后 Vue API 导入丢失，导致运行时 `ReferenceError`，整个页面渲染失败。
+**第二次修复根因**：拆分后重构了数据流，但存在多处严重错误：
+1. 未加载 volumes 数据，只加载了 pools
+2. 组件中使用的字段名与 API 接口不匹配（`used`/`capacity` vs `usedCapacity`/`totalCapacity`）
+3. 存储空间按 pool 分组逻辑丢失
+4. "基于目录的存储空间"区域完全丢失
+5. 页面标题和概览区域结构改变
+6. 操作事件参数类型改变（string vs StoragePool/StorageVolume）
 
-| 文件 | 问题 | 修复 |
-|------|------|------|
-| `volumes/index.vue` | 使用 `h()` 但未导入 | `import { h } from 'vue'` |
-| `components/CreateVolumeModal.vue` | 使用 `ref()`、`nextTick()` 但未导入 | `import { nextTick, ref } from 'vue'` |
-| `components/RenameVolumeModal.vue` | 使用 `ref()`、`nextTick()` 但未导入 | `import { nextTick, ref } from 'vue'` |
+### 修复文件清单
 
-## 截图验证
-- 修复前：`screenshots/volumes-current.png`（完全空白）
-- 修复后：`screenshots/volumes-verify-1.png`（正常显示存储池卡片和概览栏）
+| 文件 | 修复内容 |
+|------|----------|
+| `volumes/index.vue` | 重写：加载 volumes+pools 双数据流，恢复 pool 分组逻辑，添加目录区域，恢复页面标题 |
+| `components/PoolCard.vue` | 重写：使用 `usedCapacity`/`totalCapacity`/`raidType` 等正确字段，恢复渐变背景和完整操作菜单 |
+| `components/VolumeNestCard.vue` | 修复：字段名 `used`→`usedCapacity`, `capacity`→`totalCapacity` |
 
-## 关键文件
+### 截图验证
+- 修复前：`screenshots/volumes-current.png`（数据错误、存储空间为空、无目录区域）
+- 修复后：`screenshots/volumes-fix-verify.png`（与原始版本 5888 完全一致）
+
+### 关键文件
 
 | 文件 | 说明 |
 |------|------|
-| `apps/web-antd/src/views/storage/volumes/index.vue` | 主页面 |
-| `apps/web-antd/src/views/storage/volumes/components/CreateVolumeModal.vue` | 创建存储空间弹窗 |
-| `apps/web-antd/src/views/storage/volumes/components/RenameVolumeModal.vue` | 重命名弹窗 |
+| `apps/web-antd/src/views/storage/volumes/index.vue` | 主页面（277行） |
+| `apps/web-antd/src/views/storage/volumes/components/PoolCard.vue` | 存储池卡片 |
+| `apps/web-antd/src/views/storage/volumes/components/VolumeNestCard.vue` | 存储空间嵌套卡片 |
+| `apps/web-antd/src/views/storage/volumes/components/VolumeOverview.vue` | 概览栏 |
 
 ## 待修复页面
 1. 公共文件管理（页面为空）
@@ -48,6 +58,6 @@
 ## 上下文恢复检查点
 - 最后修改的文件：
   - `apps/web-antd/src/views/storage/volumes/index.vue`
-  - `apps/web-antd/src/views/storage/volumes/components/CreateVolumeModal.vue`
-  - `apps/web-antd/src/views/storage/volumes/components/RenameVolumeModal.vue`
-- 最后确认的状态：存储空间管理页面从空白恢复为正常显示
+  - `apps/web-antd/src/views/storage/volumes/components/PoolCard.vue`
+  - `apps/web-antd/src/views/storage/volumes/components/VolumeNestCard.vue`
+- 最后确认的状态：存储空间管理页面与拆分前完全一致
