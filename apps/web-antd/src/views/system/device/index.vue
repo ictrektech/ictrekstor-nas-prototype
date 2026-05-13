@@ -95,7 +95,7 @@ onMounted(loadData);
       :device-name="summary?.deviceName || 'iCTrek NAS'"
       :system-version="summary?.systemVersion || 'DSM 7.2'"
       :uptime="summary?.uptime || '30天'"
-      :cpu-model="summary?.cpuModel || 'Intel Celeron J4125'"
+      :cpu-cores="summary?.hardware?.cpuCores || 4"
       :memory-size="summary?.memorySize || '8 GB'"
       :disk-count="disks.length"
       :device-id="summary?.deviceId || 'C7N-8821-A92D'"
@@ -104,6 +104,7 @@ onMounted(loadData);
 
     <!-- 硬件示意图 -->
     <DeviceDiagramPanel
+      class="diagram-section"
       ref="diagramRef"
       :disks="disks"
       :selected-disk="selectedDiagramDisk"
@@ -201,6 +202,7 @@ onMounted(loadData);
 
 <style scoped>
 .device-manager { padding: 0 20px 16px; width: 100%; }
+.diagram-section { margin-top: 16px; }
 .page-header { display: flex; align-items: center; padding: 12px 20px; background: #fff; gap: 16px; flex-shrink: 0; margin: 0 -20px 16px; }
 .page-header-left { display: flex; align-items: center; gap: 12px; }
 .page-icon-box { width: 44px; height: 44px; border-radius: 10px; background: #e6f4ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

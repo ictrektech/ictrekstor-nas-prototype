@@ -135,45 +135,11 @@ function onToggle(checked: boolean) {
           </div>
         </div>
       </div>
-      <div class="card-actions-area">
-        <Button
-          block
-          size="small"
-          @click="emit('guide', protocol)"
-        >
-          <IconifyIcon icon="lucide:book-open" :style="{ fontSize: '14px' }" />
-          使用指南
-        </Button>
-        <Button
-          block
-          size="small"
-          type="primary"
-          @click="emit('configure', protocol)"
-        >
-          <IconifyIcon icon="lucide:settings-2" :style="{ fontSize: '14px' }" />
-          配置
-        </Button>
-      </div>
     </div>
 
-    <!-- 禁用状态精简 -->
+    <!-- 禁用状态 -->
     <div v-else class="card-body-disabled">
-      <div class="disabled-left">
-        <div class="protocol-icon-wrap" style="background: #f0f0f0;">
-          <IconifyIcon
-            :icon="protocol.icon"
-            class="protocol-icon"
-            style="color: #bfbfbf;"
-          />
-        </div>
-        <div class="protocol-meta">
-          <div class="protocol-name" style="color: #8c8c8c;">
-            {{ protocol.name }}
-            <Tag>未启用</Tag>
-          </div>
-          <div class="protocol-desc">{{ protocol.description }}</div>
-        </div>
-      </div>
+      <span class="disabled-hint">开启后即可配置和访问</span>
     </div>
   </div>
 </template>
@@ -369,33 +335,17 @@ function onToggle(checked: boolean) {
   font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
 }
 
-.card-actions-area {
-  width: 140px;
-  flex-shrink: 0;
-  padding-left: 16px;
-  border-left: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-  gap: 8px;
-  margin-left: 16px;
-}
-
 .card-body-disabled {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  gap: 16px;
+  justify-content: center;
+  padding: 16px 20px;
 }
 
-.disabled-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1;
-  min-width: 0;
+.disabled-hint {
+  font-size: 13px;
+  color: #bfbfbf;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {
@@ -403,8 +353,7 @@ function onToggle(checked: boolean) {
     flex-direction: column;
   }
   .access-url-section,
-  .card-config-area,
-  .card-actions-area {
+  .card-config-area {
     width: 100%;
   }
 }

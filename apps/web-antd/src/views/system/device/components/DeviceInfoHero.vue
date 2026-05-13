@@ -7,7 +7,7 @@ const props = defineProps<{
   deviceName: string;
   systemVersion: string;
   uptime: string;
-  cpuModel: string;
+  cpuCores: number;
   memorySize: string;
   diskCount: number;
   deviceId: string;
@@ -40,8 +40,8 @@ const copySerial = (serial: string) => {
           <IconifyIcon icon="lucide:cpu" style="font-size: 16px; color: #1677ff;" />
         </div>
         <div class="chip-text">
-          <span class="chip-value">{{ cpuModel }}</span>
-          <span class="chip-label">处理器</span>
+          <span class="chip-value">{{ cpuCores }} 核</span>
+          <span class="chip-label">CPU</span>
         </div>
       </div>
       <div class="info-chip">

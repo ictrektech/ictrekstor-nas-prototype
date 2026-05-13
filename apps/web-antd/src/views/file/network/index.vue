@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { message } from 'ant-design-vue';
-import { IconifyIcon } from '@vben/icons';
 import NetworkPageHeader from './components/NetworkPageHeader.vue';
 import ProtocolCard from './components/ProtocolCard.vue';
 import type { ProtocolData } from './components/ProtocolCard.vue';
@@ -151,25 +150,6 @@ const protocolList = ref<ProtocolData[]>([
   },
 ]);
 
-const searchText = ref('');
-const sortBy = ref<'name' | 'status'>('name');
-
-const filteredProtocols = computed(() => {
-  let list = protocolList.value;
-  if (searchText.value.trim()) {
-    const q = searchText.value.toLowerCase();
-    list = list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q),
-    );
-  }
-  if (sortBy.value === 'status') {
-    list = [...list].sort((a, b) => Number(b.enabled) - Number(a.enabled));
-  }
-  return list;
-});
-
 const activeCount = computed(
   () => protocolList.value.filter((p) => p.enabled).length,
 );
@@ -215,32 +195,10 @@ function handleSaveConfig(data: any) {
     <!-- 页面头部 -->
     <NetworkPageHeader :active-count="activeCount" />
 
-    <!-- 搜索工具栏 -->
-    <div class="network-toolbar">
-      <IconifyIcon
-        icon="lucide:search"
-        :style="{ fontSize: '14px', color: '#8c8c8c' }"
-      />
-      <a-input
-        v-model:value="searchText"
-        placeholder="搜索协议..."
-        class="search-input"
-        allow-clear
-      />
-      <a-select
-        v-model:value="sortBy"
-        style="width: 120px;"
-        size="small"
-      >
-        <a-select-option value="name">按名称</a-select-option>
-        <a-select-option value="status">按状态</a-select-option>
-      </a-select>
-    </div>
-
     <!-- 协议卡片列表 -->
-    <div v-if="filteredProtocols.length > 0" class="protocol-list">
+    <div class="protocol-list">
       <ProtocolCard
-        v-for="p in filteredProtocols"
+        v-for="p in protocolList"
         :key="p.id"
         :protocol="p"
         @toggle="toggleProtocol"
@@ -248,15 +206,6 @@ function handleSaveConfig(data: any) {
         @configure="openConfigModal"
         @copy="copyUrl"
       />
-    </div>
-
-    <!-- 空状态 -->
-    <div v-else class="empty-state">
-      <IconifyIcon
-        icon="lucide:search-x"
-        class="empty-icon"
-      />
-      <span class="empty-text">未找到匹配的协议</span>
     </div>
 
     <!-- 使用指南弹窗 -->
@@ -281,18 +230,6 @@ function handleSaveConfig(data: any) {
   background: #f5f5f5;
 }
 
-.network-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 20px 12px;
-  gap: 12px;
-}
-
-.search-input {
-  width: 220px;
-}
-
 .protocol-list {
   display: flex;
   flex-direction: column;
@@ -300,28 +237,4 @@ function handleSaveConfig(data: any) {
   margin: 0 20px;
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  gap: 12px;
-}
-
-.empty-icon {
-  font-size: 48px;
-  color: #d9d9d9;
-}
-
-.empty-text {
-  font-size: 14px;
-  color: #8c8c8c;
-}
-
-@media (max-width: 768px) {
-  .search-input {
-    width: 180px;
-  }
-}
 </style>

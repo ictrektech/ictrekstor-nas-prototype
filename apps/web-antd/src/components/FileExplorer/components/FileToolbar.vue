@@ -254,7 +254,7 @@ const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
   background: rgba(22, 119, 255, 0.1);
   border: 1px solid rgba(22, 119, 255, 0.15);
 }
-.toolbar-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.toolbar-actions-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
 .batch-bar { display: flex; align-items: center; gap: 12px; }
 .batch-bar__text { font-size: 13px; color: #595959; }
 .batch-bar__actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }

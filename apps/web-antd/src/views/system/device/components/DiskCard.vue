@@ -37,7 +37,7 @@ const statusColor = computed(() => {
 });
 
 const healthColor = computed(() => {
-  switch (props.disk.health) {
+  switch (props.disk.healthStatus) {
     case '正常': return '#52c41a';
     case '警告': return '#faad14';
     case '异常': return '#ff4d4f';
@@ -46,8 +46,8 @@ const healthColor = computed(() => {
 });
 
 const diskPools = computed(() => {
-  if (!props.disk.pools) return [];
-  return props.disk.pools.map((pid) => props.pools.find((p) => p.id === pid)?.name || pid);
+  if (!props.disk.poolIds) return [];
+  return props.disk.poolIds.map((pid) => props.pools.find((p) => p.id === pid)?.name || pid);
 });
 </script>
 
@@ -72,11 +72,11 @@ const diskPools = computed(() => {
           <div class="info-header-left">
             <span class="disk-device-name">{{ disk.deviceName }}</span>
             <span class="disk-capacity" :style="{ background: `${diskIconColor}12`, color: diskIconColor }">
-              {{ disk.capacity }}
+              {{ disk.size }}
             </span>
             <Tag size="small" :style="{ color: healthColor, borderColor: `${healthColor}50`, background: `${healthColor}10` }">
               <span class="health-dot-mini" :style="{ background: healthColor }" />
-              {{ disk.health || '未知' }}
+              {{ disk.healthStatus || '未知' }}
             </Tag>
           </div>
           <div class="header-actions">

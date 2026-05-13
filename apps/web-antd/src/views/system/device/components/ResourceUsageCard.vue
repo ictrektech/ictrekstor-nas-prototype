@@ -2,7 +2,13 @@
 import { computed } from 'vue';
 import { Card } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
-import { generateLinePath, generateAreaPath } from '#/utils/svgChart';
+import VChart from 'vue-echarts';
+import { use } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { LineChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent } from 'echarts/components';
+
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent]);
 
 const props = defineProps<{
   title: string;
@@ -15,16 +21,33 @@ const props = defineProps<{
   colorTheme: string;
 }>();
 
-const CHART_CONFIG = { width: 400, height: 80, padding: { top: 8, right: 8, bottom: 20, left: 32 } };
-const innerW = CHART_CONFIG.width - CHART_CONFIG.padding.left - CHART_CONFIG.padding.right;
-const innerH = CHART_CONFIG.height - CHART_CONFIG.padding.top - CHART_CONFIG.padding.bottom;
-const yTicks = [0, 25, 50, 75, 100];
 const xLabels = ['-60分', '-45分', '-30分', '-15分', '现在'];
 
-const linePath = computed(() => generateLinePath(props.historyData, innerW, innerH));
-const areaPath = computed(() => generateAreaPath(props.historyData, innerW, innerH));
-const areaColor = computed(() => `${props.colorTheme}18`);
-const lineColor = computed(() => props.colorTheme);
+const chartOption = computed(() => ({
+  grid: { left: 36, right: 12, top: 8, bottom: 20 },
+  xAxis: {
+    type: 'category',
+    data: xLabels,
+    axisLine: { show: false },
+    axisTick: { show: false },
+    axisLabel: { fontSize: 10, color: '#bfbfbf' },
+  },
+  yAxis: {
+    type: 'value',
+    max: 100,
+    splitLine: { lineStyle: { color: '#f0f0f0' } },
+    axisLabel: { fontSize: 10, color: '#bfbfbf', formatter: '{value}%' },
+  },
+  tooltip: { trigger: 'axis', formatter: (params: any) => `${params[0].name}: ${params[0].value}%` },
+  series: [{
+    type: 'line',
+    data: props.historyData,
+    smooth: true,
+    symbol: 'none',
+    lineStyle: { color: props.colorTheme, width: 2 },
+    areaStyle: { color: props.colorTheme, opacity: 0.1 },
+  }],
+}));
 </script>
 
 <template>
@@ -49,29 +72,7 @@ const lineColor = computed(() => props.colorTheme);
     </div>
 
     <div class="chart-container">
-      <svg :width="CHART_CONFIG.width" :height="CHART_CONFIG.height" class="usage-chart">
-        <g :transform="`translate(${CHART_CONFIG.padding.left},${CHART_CONFIG.padding.top})`">
-          <g v-for="(tick, i) in yTicks" :key="i" class="chart-grid">
-            <line
-              :x1="0" :y1="innerH - (tick / 100) * innerH"
-              :x2="innerW" :y2="innerH - (tick / 100) * innerH"
-              stroke="#f0f0f0" stroke-width="1"
-            />
-            <text
-              :x="-6" :y="innerH - (tick / 100) * innerH + 3"
-              text-anchor="end" font-size="9" fill="#bfbfbf"
-            >{{ tick }}%</text>
-          </g>
-          <path :d="areaPath" :fill="areaColor" />
-          <path :d="linePath" :stroke="lineColor" fill="none" stroke-width="2" stroke-linecap="round" />
-          <g v-for="(label, i) in xLabels" :key="`x-${i}`">
-            <text
-              :x="(i / (xLabels.length - 1)) * innerW"
-              :y="innerH + 14" text-anchor="middle" font-size="9" fill="#bfbfbf"
-            >{{ label }}</text>
-          </g>
-        </g>
-      </svg>
+      <VChart :option="chartOption" style="width: 100%; height: 140px;" autoresize />
       <div class="chart-avg">
         <span class="avg-dot" :style="{ background: colorTheme }" />
         <span class="avg-text">平均使用率 {{ avgPercent }}%</span>
@@ -95,8 +96,7 @@ const lineColor = computed(() => props.colorTheme);
 .percent-value { font-size: 24px; font-weight: 700; font-family: 'SF Mono', monospace; }
 .percent-label { font-size: 11px; color: #8c8c8c; }
 .chart-container { position: relative; }
-.usage-chart { width: 100%; height: auto; }
-.chart-avg { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-left: 32px; }
+.chart-avg { display: flex; align-items: center; gap: 6px; margin-top: 4px; padding-left: 36px; }
 .avg-dot { width: 6px; height: 6px; border-radius: 50%; }
 .avg-text { font-size: 11px; color: #8c8c8c; }
 </style>
