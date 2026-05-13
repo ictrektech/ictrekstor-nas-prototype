@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
 import { Empty, message, Modal } from 'ant-design-vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { getStoragePoolsApi } from '#/api/storage';

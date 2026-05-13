@@ -10,7 +10,7 @@
 - [x] 修复：文件管理 - 网络访问（卡片颜色、内容）
 - [x] 修复：系统设置 - 设备管理（设备示意图、CPU、内存卡片）
 - [x] 修复：系统设置 - 设备管理（磁盘卡片状态展示）
-- [ ] 修复：系统设置 - 存储空间管理（页面为空）
+- [x] 修复：系统设置 - 存储空间管理（页面空白）
 - [ ] 修复：公共文件管理（页面为空）
 - [ ] 验证修复效果
 
@@ -18,40 +18,36 @@
 - [x] 我的文件页面修复完成，已截图验证
 - [x] 网络访问页面修复完成，已截图验证
 - [x] 设备管理页面修复完成，已截图验证
+- [x] 存储空间管理页面修复完成，已截图验证
 
-## 已修复问题（设备管理）
+## 已修复问题（存储空间管理）
 
-| 问题 | 修复文件 | 修复内容 |
-|------|---------|---------|
-| CPU 显示型号而非核数 | `DeviceInfoHero.vue` | `cpuModel` → `cpuCores`，展示 "16 核" |
-| 设备信息与示意图间距 | `device/index.vue` | 添加 `diagram-section { margin-top: 16px }` |
-| CPU/内存图表为自定义SVG | `ResourceUsageCard.vue` | 改用 `vue-echarts` + ECharts `LineChart` |
-| 磁盘健康状态显示"未知" | `DiskCard.vue` | `disk.health` → `disk.healthStatus` |
-| 磁盘容量不显示 | `DiskCard.vue` | `disk.capacity` → `disk.size` |
-| 存储池全部"未分配" | `DiskCard.vue` | `disk.pools` → `disk.poolIds` |
+**根因**：组件拆分后 Vue API 导入丢失，导致运行时 `ReferenceError`，整个页面渲染失败。
+
+| 文件 | 问题 | 修复 |
+|------|------|------|
+| `volumes/index.vue` | 使用 `h()` 但未导入 | `import { h } from 'vue'` |
+| `components/CreateVolumeModal.vue` | 使用 `ref()`、`nextTick()` 但未导入 | `import { nextTick, ref } from 'vue'` |
+| `components/RenameVolumeModal.vue` | 使用 `ref()`、`nextTick()` 但未导入 | `import { nextTick, ref } from 'vue'` |
+
+## 截图验证
+- 修复前：`screenshots/volumes-current.png`（完全空白）
+- 修复后：`screenshots/volumes-verify-1.png`（正常显示存储池卡片和概览栏）
 
 ## 关键文件
 
 | 文件 | 说明 |
 |------|------|
-| `apps/web-antd/src/views/system/device/components/DeviceInfoHero.vue` | 设备信息 Hero 卡片 |
-| `apps/web-antd/src/views/system/device/components/ResourceUsageCard.vue` | CPU/内存资源卡片（ECharts 折线图） |
-| `apps/web-antd/src/views/system/device/components/DiskCard.vue` | 磁盘信息卡片 |
-| `apps/web-antd/src/views/system/device/index.vue` | 设备管理主页面 |
-
-## 截图验证
-- 修复后截图：`screenshots/device-verify-1.png`（设备信息 Hero）
-- 修复后截图：`screenshots/device-verify-2.png`（CPU/内存 ECharts 图表）
-- 修复后截图：`screenshots/device-verify-3.png`（磁盘卡片状态）
+| `apps/web-antd/src/views/storage/volumes/index.vue` | 主页面 |
+| `apps/web-antd/src/views/storage/volumes/components/CreateVolumeModal.vue` | 创建存储空间弹窗 |
+| `apps/web-antd/src/views/storage/volumes/components/RenameVolumeModal.vue` | 重命名弹窗 |
 
 ## 待修复页面
-1. 系统设置 - 存储空间管理（页面为空）
-2. 公共文件管理（页面为空）
+1. 公共文件管理（页面为空）
 
 ## 上下文恢复检查点
 - 最后修改的文件：
-  - `apps/web-antd/src/views/system/device/components/DeviceInfoHero.vue`
-  - `apps/web-antd/src/views/system/device/components/ResourceUsageCard.vue`
-  - `apps/web-antd/src/views/system/device/components/DiskCard.vue`
-  - `apps/web-antd/src/views/system/device/index.vue`
-- 最后确认的状态：设备管理页面3项问题全部修复，截图验证通过
+  - `apps/web-antd/src/views/storage/volumes/index.vue`
+  - `apps/web-antd/src/views/storage/volumes/components/CreateVolumeModal.vue`
+  - `apps/web-antd/src/views/storage/volumes/components/RenameVolumeModal.vue`
+- 最后确认的状态：存储空间管理页面从空白恢复为正常显示
