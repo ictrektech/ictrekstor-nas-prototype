@@ -1,16 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import {
-  Tag,
-  Tooltip,
-  message,
-  Modal,
-  Form,
-  Input,
-  Button,
-} from 'ant-design-vue';
-import { IconifyIcon } from '@vben/icons';
+import { message } from 'ant-design-vue';
 import {
   FileTreePanel,
   FileManagerPanel,
@@ -21,20 +12,17 @@ import {
   findParentKeys,
   findNodeInTree,
 } from '#/components/FileExplorer';
+import RenameModal from '#/components/common/RenameModal.vue';
+import DeviceInfoHeader from './components/DeviceInfoHeader.vue';
+import TransferConfirmModal from './components/TransferConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-// ═══════════════════════════════════════════════════════════
 // 当前设备 ID
-// ═══════════════════════════════════════════════════════════
-
 const deviceId = computed(() => route.params.deviceId as string);
 
-// ═══════════════════════════════════════════════════════════
 // 设备信息
-// ═══════════════════════════════════════════════════════════
-
 interface ExternalDevice {
   id: string;
   name: string;
@@ -98,45 +86,13 @@ const currentDevice = computed(() =>
   devices.value.find((d) => d.id === deviceId.value),
 );
 
-// ═══════════════════════════════════════════════════════════
-// 设备图标
-// ═══════════════════════════════════════════════════════════
-
-function getDeviceIcon(type: string): string {
-  // 所有外接设备统一使用 U盘 图标
-  return 'lucide:usb';
-}
-
-function getDeviceIconColor(type: string): string {
-  // 所有外接设备统一使用 U盘 蓝色
-  return '#1677ff';
-}
-
-function getDeviceTypeLabel(type: string): string {
-  switch (type) {
-    case 'usb': return 'U盘';
-    case 'hdd': return '移动硬盘';
-    case 'ssd': return '移动SSD';
-    case 'sd': return 'SD卡';
-    default: return '未知';
-  }
-}
-
-function getCapacityColor(percent: number): string {
-  if (percent >= 90) return '#ff4d4f';
-  if (percent >= 70) return '#faad14';
-  return '#1677ff';
-}
-
-// ═══════════════════════════════════════════════════════════
-// 目录树
-// ═══════════════════════════════════════════════════════════
-
+// 设备节点类型
 function getDeviceNodeType(device: ExternalDevice): string {
   if (device.status === 'disconnected') return 'device-disconnected';
   return `device-${device.type}`;
 }
 
+// 目录树
 const treeData = computed<FileTreeNode[]>(() => {
   const device = currentDevice.value;
   if (!device) return [];
@@ -190,10 +146,7 @@ const treeData = computed<FileTreeNode[]>(() => {
   ];
 });
 
-// ═══════════════════════════════════════════════════════════
 // Mock 文件数据
-// ═══════════════════════════════════════════════════════════
-
 const deviceFilesData: Record<string, FileItem[]> = {
   'usb-1:root': [
     { id: 'u1-d1', name: '文档', type: 'folder', size: '--', modifyTime: '2025-05-06 10:30:00' },
@@ -282,10 +235,7 @@ const deviceFilesData: Record<string, FileItem[]> = {
   ],
 };
 
-// ═══════════════════════════════════════════════════════════
-// 本地存储目录树（用于双栏传输）
-// ═══════════════════════════════════════════════════════════
-
+// 本地存储目录树
 const localTree: FileTreeNode[] = [
   {
     key: 'local:root',
@@ -363,13 +313,8 @@ const localFiles: Record<string, FileItem[]> = {
   ],
 };
 
-// ═══════════════════════════════════════════════════════════
 // 状态
-// ═══════════════════════════════════════════════════════════
-
 const showLocalPanel = ref(false);
-
-// 外接设备面板状态
 const selectedKeys = ref<string[]>(['root']);
 const expandedKeys = ref<string[]>(['root']);
 const files = ref<FileItem[]>([]);
@@ -377,7 +322,6 @@ const searchText = ref('');
 const viewMode = ref<'list' | 'grid'>('list');
 const loading = ref(false);
 
-// 本地面板状态
 const localTreeData = ref<FileTreeNode[]>(localTree);
 const localSelectedKeys = ref<string[]>(['local:root']);
 const localExpandedKeys = ref<string[]>(['local:root']);
@@ -386,7 +330,6 @@ const localSearchText = ref('');
 const localViewMode = ref<'list' | 'grid'>('list');
 const localLoading = ref(false);
 
-// 树状面板引用（用于外部控制收起/展开）
 const deviceTreeRef = ref<InstanceType<typeof FileTreePanel> | null>(null);
 const localTreeRef = ref<InstanceType<typeof FileTreePanel> | null>(null);
 
@@ -397,16 +340,12 @@ const transferDirection = ref<'to-local' | 'to-device'>('to-local');
 
 // 重命名
 const renameModalVisible = ref(false);
-const renameFormRef = ref();
-const renameForm = ref({ name: '' });
+const renameFileName = ref('');
 const editingFile = ref<FileItem | null>(null);
 
 const filesMap = ref<Record<string, FileItem[]>>(JSON.parse(JSON.stringify(deviceFilesData)));
 
-// ═══════════════════════════════════════════════════════════
 // 计算属性
-// ═══════════════════════════════════════════════════════════
-
 const breadcrumbPath = computed(() => {
   const key = selectedKeys.value[0];
   if (!key || key === 'root') {
@@ -421,13 +360,9 @@ const localBreadcrumbPath = computed(() => {
   return buildBreadcrumbPath(localTreeData.value, key, '本地存储', 'local:root');
 });
 
-// ═══════════════════════════════════════════════════════════
 // 方法
-// ═══════════════════════════════════════════════════════════
-
 function loadFiles(key: string) {
   if (key === 'root') {
-    // 根节点显示设备根目录文件
     const device = currentDevice.value;
     if (!device) {
       files.value = [];
@@ -509,7 +444,6 @@ function handleLocalOpenFolder(file: FileItem) {
   }
 }
 
-/** 在树中查找子节点的 key */
 function findChildKey(nodes: FileTreeNode[], parentKey: string, childName: string): string | null {
   const parent = findNodeInTree(nodes, parentKey);
   if (parent?.children) {
@@ -519,19 +453,18 @@ function findChildKey(nodes: FileTreeNode[], parentKey: string, childName: strin
   return null;
 }
 
-// ═══ 拖拽传输 ═══
-
-function onDeviceDrop(files: FileItem[], _event: DragEvent) {
-  if (files.length === 0) return;
-  const file = files[0];
+// 拖拽传输
+function onDeviceDrop(droppedFiles: FileItem[]) {
+  if (droppedFiles.length === 0) return;
+  const file = droppedFiles[0];
   transferFileName.value = file.name;
   transferDirection.value = 'to-device';
   transferModalVisible.value = true;
 }
 
-function onLocalDrop(files: FileItem[], _event: DragEvent) {
-  if (files.length === 0) return;
-  const file = files[0];
+function onLocalDrop(droppedFiles: FileItem[]) {
+  if (droppedFiles.length === 0) return;
+  const file = droppedFiles[0];
   transferFileName.value = file.name;
   transferDirection.value = 'to-local';
   transferModalVisible.value = true;
@@ -571,26 +504,22 @@ function confirmTransfer() {
   }
 }
 
-// ═══ 重命名 ═══
-
+// 重命名
 function openRenameModal(file: FileItem) {
   editingFile.value = file;
-  renameForm.value = { name: file.name };
+  renameFileName.value = file.name;
   renameModalVisible.value = true;
 }
 
-function handleRename() {
-  renameFormRef.value?.validate().then(() => {
-    if (editingFile.value) {
-      editingFile.value.name = renameForm.value.name;
-      message.success('重命名成功');
-    }
-    renameModalVisible.value = false;
-  }).catch(() => {});
+function handleRename(newName: string) {
+  if (editingFile.value) {
+    editingFile.value.name = newName;
+    message.success('重命名成功');
+  }
+  renameModalVisible.value = false;
 }
 
-// ═══ 删除 ═══
-
+// 删除
 function handleDeleteFile(file: FileItem) {
   message.success(`"${file.name}" 已删除`);
   files.value = files.value.filter((f) => f.id !== file.id);
@@ -601,8 +530,7 @@ function handleDeleteLocalFile(file: FileItem) {
   localFilesList.value = localFilesList.value.filter((f) => f.id !== file.id);
 }
 
-// ═══ 刷新 ═══
-
+// 刷新
 function refreshFiles() {
   loadFiles(selectedKeys.value[0]);
   message.success('已刷新');
@@ -613,13 +541,10 @@ function refreshLocal() {
   message.success('已刷新');
 }
 
-// ═══ 树节点图标 ═══
-
+// 树节点图标
 function nodeIconResolver(node: FileTreeNode) {
   const device = currentDevice.value;
   if (!device) return { icon: 'lucide:usb', color: '#1677ff' };
-
-  // 所有外接设备节点统一使用 U盘 图标和蓝色
   if (node.type?.startsWith('device-')) {
     if (node.type === 'device-disconnected') {
       return { icon: 'lucide:usb', color: '#bfbfbf' };
@@ -636,39 +561,29 @@ function localNodeIconResolver(node: FileTreeNode) {
   return { icon: 'lucide:folder', color: '#faad14' };
 }
 
-// ═══ 返回列表 ═══
-
+// 返回列表
 function goBack() {
   router.push('/file/external-device');
 }
 
-// ═══ 拷贝模式切换 ═══
-
-/** 切换双栏拷贝模式 */
+// 拷贝模式切换
 function toggleCopyMode() {
   showLocalPanel.value = !showLocalPanel.value;
 }
 
-// 监听拷贝模式变化，自动切换树状视图侧边栏状态
 watch(showLocalPanel, (val) => {
   if (val) {
-    // 进入拷贝模式：两侧树状视图切换为悬浮收起模式
     deviceTreeRef.value?.setPin?.(false);
     deviceTreeRef.value?.collapse?.();
     localTreeRef.value?.setPin?.(false);
     localTreeRef.value?.collapse?.();
   } else {
-    // 退出拷贝模式：恢复为固定展开模式
     deviceTreeRef.value?.setPin?.(true);
     deviceTreeRef.value?.expand?.();
     localTreeRef.value?.setPin?.(true);
     localTreeRef.value?.expand?.();
   }
 });
-
-// ═══════════════════════════════════════════════════════════
-// 初始化
-// ═══════════════════════════════════════════════════════════
 
 onMounted(() => {
   loadFiles('root');
@@ -678,90 +593,15 @@ onMounted(() => {
 
 <template>
   <div class="external-device-manage">
-    <!-- ═══════ 统一头部栏（两行布局） ═══════ -->
-    <div class="unified-header">
-      <!-- 第一行：页面描述与状态信息 -->
-      <div class="unified-header__row">
-        <div class="unified-header__left">
-          <div class="device-info">
-            <div class="device-info__icon">
-              <IconifyIcon
-                :icon="getDeviceIcon(currentDevice?.type || 'usb')"
-                style="font-size: 18px;"
-                :style="{ color: getDeviceIconColor(currentDevice?.type || 'usb') }"
-              />
-            </div>
-            <div class="device-info__text">
-              <div class="device-info__name">{{ currentDevice?.name || '外接设备' }}</div>
-              <div class="device-info__meta">
-                <span class="meta-tag">{{ getDeviceTypeLabel(currentDevice?.type || 'usb') }}</span>
-                <span class="meta-sep">·</span>
-                <span>{{ currentDevice?.fileSystem }}</span>
-                <span class="meta-sep">·</span>
-                <span>{{ currentDevice?.capacity }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="header-divider" />
-          <div
-            class="connection-badge"
-            :class="{ 'connection-badge--connected': currentDevice?.status === 'connected' }"
-          >
-            <span class="connection-badge__dot" />
-            <span class="connection-badge__text">
-              {{ currentDevice?.status === 'connected' ? '已连接' : '未连接' }}
-            </span>
-          </div>
-        </div>
+    <!-- 统一头部栏 -->
+    <DeviceInfoHeader
+      :device="currentDevice"
+      :show-copy-mode="showLocalPanel"
+      @back="goBack"
+      @toggle-copy-mode="toggleCopyMode"
+    />
 
-        <!-- 右侧：容量概览 -->
-        <div class="unified-header__right-stats">
-          <div class="stat-chip">
-            <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
-            <div class="stat-chip__content">
-              <span class="stat-chip__label">总容量</span>
-              <span class="stat-chip__value">{{ currentDevice?.capacity || '-' }}</span>
-            </div>
-          </div>
-          <div class="stat-chip">
-            <IconifyIcon icon="lucide:database" style="font-size: 14px; color: #52c41a;" />
-            <div class="stat-chip__content">
-              <span class="stat-chip__label">已用</span>
-              <span class="stat-chip__value">{{ currentDevice?.used || '-' }}</span>
-            </div>
-          </div>
-          <div class="stat-chip">
-            <IconifyIcon icon="lucide:percent" style="font-size: 14px; color: #faad14;" />
-            <div class="stat-chip__content">
-              <span class="stat-chip__label">使用率</span>
-              <span class="stat-chip__value">{{ currentDevice?.usedPercent ?? 0 }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 第二行：操作按钮 -->
-      <div class="unified-header__row">
-        <Button size="small" class="back-btn" @click="goBack">
-          <IconifyIcon icon="lucide:arrow-left" style="font-size: 14px;" />
-          返回外接设备列表
-        </Button>
-
-        <button
-          class="copy-mode-toggle"
-          :class="{ 'copy-mode-toggle--active': showLocalPanel }"
-          @click="toggleCopyMode"
-        >
-          <IconifyIcon
-            :icon="showLocalPanel ? 'lucide:folder-x' : 'lucide:folder-sync'"
-            style="font-size: 14px;"
-          />
-          <span>{{ showLocalPanel ? '退出拷贝' : '文件拷贝' }}</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- ═══════ 双栏文件管理器 ═══════ -->
+    <!-- 双栏文件管理器 -->
     <div class="dual-panel" :class="{ 'dual-panel--single': !showLocalPanel }">
       <!-- 左侧：外接设备 -->
       <div class="panel-wrapper panel-wrapper--device">
@@ -833,54 +673,21 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- ═══════ 传输确认弹窗 ═══════ -->
-    <Modal
-      v-model:open="transferModalVisible"
-      :title="transferDirection === 'to-local' ? '传输确认' : '传输确认'"
-      width="420px"
-      @ok="confirmTransfer"
-      ok-text="确认传输"
-      cancel-text="取消"
-    >
-      <div class="transfer-modal-content">
-        <div class="transfer-modal-icon">
-          <IconifyIcon icon="lucide:arrow-left-right" style="font-size: 32px; color: #1677ff;" />
-        </div>
-        <div class="transfer-modal-info">
-          <p class="transfer-modal-file">
-            <IconifyIcon icon="lucide:file" style="font-size: 14px; color: #8c8c8c;" />
-            <span>{{ transferFileName }}</span>
-          </p>
-          <p class="transfer-modal-direction">
-            <span v-if="transferDirection === 'to-local'">
-              将传输到 <strong>本地存储</strong>
-            </span>
-            <span v-else>
-              将传输到 <strong>{{ currentDevice?.name }}</strong>
-            </span>
-          </p>
-        </div>
-      </div>
-    </Modal>
+    <!-- 传输确认弹窗 -->
+    <TransferConfirmModal
+      v-model:visible="transferModalVisible"
+      :file-name="transferFileName"
+      :direction="transferDirection"
+      :target-name="currentDevice?.name || '外接设备'"
+      @confirm="confirmTransfer"
+    />
 
-    <!-- ═══════ 重命名弹窗 ═══════ -->
-    <Modal
-      v-model:open="renameModalVisible"
-      title="重命名"
-      width="400px"
-      @ok="handleRename"
-    >
-      <Form
-        ref="renameFormRef"
-        :model="renameForm"
-        layout="vertical"
-        :rules="{ name: [{ required: true, message: '请输入名称', trigger: 'blur' }] }"
-      >
-        <Form.Item label="新名称" name="name">
-          <Input v-model:value="renameForm.name" placeholder="请输入新名称" />
-        </Form.Item>
-      </Form>
-    </Modal>
+    <!-- 重命名弹窗（复用全局组件） -->
+    <RenameModal
+      v-model:visible="renameModalVisible"
+      :name="renameFileName"
+      @confirm="handleRename"
+    />
   </div>
 </template>
 
@@ -893,225 +700,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   统一头部栏（两行布局）
-   ═══════════════════════════════════════════════════════════ */
-.unified-header {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.unified-header__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-/* 左侧：设备信息 + 连接状态 */
-.unified-header__left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 6px;
-}
-
-.header-divider {
-  width: 1px;
-  height: 24px;
-  background: #e8e8e8;
-  flex-shrink: 0;
-}
-
-.device-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.device-info__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #e6f4ff 0%, #d6e8ff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.device-info__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.device-info__name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #262626;
-  line-height: 1.3;
-}
-
-.device-info__meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #8c8c8c;
-}
-
-.meta-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 8px;
-  background: #f0f5ff;
-  border-radius: 10px;
-  font-size: 11px;
-  color: #1677ff;
-  font-weight: 500;
-}
-
-.meta-sep {
-  color: #d9d9d9;
-}
-
-/* 右侧：容量概览统计 */
-.unified-header__right-stats {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.stat-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-}
-
-.stat-chip:hover {
-  background: #f0f5ff;
-  border-color: #bae0ff;
-}
-
-.stat-chip__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.stat-chip__label {
-  font-size: 10px;
-  color: #8c8c8c;
-  line-height: 1.3;
-}
-
-.stat-chip__value {
-  font-size: 14px;
-  font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  line-height: 1.3;
-}
-
-
-/* 右侧：连接状态 + 拷贝模式 */
-.unified-header__right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.connection-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  background: #f5f5f5;
-  border-radius: 20px;
-  font-size: 12px;
-  color: #8c8c8c;
-  transition: all 0.2s ease;
-}
-
-.connection-badge--connected {
-  background: #f6ffed;
-  color: #52c41a;
-}
-
-.connection-badge__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #bfbfbf;
-  flex-shrink: 0;
-}
-
-.connection-badge--connected .connection-badge__dot {
-  background: #52c41a;
-  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
-}
-
-/* 拷贝模式切换按钮 */
-.copy-mode-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #595959;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: inherit;
-  outline: none;
-}
-
-.copy-mode-toggle:hover {
-  background: #f0f5ff;
-  border-color: #bae0ff;
-  color: #1677ff;
-}
-
-.copy-mode-toggle--active {
-  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
-  border-color: #1677ff;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
-}
-
-.copy-mode-toggle--active:hover {
-  background: linear-gradient(135deg, #0958d9 0%, #1677ff 100%);
-  border-color: #0958d9;
-  color: #fff;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   双栏布局
-   ═══════════════════════════════════════════════════════════ */
+/* 双栏布局 */
 .dual-panel {
   display: flex;
   flex: 1;
@@ -1158,61 +747,7 @@ onMounted(() => {
   display: block;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   传输弹窗
-   ═══════════════════════════════════════════════════════════ */
-.transfer-modal-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 0;
-}
-
-.transfer-modal-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #e6f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.transfer-modal-info {
-  text-align: center;
-}
-
-.transfer-modal-file {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0 0 8px;
-}
-
-.transfer-modal-direction {
-  font-size: 13px;
-  color: #595959;
-  margin: 0;
-}
-
-.transfer-modal-direction strong {
-  color: #1677ff;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   响应式
-   ═══════════════════════════════════════════════════════════ */
-@media (max-width: 1200px) {
-  .unified-header__center {
-    display: none;
-  }
-}
-
+/* 响应式 */
 @media (max-width: 1024px) {
   .dual-panel {
     flex-direction: column;
@@ -1233,20 +768,6 @@ onMounted(() => {
     min-width: auto !important;
     max-height: 200px;
     border-radius: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .unified-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 14px;
-  }
-
-  .unified-header__right {
-    width: 100%;
-    justify-content: space-between;
   }
 }
 </style>
