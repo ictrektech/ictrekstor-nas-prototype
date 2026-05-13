@@ -51,6 +51,21 @@ npm install -g chrome-devtools-mcp@latest
 
 ```
 
+## 如何上传到公网托管页面
+
+首先进行构建：
+```
+pnpm run build:antd
+```
+
+然后将构建结果上传，按提示输入密码：
+```
+scp -r ./apps/web-antd/dist/* ictrek@192.168.1.199:/home/ictrek/release-build/vst/ictrekstor-nas-prototype/
+```
+
+随后可以公网访问：
+http://117.139.166.210:1080/vos-release/vst/ictrekstor-nas-prototype/index.html
+
 ## TIPS
 
 - vscode 在 windows 下使用 cline 时，务必确保在 cline 的 Terminal 设置中：
