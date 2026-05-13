@@ -1,22 +1,25 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { Empty, message, Modal } from 'ant-design-vue';
+import { Button, Empty, message, Modal } from 'ant-design-vue';
 import { computed, h, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { getStoragePoolsApi, getStorageVolumesApi } from '#/api/storage';
+import { getDisksApi, getStoragePoolsApi, getStorageVolumesApi } from '#/api/storage';
+import type { DiskInfo } from '#/api/storage';
 
 import ConfigUserModal from './components/ConfigUserModal.vue';
+import CreatePoolModal from './components/CreatePoolModal.vue';
 import CreateVolumeModal from './components/CreateVolumeModal.vue';
 import PoolCard from './components/PoolCard.vue';
 import RenameVolumeModal from './components/RenameVolumeModal.vue';
 import VolumeNestCard from './components/VolumeNestCard.vue';
 import VolumeOverview from './components/VolumeOverview.vue';
-import type { StoragePool, StorageVolume, VolumeCreateForm } from './types';
+import type { PoolCreateForm, StoragePool, StorageVolume, VolumeCreateForm } from './types';
 
 const router = useRouter();
 const items = ref<StorageVolume[]>([]);
 const pools = ref<StoragePool[]>([]);
+const availableDisks = ref<DiskInfo[]>([]);
 const loading = ref(false);
 
 // ═══════ 按存储池分组的卷 ═══════
@@ -74,6 +77,8 @@ const overviewStats = computed(() => {
 // ═══════ 弹窗状态 ═══════
 const createVisible = ref(false);
 const createLoading = ref(false);
+const createPoolVisible = ref(false);
+const createPoolLoading = ref(false);
 const configVisible = ref(false);
 const configVolumeName = ref('');
 const renameVisible = ref(false);
@@ -84,12 +89,17 @@ onMounted(() => loadData());
 async function loadData() {
   loading.value = true;
   try {
-    const [volumesRes, poolsRes] = await Promise.all([
+    const [volumesRes, poolsRes, disksRes] = await Promise.all([
       getStorageVolumesApi(),
       getStoragePoolsApi(),
+      getDisksApi(),
     ]);
     items.value = volumesRes;
     pools.value = poolsRes;
+    // 过滤出未使用的磁盘（usageStatus 为 "未使用" 或 isUsed 为 "否"）
+    availableDisks.value = disksRes.filter(
+      (d) => d.usageStatus === '未使用' || d.isUsed === '否',
+    );
   } catch (e) {
     message.error('加载数据失败');
   } finally {
@@ -112,8 +122,18 @@ function openCreateModal() {
   createVisible.value = true;
 }
 
-function openCreateModalForPool(_poolId: string) {
-  createVisible.value = true;
+function openCreatePoolModal() {
+  createPoolVisible.value = true;
+}
+
+function handleCreatePool(values: PoolCreateForm) {
+  createPoolLoading.value = true;
+  setTimeout(() => {
+    createPoolLoading.value = false;
+    createPoolVisible.value = false;
+    message.success(`存储池 "${values.name}" 创建成功`);
+    loadData();
+  }, 1000);
 }
 
 // ═══════ 存储池操作 ═══════
@@ -194,6 +214,20 @@ function handleDeleteVolume(vol: StorageVolume) {
         <div class="page-title-area">
           <h1 class="page-title">存储空间管理</h1>
           <p class="page-desc">管理基于存储池或目录的存储空间分配与使用</p>
+          <div class="header-actions">
+            <Button type="primary" size="small" @click="openCreatePoolModal">
+              <template #icon>
+                <IconifyIcon icon="lucide:database" />
+              </template>
+              创建存储池
+            </Button>
+            <Button size="small" @click="openCreateModal">
+              <template #icon>
+                <IconifyIcon icon="lucide:plus" />
+              </template>
+              创建存储空间
+            </Button>
+          </div>
         </div>
       </div>
       <div class="page-header-right">
@@ -231,14 +265,6 @@ function handleDeleteVolume(vol: StorageVolume) {
             <span>存储空间</span>
             <span class="volumes-count">{{ getVolumesByPool(pool.id).length }}</span>
           </div>
-          <a-button
-            size="small"
-            class="create-volume-inline-btn"
-            @click="openCreateModalForPool(pool.id)"
-          >
-            <IconifyIcon icon="lucide:plus" style="font-size: 12px;" />
-            创建存储空间
-          </a-button>
         </div>
 
         <!-- 该池下的存储空间卡片 -->
@@ -283,14 +309,6 @@ function handleDeleteVolume(vol: StorageVolume) {
             <span>存储空间</span>
             <span class="volumes-count">{{ directoryVolumes.length }}</span>
           </div>
-          <a-button
-            size="small"
-            class="create-volume-inline-btn"
-            @click="openCreateModal"
-          >
-            <IconifyIcon icon="lucide:plus" style="font-size: 12px;" />
-            创建存储空间
-          </a-button>
         </div>
 
         <!-- 目录下的存储空间卡片 -->
@@ -313,15 +331,21 @@ function handleDeleteVolume(vol: StorageVolume) {
         :image="h('div', { class: 'empty-image' }, h(IconifyIcon, { icon: 'lucide:database', style: 'font-size: 64px; color: #d9d9d9;' }))"
         description="暂无存储空间"
       >
-        <a-button type="primary" size="small" @click="openCreateModal">
+        <Button type="primary" size="small" @click="openCreateModal">
           <IconifyIcon icon="lucide:plus" style="font-size: 14px;" />
           立即创建
-        </a-button>
+        </Button>
       </Empty>
     </div>
   </div>
 
   <!-- 弹窗 -->
+  <CreatePoolModal
+    v-model:visible="createPoolVisible"
+    :loading="createPoolLoading"
+    :available-disks="availableDisks"
+    @submit="handleCreatePool"
+  />
   <CreateVolumeModal
     v-model:visible="createVisible"
     :pools="pools"
@@ -384,6 +408,13 @@ function handleDeleteVolume(vol: StorageVolume) {
   font-size: 12px;
   color: #8c8c8c;
   margin: 2px 0 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .page-header-right {

@@ -13,6 +13,13 @@ export interface VolumeCreateForm {
   description: string;
 }
 
+export interface PoolCreateForm {
+  name: string;
+  raidType: string;
+  description: string;
+  diskIds: string[];
+}
+
 /* ═══════ 容量计算工具 ═══════ */
 export function getUsagePercent(used: string, total: string): number {
   const parseSize = (s: string): number => {
