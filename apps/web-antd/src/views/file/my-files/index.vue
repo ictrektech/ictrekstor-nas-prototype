@@ -1,20 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  message,
-  Dropdown,
-  Menu,
-  Checkbox,
-  Radio as AntRadio,
-  Tree,
-  DatePicker,
-  Select,
-  Divider,
-} from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import {
   FileTreePanel,
@@ -24,6 +10,10 @@ import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
 import { findParentKeys, findNodeInTree } from '#/components/FileExplorer';
 import { ShareConfigModal } from '#/components/ShareConfigModal';
 import type { ShareFormData } from '#/components/ShareConfigModal';
+import RenameModal from '#/components/common/RenameModal.vue';
+import FilePageHeader from './components/FilePageHeader.vue';
+import TargetDirModal from './components/TargetDirModal.vue';
+import NewFolderModal from './components/NewFolderModal.vue';
 
 // ─── 页面级扩展类型 ───
 interface MyFileItem extends FileItem {
@@ -31,8 +21,6 @@ interface MyFileItem extends FileItem {
 }
 
 // ─── Mock 树数据 ───
-// 直接展示存储空间，去除顶层"存储空间级别"
-// 增加大深度目录结构用于测试路径滚动效果
 const mockTree: FileTreeNode[] = [
   {
     key: 'space-1',
@@ -140,7 +128,6 @@ const mockTree: FileTreeNode[] = [
 
 // ─── Mock 文件数据 ───
 const mockFiles: Record<string, MyFileItem[]> = {
-  // 存储空间
   'space-1': [
     { id: 'f-1', name: '文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
     { id: 'f-2', name: '图片', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
@@ -161,7 +148,6 @@ const mockFiles: Record<string, MyFileItem[]> = {
   'space-1/videos': [
     { id: 'v1', name: '产品介绍.mp4', type: 'file', size: '256 MB', modifyTime: '2024-04-20 14:00:00', extension: 'mp4' },
   ],
-  // 深层目录 mock 数据
   'space-1/docs/2024': [
     { id: 'd24-1', name: '第一季度', type: 'folder', size: '--', modifyTime: '2024-01-15 09:00:00' },
     { id: 'd24-2', name: '第二季度', type: 'folder', size: '--', modifyTime: '2024-04-01 09:00:00' },
@@ -220,8 +206,6 @@ const mockFiles: Record<string, MyFileItem[]> = {
   'space-2/download': [
     { id: 'dl1', name: 'setup.exe', type: 'file', size: '45 MB', modifyTime: '2024-01-15 09:00:00', extension: 'exe' },
   ],
-
-  // 团队文件
   'tf-1': [
     { id: 'tf1-d1', name: '项目文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
     { id: 'tf1-d2', name: '会议纪要', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
@@ -262,8 +246,6 @@ const mockFiles: Record<string, MyFileItem[]> = {
     { id: 'tt1', name: '增值税.xlsx', type: 'file', size: '180 KB', modifyTime: '2024-04-15 09:00:00', extension: 'xlsx' },
     { id: 'tt2', name: '个税申报.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-04-10 10:00:00', extension: 'pdf' },
   ],
-
-  // 他人共享文件
   'zs-share1': [
     { id: 'zs1-f1', name: '项目计划书.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-05-06 10:30:00', extension: 'pdf', isShared: true },
     { id: 'zs1-f2', name: '设计规范.docx', type: 'file', size: '856 KB', modifyTime: '2024-05-05 14:20:00', extension: 'docx', isShared: true },
@@ -285,8 +267,6 @@ const mockFiles: Record<string, MyFileItem[]> = {
     { id: 'ww1-f1', name: '周会-20240501.mp3', type: 'file', size: '45 MB', modifyTime: '2024-05-01 12:00:00', extension: 'mp3', isShared: true },
     { id: 'ww1-f2', name: '周会-20240508.mp3', type: 'file', size: '52 MB', modifyTime: '2024-05-08 12:00:00', extension: 'mp3', isShared: true },
   ],
-
-  // 回收站
 };
 
 // ─── 状态 ───
@@ -299,25 +279,12 @@ const viewMode = ref<'list' | 'grid'>('list');
 const currentFiles = ref<MyFileItem[]>([]);
 const selectedFileIds = ref<string[]>([]);
 
-// 重命名
+// 重命名（复用全局组件）
 const renameModalVisible = ref(false);
-const renameFormRef = ref();
-const renameForm = ref({ name: '' });
+const renameFileName = ref('');
 const editingFile = ref<MyFileItem | null>(null);
 
-// 移动到
-const moveModalVisible = ref(false);
-const moveTarget = ref('');
-
-// ═══ 新建文件夹 ═══
-const newFolderModalVisible = ref(false);
-const newFolderFormRef = ref();
-const newFolderForm = ref({ name: '' });
-
-// ═══ 上传文件 ═══
-const uploadInputRef = ref<HTMLInputElement | null>(null);
-
-// ═══ 目标目录选择弹窗（复制/移动共用）═══
+// 目标目录选择弹窗（复制/移动共用）
 const targetDirModalVisible = ref(false);
 const targetDirModalTitle = ref('选择目标目录');
 const targetDirAction = ref<'copy' | 'move'>('copy');
@@ -325,11 +292,26 @@ const targetDirSelectedKeys = ref<string[]>([]);
 const targetDirExpandedKeys = ref<string[]>([]);
 const targetDirPendingFiles = ref<MyFileItem[]>([]);
 
-// 统一的目标目录树数据（我的文件 + 公共文件 + 他人分享）
+// 共享设置
+const shareModalVisible = ref(false);
+
+// 新建文件夹
+const newFolderModalVisible = ref(false);
+
+// 上传
+const uploadInputRef = ref<HTMLInputElement | null>(null);
+
+// 用户选项
+const userOptions = [
+  { label: 'zhangsan', value: 'zhangsan' },
+  { label: 'lisi', value: 'lisi' },
+  { label: 'wangwu', value: 'wangwu' },
+  { label: 'admin', value: 'admin' },
+];
+
+// 目标目录树数据
 const targetDirTreeData = computed<FileTreeNode[]>(() => {
-  // 复用 mockTree（我的文件）作为基础，添加顶层分类
-  const myFilesNodes = mockTree.map(n => ({ ...n }));
-  // 公共文件 mock 数据
+  const myFilesNodes = mockTree.map((n) => ({ ...n }));
   const publicFilesNodes: FileTreeNode[] = [
     {
       key: 'pub-docs',
@@ -355,7 +337,6 @@ const targetDirTreeData = computed<FileTreeNode[]>(() => {
       isLeaf: true,
     },
   ];
-  // 他人分享 mock 数据
   const sharedFromOthersNodes: FileTreeNode[] = [
     {
       key: 'zs-share',
@@ -385,90 +366,17 @@ const targetDirTreeData = computed<FileTreeNode[]>(() => {
     },
   ];
   return [
-    {
-      key: 'root-my-files',
-      title: '我的文件',
-      type: 'category',
-      children: myFilesNodes,
-    },
-    {
-      key: 'root-public',
-      title: '公共文件',
-      type: 'category',
-      children: publicFilesNodes,
-    },
-    {
-      key: 'root-shared',
-      title: '他人分享',
-      type: 'category',
-      children: sharedFromOthersNodes,
-    },
+    { key: 'root-my-files', title: '我的文件', type: 'category', children: myFilesNodes },
+    { key: 'root-public', title: '公共文件', type: 'category', children: publicFilesNodes },
+    { key: 'root-shared', title: '他人分享', type: 'category', children: sharedFromOthersNodes },
   ];
 });
 
-// 目标目录树节点图标解析
-function targetDirIconResolver(node: FileTreeNode) {
-  switch (node.type) {
-    case 'category':
-      if (node.key === 'root-my-files') return { icon: 'lucide:user', color: '#1677ff' };
-      if (node.key === 'root-public') return { icon: 'lucide:folder-heart', color: '#fa8c16' };
-      if (node.key === 'root-shared') return { icon: 'lucide:share-2', color: '#722ed1' };
-      return { icon: 'lucide:folder-kanban', color: '#595959' };
-    case 'space':
-      return { icon: 'lucide:hard-drive', color: '#1677ff' };
-    case 'public-folder':
-      return { icon: 'lucide:folder-heart', color: '#fa8c16' };
-    case 'shared-user':
-      return { icon: 'lucide:user-circle', color: '#722ed1' };
-    case 'shared-folder':
-      return { icon: 'lucide:folder-symlink', color: '#a855f7' };
-    case 'folder':
-    case 'subfolder':
-      return { icon: 'lucide:folder-open', color: '#faad14' };
-    default:
-      return { icon: 'lucide:folder', color: '#faad14' };
-  }
-}
-
-// 用户选项（MOCK）
-const userOptions = [
-  { label: 'zhangsan', value: 'zhangsan' },
-  { label: 'lisi', value: 'lisi' },
-  { label: 'wangwu', value: 'wangwu' },
-  { label: 'admin', value: 'admin' },
-];
-
-// 共享设置（入口一：选中文件夹后分享）
-const shareModalVisible = ref(false);
-
-// 移动目标选项（所有叶子/文件夹节点）
-const folderOptions = computed(() => {
-  const opts: { label: string; value: string }[] = [];
-  function walk(nodes: FileTreeNode[], prefix: string) {
-    for (const n of nodes) {
-      const label = prefix ? `${prefix} / ${n.title}` : n.title;
-      if (n.children) {
-        walk(n.children, label);
-      }
-      // 允许作为移动目标的节点
-      if (n.type !== 'shared-user') {
-        opts.push({ label, value: n.key });
-      }
-    }
-  }
-  walk(treeData.value, '');
-  return opts;
-});
-
 // ─── 计算属性 ───
-
-/** 自定义面包屑路径 */
 const breadcrumbPath = computed(() => {
   const key = selectedKeys.value[0];
   if (!key) return [{ title: '我的文件', key: 'root' }];
-
   const parts: { title: string; key: string }[] = [{ title: '我的文件', key: 'root' }];
-
   function findPath(
     nodes: FileTreeNode[],
     target: string,
@@ -480,36 +388,31 @@ const breadcrumbPath = computed(() => {
         return true;
       }
       if (node.children) {
-        const res = findPath(node.children, target, [
-          ...current,
-          { title: node.title, key: node.key },
-        ]);
+        const res = findPath(node.children, target, [...current, { title: node.title, key: node.key }]);
         if (res) return true;
       }
     }
     return false;
   }
-
   findPath(treeData.value, key, []);
   return parts;
 });
 
-/** 概览统计 */
 const overviewStats = computed(() => {
   const spaces = treeData.value.length;
   const folders = treeData.value.reduce((sum, s) => sum + (s.children?.length || 0), 0);
   let fileCount = 0;
-  Object.values(mockFiles).forEach(list => {
-    list.forEach(f => { if (f.type === 'file') fileCount++; });
+  Object.values(mockFiles).forEach((list) => {
+    list.forEach((f) => {
+      if (f.type === 'file') fileCount++;
+    });
   });
   return { spaces, folders, files: fileCount };
 });
 
-/** 当前是否为回收站 */
 const isTrash = computed(() => selectedKeys.value[0] === 'trash');
 
 // ─── 方法 ───
-
 function loadFiles(key: string) {
   loading.value = true;
   setTimeout(() => {
@@ -517,10 +420,9 @@ function loadFiles(key: string) {
     if (direct) {
       currentFiles.value = direct;
     } else {
-      // 若选中分类/中间节点，展示其子节点作为文件夹入口
       const node = findNodeInTree(treeData.value, key);
       if (node?.children) {
-        currentFiles.value = node.children.map(child => ({
+        currentFiles.value = node.children.map((child) => ({
           id: child.key,
           name: child.title,
           type: 'folder' as const,
@@ -567,52 +469,35 @@ function refresh() {
   message.success('已刷新');
 }
 
-// ─── 文件操作 ───
-
 function handleDownload(file: MyFileItem) {
   message.success(`开始下载：${file.name}`);
 }
 
 function openRenameModal(file: MyFileItem) {
   editingFile.value = file;
-  renameForm.value = { name: file.name };
+  renameFileName.value = file.name;
   renameModalVisible.value = true;
 }
 
-function handleRename() {
-  renameFormRef.value?.validate().then(() => {
-    if (editingFile.value) {
-      editingFile.value.name = renameForm.value.name;
-      message.success('重命名成功');
-    }
-    renameModalVisible.value = false;
-  }).catch(() => {});
-}
-
-function openMoveModal(file: MyFileItem) {
-  editingFile.value = file;
-  moveTarget.value = '';
-  moveModalVisible.value = true;
-}
-
-function handleMove() {
-  if (!moveTarget.value || !editingFile.value) return;
-  message.success(`"${editingFile.value.name}" 已移动`);
-  currentFiles.value = currentFiles.value.filter(f => f.id !== editingFile.value!.id);
-  moveModalVisible.value = false;
+function handleRename(newName: string) {
+  if (editingFile.value) {
+    editingFile.value.name = newName;
+    message.success('重命名成功');
+  }
+  renameModalVisible.value = false;
 }
 
 function handleDeleteFile(file: MyFileItem) {
   message.success(`"${file.name}" 已删除`);
-  currentFiles.value = currentFiles.value.filter(f => f.id !== file.id);
-  selectedFileIds.value = selectedFileIds.value.filter(id => id !== file.id);
+  currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+  selectedFileIds.value = selectedFileIds.value.filter((id) => id !== file.id);
 }
 
 function handleBatchDelete(files: MyFileItem[]) {
-  const names = files.map(f => f.name).join('、');
+  const names = files.map((f) => f.name).join('、');
   message.success(`已删除 ${files.length} 个文件：${names}`);
-  const idsToRemove = new Set(files.map(f => f.id));
-  currentFiles.value = currentFiles.value.filter(f => !idsToRemove.has(f.id));
+  const idsToRemove = new Set(files.map((f) => f.id));
+  currentFiles.value = currentFiles.value.filter((f) => !idsToRemove.has(f.id));
   selectedFileIds.value = [];
 }
 
@@ -625,22 +510,14 @@ function handleSaveShare(data: ShareFormData) {
   if (!editingFile.value) return;
   editingFile.value.isShared = true;
   const names = data.shareUsers.map((u) => u.user).join('、') || '无';
-  const permissions = data.shareUsers.map((u) =>
-    u.permission === 'readonly' ? '只读' : '读写'
-  );
-  // 如果有多个用户且权限一致，简写；否则列出每个用户的权限
-  const permText = permissions.length > 0
-    ? (new Set(permissions).size === 1 ? permissions[0] : permissions.join('、'))
-    : '只读';
-  message.success(
-    `已将「${editingFile.value.name}」分享给 ${names}，权限：${permText}`,
-  );
+  const permissions = data.shareUsers.map((u) => (u.permission === 'readonly' ? '只读' : '读写'));
+  const permText =
+    permissions.length > 0 ? (new Set(permissions).size === 1 ? permissions[0] : permissions.join('、')) : '只读';
+  message.success(`已将「${editingFile.value.name}」分享给 ${names}，权限：${permText}`);
   shareModalVisible.value = false;
 }
 
-// ═══ 复制 / 移动：目标目录弹窗逻辑 ═══
-
-/** 打开目标目录选择弹窗 */
+// 复制/移动：目标目录弹窗
 function openTargetDirModal(action: 'copy' | 'move', files: MyFileItem[]) {
   targetDirAction.value = action;
   targetDirModalTitle.value = action === 'copy' ? '复制到' : '移动到';
@@ -650,7 +527,6 @@ function openTargetDirModal(action: 'copy' | 'move', files: MyFileItem[]) {
   targetDirModalVisible.value = true;
 }
 
-/** 处理单文件右键复制/移动 */
 function handleCopyFile(file: MyFileItem) {
   openTargetDirModal('copy', [file]);
 }
@@ -659,7 +535,6 @@ function handleMoveFile(file: MyFileItem) {
   openTargetDirModal('move', [file]);
 }
 
-/** 处理批量复制/移动 */
 function handleBatchCopy(files: MyFileItem[]) {
   openTargetDirModal('copy', files);
 }
@@ -668,16 +543,6 @@ function handleBatchMove(files: MyFileItem[]) {
   openTargetDirModal('move', files);
 }
 
-/** 目标目录树选择事件 */
-function onTargetDirSelect(keys: string[]) {
-  targetDirSelectedKeys.value = keys;
-}
-
-function onTargetDirExpand(keys: string[]) {
-  targetDirExpandedKeys.value = keys;
-}
-
-/** 确认复制/移动 */
 function handleTargetDirConfirm() {
   const targetKey = targetDirSelectedKeys.value[0];
   if (!targetKey) {
@@ -686,7 +551,7 @@ function handleTargetDirConfirm() {
   }
   const action = targetDirAction.value;
   const files = targetDirPendingFiles.value;
-  const names = files.map(f => f.name).join('、');
+  const names = files.map((f) => f.name).join('、');
   const targetNode = findNodeInTree(targetDirTreeData.value, targetKey);
   const targetName = targetNode?.title || targetKey;
 
@@ -694,28 +559,74 @@ function handleTargetDirConfirm() {
     message.success(`已将 ${files.length} 个文件复制到「${targetName}」：${names}`);
   } else {
     message.success(`已将 ${files.length} 个文件移动到「${targetName}」：${names}`);
-    // 从当前列表移除（移动时才移除）
-    const idsToRemove = new Set(files.map(f => f.id));
-    currentFiles.value = currentFiles.value.filter(f => !idsToRemove.has(f.id));
+    const idsToRemove = new Set(files.map((f) => f.id));
+    currentFiles.value = currentFiles.value.filter((f) => !idsToRemove.has(f.id));
     selectedFileIds.value = [];
   }
   targetDirModalVisible.value = false;
 }
 
-// ─── 树节点图标 ───
+// 新建文件夹
+function handleCreateFolder(name: string) {
+  if (!name) {
+    message.warning('请输入文件夹名称');
+    return;
+  }
+  const newFolder: MyFileItem = {
+    id: `folder-${Date.now()}`,
+    name,
+    type: 'folder',
+    size: '--',
+    modifyTime: new Date()
+      .toLocaleString('zh-CN', { hour12: false })
+      .replace(/\//g, '-'),
+  };
+  currentFiles.value.unshift(newFolder);
+  message.success(`文件夹「${name}」创建成功`);
+}
+
+// 上传
+function handleUploadClick() {
+  uploadInputRef.value?.click();
+}
+
+function handleFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  if (!files || files.length === 0) return;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const sizeStr =
+      file.size > 1024 * 1024
+        ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+        : `${(file.size / 1024).toFixed(1)} KB`;
+    const ext = file.name.split('.').pop() || '';
+
+    const newFile: MyFileItem = {
+      id: `upload-${Date.now()}-${i}`,
+      name: file.name,
+      type: 'file',
+      size: sizeStr,
+      modifyTime: new Date()
+        .toLocaleString('zh-CN', { hour12: false })
+        .replace(/\//g, '-'),
+      extension: ext,
+    };
+    currentFiles.value.unshift(newFile);
+  }
+
+  message.success(`已上传 ${files.length} 个文件`);
+  input.value = '';
+}
+
+// 树节点图标
 function nodeIconResolver(node: FileTreeNode) {
   switch (node.type) {
     case 'category':
-      // 根据分类 key 返回对应图标
-      if (node.key === 'spaces') {
-        return { icon: 'lucide:database', color: '#1677ff' };
-      }
-      if (node.key === 'team') {
-        return { icon: 'lucide:users', color: '#fa8c16' };
-      }
-      if (node.key === 'shared-from-others') {
-        return { icon: 'lucide:share-2', color: '#722ed1' };
-      }
+      if (node.key === 'spaces') return { icon: 'lucide:database', color: '#1677ff' };
+      if (node.key === 'team') return { icon: 'lucide:users', color: '#fa8c16' };
+      if (node.key === 'shared-from-others') return { icon: 'lucide:share-2', color: '#722ed1' };
       return { icon: 'lucide:folder-kanban', color: '#595959' };
     case 'space':
       return { icon: 'lucide:hard-drive', color: '#1677ff' };
@@ -732,65 +643,6 @@ function nodeIconResolver(node: FileTreeNode) {
   }
 }
 
-// ═══ 新建文件夹 / 上传文件 ═══
-
-function openNewFolderModal() {
-  newFolderForm.value = { name: '' };
-  newFolderModalVisible.value = true;
-}
-
-function handleCreateFolder() {
-  newFolderFormRef.value?.validate().then(() => {
-    const name = newFolderForm.value.name.trim();
-    if (!name) {
-      message.warning('请输入文件夹名称');
-      return;
-    }
-    // 模拟创建文件夹：添加到当前文件列表
-    const newFolder: MyFileItem = {
-      id: `folder-${Date.now()}`,
-      name,
-      type: 'folder',
-      size: '--',
-      modifyTime: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
-    };
-    currentFiles.value.unshift(newFolder);
-    message.success(`文件夹「${name}」创建成功`);
-    newFolderModalVisible.value = false;
-  }).catch(() => {});
-}
-
-function handleUploadClick() {
-  uploadInputRef.value?.click();
-}
-
-function handleFileSelected(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const files = input.files;
-  if (!files || files.length === 0) return;
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const sizeStr = file.size > 1024 * 1024
-      ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
-      : `${(file.size / 1024).toFixed(1)} KB`;
-    const ext = file.name.split('.').pop() || '';
-
-    const newFile: MyFileItem = {
-      id: `upload-${Date.now()}-${i}`,
-      name: file.name,
-      type: 'file',
-      size: sizeStr,
-      modifyTime: new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-'),
-      extension: ext,
-    };
-    currentFiles.value.unshift(newFile);
-  }
-
-  message.success(`已上传 ${files.length} 个文件`);
-  input.value = ''; // 清空以便重复选择同一文件
-}
-
 onMounted(() => {
   loadFiles('space-1');
 });
@@ -798,31 +650,11 @@ onMounted(() => {
 
 <template>
   <div class="file-manager-page">
-    <!-- ═══════ 页面顶部概览 ═══════ -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">我的文件</h1>
-          <p class="page-desc">普通用户所能访问到的所有文件资源</p>
-        </div>
-      </div>
-      <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
-          <div class="overview-info">
-            <span class="overview-label">存储空间</span>
-            <span class="overview-value">{{ overviewStats.spaces }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 页面顶部概览 -->
+    <FilePageHeader :spaces="overviewStats.spaces" />
 
-    <!-- ═══════ 主体区域 ═══════ -->
+    <!-- 主体区域 -->
     <div class="fm-body">
-      <!-- 左侧目录树 -->
       <FileTreePanel
         :tree-data="treeData"
         v-model:selected-keys="selectedKeys"
@@ -830,8 +662,6 @@ onMounted(() => {
         :node-icon-resolver="nodeIconResolver"
         @select="onSelectTree"
       />
-
-      <!-- 右侧文件区域 -->
       <FileManagerPanel
         :files="currentFiles"
         :breadcrumb-path="breadcrumbPath"
@@ -852,75 +682,19 @@ onMounted(() => {
         @move="handleMoveFile"
         @batch-copy="handleBatchCopy"
         @batch-move="handleBatchMove"
-        @new-folder="openNewFolderModal"
+        @new-folder="newFolderModalVisible = true"
         @upload="handleUploadClick"
       />
     </div>
 
-    <!-- ═══════ 重命名弹窗 ═══════ -->
-    <Modal
-      v-model:open="renameModalVisible"
-      title="重命名"
-      width="400px"
-      @ok="handleRename"
-    >
-      <Form
-        ref="renameFormRef"
-        :model="renameForm"
-        layout="vertical"
-        :rules="{ name: [{ required: true, message: '请输入名称', trigger: 'blur' }] }"
-      >
-        <Form.Item label="新名称" name="name">
-          <Input v-model:value="renameForm.name" placeholder="请输入新名称" />
-        </Form.Item>
-      </Form>
-    </Modal>
+    <!-- 重命名弹窗（复用全局组件） -->
+    <RenameModal
+      v-model:visible="renameModalVisible"
+      :name="renameFileName"
+      @confirm="handleRename"
+    />
 
-    <!-- ═══════ 移动到弹窗 ═══════ -->
-    <Modal
-      v-model:open="moveModalVisible"
-      title="移动到"
-      width="400px"
-      @ok="handleMove"
-    >
-      <Form layout="vertical">
-        <Form.Item label="目标文件夹">
-          <div class="move-folder-list">
-            <div
-              v-for="opt in folderOptions"
-              :key="opt.value"
-              class="move-folder-item"
-              :class="{ active: moveTarget === opt.value }"
-              @click="moveTarget = opt.value"
-            >
-              <IconifyIcon icon="lucide:folder" style="font-size: 13px; color: #bfbfbf; margin-right: 6px;" />
-              {{ opt.label }}
-            </div>
-          </div>
-        </Form.Item>
-      </Form>
-    </Modal>
-
-    <!-- ═══════ 新建文件夹弹窗 ═══════ -->
-    <Modal
-      v-model:open="newFolderModalVisible"
-      title="新建文件夹"
-      width="400px"
-      @ok="handleCreateFolder"
-    >
-      <Form
-        ref="newFolderFormRef"
-        :model="newFolderForm"
-        layout="vertical"
-        :rules="{ name: [{ required: true, message: '请输入文件夹名称', trigger: 'blur' }] }"
-      >
-        <Form.Item label="文件夹名称" name="name">
-          <Input v-model:value="newFolderForm.name" placeholder="请输入文件夹名称" />
-        </Form.Item>
-      </Form>
-    </Modal>
-
-    <!-- ═══════ 分享弹窗（入口一：选中文件夹后分享）═══════ -->
+    <!-- 分享弹窗 -->
     <ShareConfigModal
       v-model:visible="shareModalVisible"
       :title="`分享 - ${editingFile?.name || ''}`"
@@ -930,42 +704,25 @@ onMounted(() => {
       @ok="handleSaveShare"
     />
 
-    <!-- ═══════ 目标目录选择弹窗（复制/移动共用）═══════ -->
-    <Modal
-      v-model:open="targetDirModalVisible"
+    <!-- 目标目录选择弹窗 -->
+    <TargetDirModal
+      v-model:visible="targetDirModalVisible"
       :title="targetDirModalTitle"
-      width="480px"
-      @ok="handleTargetDirConfirm"
-    >
-      <div class="target-dir-tree-wrap">
-        <Tree
-          :tree-data="targetDirTreeData"
-          :selected-keys="targetDirSelectedKeys"
-          :expanded-keys="targetDirExpandedKeys"
-          :field-names="{ title: 'title', key: 'key', children: 'children' }"
-          @update:selected-keys="onTargetDirSelect"
-          @update:expanded-keys="onTargetDirExpand"
-          class="target-dir-tree"
-          :show-line="{ showLeafIcon: false }"
-        >
-          <template #title="node">
-            <span class="tree-node-title">
-              <IconifyIcon
-                :icon="targetDirIconResolver(node).icon"
-                :style="{ fontSize: '14px', color: targetDirIconResolver(node).color, marginRight: '6px', flexShrink: 0 }"
-              />
-              <span class="tree-node-text" :title="node.title">{{ node.title }}</span>
-            </span>
-          </template>
-        </Tree>
-      </div>
-      <div v-if="targetDirPendingFiles.length > 0" class="target-dir-pending">
-        <span class="target-dir-pending-label">待{{ targetDirAction === 'copy' ? '复制' : '移动' }}文件：</span>
-        <span class="target-dir-pending-names">{{ targetDirPendingFiles.map(f => f.name).join('、') }}</span>
-      </div>
-    </Modal>
+      :tree-data="targetDirTreeData"
+      v-model:selected-keys="targetDirSelectedKeys"
+      v-model:expanded-keys="targetDirExpandedKeys"
+      :pending-files="targetDirPendingFiles"
+      :action="targetDirAction"
+      @confirm="handleTargetDirConfirm"
+    />
 
-    <!-- ═══════ 隐藏的文件上传 input ═══════ -->
+    <!-- 新建文件夹弹窗 -->
+    <NewFolderModal
+      v-model:visible="newFolderModalVisible"
+      @confirm="handleCreateFolder"
+    />
+
+    <!-- 隐藏的文件上传 input -->
     <input
       ref="uploadInputRef"
       type="file"
@@ -984,84 +741,6 @@ onMounted(() => {
   background: #f5f5f5;
 }
 
-/* ═══ 页面顶部概览 ═══ */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  gap: 16px;
-  flex-shrink: 0;
-}
-
-.page-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.page-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #e6f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin: 2px 0 0;
-}
-
-.page-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
-}
-
-.overview-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-}
-
-/* ═══ 主体区域 ═══ */
 .fm-body {
   display: flex;
   flex: 1;
@@ -1070,165 +749,10 @@ onMounted(() => {
   gap: 12px;
 }
 
-/* ═══ 自定义操作列 ═══ */
-.custom-actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-:deep(.ant-table-tbody > tr:hover) .custom-actions {
-  opacity: 1;
-}
-
-.action-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-}
-
-.menu-item-inner {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.menu-item-danger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #ff4d4f;
-}
-
-/* 修复 Dropdown Menu danger 项 hover 颜色 */
-:global(.ant-dropdown-menu-item-danger:hover) {
-  color: #ff4d4f !important;
-  background: #fff1f0 !important;
-}
-
-:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-title-content) {
-  color: #ff4d4f !important;
-}
-
-/* ═══ 移动文件夹列表 ═══ */
-.move-folder-list {
-  max-height: 240px;
-  overflow-y: auto;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
-}
-
-.move-folder-item {
-  display: flex;
-  align-items: center;
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  color: #262626;
-  transition: background 0.2s;
-}
-
-.move-folder-item:hover {
-  background: #f5f5f5;
-}
-
-.move-folder-item.active {
-  background: #e6f7ff;
-  color: #1677ff;
-}
-
-/* ═══ 分享弹窗 ═══ */
-.radio-with-icon {
-  display: inline-flex;
-  align-items: center;
-  font-size: 13px;
-}
-
-.share-expire-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ═══ 共享链接 ═══ */
-.share-link-row {
-  display: flex;
-  gap: 8px;
-}
-
-.share-link-row :deep(.ant-input) {
-  flex: 1;
-}
-
-/* ═══ 目标目录选择弹窗样式 ═══ */
-.target-dir-tree-wrap {
-  max-height: 320px;
-  overflow: auto;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
-  padding: 8px;
-}
-
-.target-dir-tree :deep(.ant-tree-treenode) {
-  padding: 2px 0;
-}
-
-.target-dir-tree :deep(.ant-tree-node-content-wrapper) {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 6px;
-  transition: all 0.2s;
-  padding: 4px 8px;
-}
-
-.target-dir-tree :deep(.ant-tree-node-content-wrapper:hover) {
-  background: #f0f5ff;
-}
-
-.target-dir-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
-  background: #e6f4ff !important;
-  color: #1677ff;
-  font-weight: 500;
-}
-
-.target-dir-tree .tree-node-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.target-dir-tree .tree-node-text {
-  white-space: nowrap;
-}
-
-.target-dir-pending {
-  margin-top: 12px;
-  padding: 8px 12px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.target-dir-pending-label {
-  color: #52c41a;
-  font-weight: 500;
-}
-
-.target-dir-pending-names {
-  color: #262626;
-}
-
-/* ═══ 响应式 ═══ */
+/* 响应式 */
 @media (max-width: 768px) {
-  .page-header {
+  .fm-body {
     flex-direction: column;
-    align-items: flex-start;
   }
 }
 </style>
