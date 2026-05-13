@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Tree } from 'ant-design-vue';
+import { Modal, Tree } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import type { FileTreeNode } from '#/components/FileExplorer';
 

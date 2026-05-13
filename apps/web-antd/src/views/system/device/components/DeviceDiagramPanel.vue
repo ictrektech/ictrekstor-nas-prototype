@@ -15,7 +15,8 @@ const emit = defineEmits<{
   locate: [deviceName: string];
 }>();
 
-const diagramRef = ref<InstanceType<typeof DeviceDiagram> | null>(null);
+const frontRef = ref<InstanceType<typeof DeviceDiagram> | null>(null);
+const rearRef = ref<InstanceType<typeof DeviceDiagram> | null>(null);
 
 function handleSelect(disk: DiskInfo | null) {
   emit('select', disk);
@@ -26,7 +27,7 @@ function handleLocate(deviceName: string) {
 }
 
 defineExpose({
-  highlightBay: (name: string) => diagramRef.value?.highlightBay?.(name),
+  highlightBay: (name: string) => frontRef.value?.highlightBay?.(name),
 });
 </script>
 
@@ -40,13 +41,36 @@ defineExpose({
       <span class="diagram-hint">点击插槽可查看对应硬盘信息</span>
     </div>
     <div class="diagram-panels">
-      <DeviceDiagram
-        ref="diagramRef"
-        :disks="disks"
-        :selected-disk="selectedDisk"
-        @select="handleSelect"
-        @locate="handleLocate"
-      />
+      <!-- 前面板 -->
+      <div class="diagram-panel">
+        <div class="diagram-panel-label">
+          <IconifyIcon icon="lucide:square" style="font-size: 12px; color: #8c8c8c;" />
+          前面板
+        </div>
+        <DeviceDiagram
+          ref="frontRef"
+          :disks="disks"
+          :selected-disk="selectedDisk"
+          mode="front"
+          @select="handleSelect"
+          @locate="handleLocate"
+        />
+      </div>
+      <!-- 后面板 -->
+      <div class="diagram-panel">
+        <div class="diagram-panel-label">
+          <IconifyIcon icon="lucide:square" style="font-size: 12px; color: #8c8c8c;" />
+          后面板
+        </div>
+        <DeviceDiagram
+          ref="rearRef"
+          :disks="disks"
+          :selected-disk="selectedDisk"
+          mode="rear"
+          @select="handleSelect"
+          @locate="handleLocate"
+        />
+      </div>
     </div>
   </Card>
 </template>

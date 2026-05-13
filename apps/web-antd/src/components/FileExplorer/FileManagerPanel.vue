@@ -178,7 +178,9 @@ function onDrop(event: DragEvent) {
     <div class="fmp-body" @click.stop>
       <FileListView v-if="viewMode === 'list'" :files="sortedFiles" :loading="loading"
         :selected-ids="selectedFileIds" :draggable="draggable" :mode="mode" :empty-description="emptyDescription"
-        @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart" />
+        @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart"
+        @rename="$emit('rename', $event)" @delete-file="$emit('deleteFile', $event)" @restore="$emit('restore', $event)"
+        @share="$emit('share', $event)" @copy="$emit('copy', $event)" @move="$emit('move', $event)" />
       <FileGridView v-else :files="sortedFiles" :loading="loading" :selected-ids="selectedFileIds"
         :draggable="draggable" :mode="mode" :empty-description="emptyDescription"
         @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart" />

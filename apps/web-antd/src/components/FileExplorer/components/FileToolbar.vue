@@ -189,15 +189,71 @@ const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
 </template>
 
 <style scoped>
-.file-toolbar { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+.file-toolbar { display: flex; flex-direction: column; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f5f5f5; flex-shrink: 0; }
 .toolbar-path-row { display: flex; align-items: center; gap: 12px; min-height: 28px; }
 .toolbar-panel-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #262626; flex-shrink: 0; }
-.toolbar-breadcrumb-scroll { flex: 1; overflow-x: auto; }
-.toolbar-breadcrumb-inner { white-space: nowrap; }
-.toolbar-breadcrumb { font-size: 13px; }
-.breadcrumb-link { color: #1677ff; cursor: pointer; }
-.breadcrumb-link:hover { text-decoration: underline; }
-.breadcrumb-current { color: #262626; font-weight: 500; }
+.toolbar-breadcrumb-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.toolbar-breadcrumb-scroll::-webkit-scrollbar {
+  display: none;
+}
+.toolbar-breadcrumb-inner {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #f6f8fb 0%, #f0f3f8 100%);
+  border: 1px solid #e8ecf2;
+  border-radius: 20px;
+  padding: 3px 14px;
+  gap: 2px;
+}
+.toolbar-breadcrumb {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.toolbar-breadcrumb :deep(.ant-breadcrumb-link) {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.toolbar-breadcrumb :deep(.ant-breadcrumb-separator) {
+  color: #c0c8d5;
+  margin: 0 4px;
+  font-size: 11px;
+}
+.toolbar-breadcrumb :deep(.ant-breadcrumb-item) {
+  display: inline-flex;
+  align-items: center;
+}
+.breadcrumb-link {
+  color: #4e7ac8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.breadcrumb-link:hover {
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  text-decoration: none;
+}
+.breadcrumb-current {
+  color: #1a2b4c;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: rgba(22, 119, 255, 0.1);
+  border: 1px solid rgba(22, 119, 255, 0.15);
+}
 .toolbar-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .batch-bar { display: flex; align-items: center; gap: 12px; }
 .batch-bar__text { font-size: 13px; color: #595959; }
@@ -208,4 +264,10 @@ const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
 .toolbar-actions { display: flex; align-items: center; gap: 8px; }
 .toolbar-search { width: 200px; }
 .toolbar-view-toggle { display: flex; }
+.toolbar-view-toggle :deep(.ant-radio-button-wrapper) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
 </style>
