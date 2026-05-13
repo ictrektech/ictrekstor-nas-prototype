@@ -1,7 +1,13 @@
 <script lang="ts" setup>
-import { Tag, Button, Tooltip } from 'ant-design-vue';
+import type { DiskInfo, StoragePool } from '@/api/storage';
+import { Button, Tag, Tooltip } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
-import type { DiskInfo, StoragePool } from '#/api/storage';
+import {
+  getStatusDot,
+  getHealthBadgeColor,
+  getDeviceIcon,
+  getDeviceIconColor,
+} from './diskUtils';
 
 const props = defineProps<{
   disk: DiskInfo;
@@ -18,42 +24,6 @@ const emit = defineEmits<{
   (e: 'go-pool', poolId: string): void;
   (e: 'go-detail', disk: DiskInfo): void;
 }>();
-
-function getStatusDot(status: string): string {
-  switch (status) {
-    case '运行中':
-      return '#52c41a';
-    case '休眠':
-      return '#faad14';
-    default:
-      return '#bfbfbf';
-  }
-}
-
-function getHealthBadgeColor(health?: string): string {
-  switch (health) {
-    case '正常':
-      return '#52c41a';
-    case '警告':
-      return '#faad14';
-    case '异常':
-      return '#ff4d4f';
-    default:
-      return '#8c8c8c';
-  }
-}
-
-function getDeviceIcon(deviceType?: string): string {
-  if (deviceType?.includes('SSD')) return 'lucide:cpu';
-  if (deviceType?.includes('NVMe')) return 'lucide:zap';
-  return 'lucide:hard-drive';
-}
-
-function getDeviceIconColor(deviceType?: string): string {
-  if (deviceType?.includes('SSD')) return '#722ed1';
-  if (deviceType?.includes('NVMe')) return '#eb2f96';
-  return '#1677ff';
-}
 </script>
 
 <template>
