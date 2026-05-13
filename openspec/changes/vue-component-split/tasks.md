@@ -8,23 +8,23 @@
 ## Phase 0: 基础设施（前置准备）
 
 ### Task 0.1 创建通用工具函数
-- [ ] 创建 `apps/web-antd/src/utils/format.ts`
+- [x] 创建 `apps/web-antd/src/utils/format.ts`
   - 迁移 `formatSpeed`、`formatBytes`、`parseCapacity`（来自 system/device）
-- [ ] 创建 `apps/web-antd/src/utils/svgChart.ts`
+- [x] 创建 `apps/web-antd/src/utils/svgChart.ts`
   - 迁移 `generateLinePath`、`generateAreaPath`（来自 system/device）
-- [ ] 创建 `apps/web-antd/src/utils/treeIcons.ts`
+- [x] 创建 `apps/web-antd/src/utils/treeIcons.ts`
   - 迁移 `treeNodeIconResolver`（来自 FileTreePanel / ShareConfigModal）
 
 ### Task 0.2 创建组合式函数
-- [ ] 创建 `apps/web-antd/src/composables/useResizePanel.ts`
+- [x] 创建 `apps/web-antd/src/composables/useResizePanel.ts`
   - 提取 FileTreePanel 中的拖拽调整大小逻辑
-- [ ] 创建 `apps/web-antd/src/composables/useFileIcons.ts`
+- [x] 创建 `apps/web-antd/src/composables/useFileIcons.ts`
   - 统一文件图标映射逻辑
 
 ### Task 0.3 创建全局复用基础组件
-- [ ] 创建 `apps/web-antd/src/components/common/RenameModal.vue`
+- [x] 创建 `apps/web-antd/src/components/common/RenameModal.vue`
   - 合并 all-files/detail 和 external-device/manage 中的重命名弹窗
-- [ ] 创建 `apps/web-antd/src/components/common/SvgMiniChart.vue`
+- [x] 创建 `apps/web-antd/src/components/common/SvgMiniChart.vue`
   - 提取 system/device 中的 SVG 迷你折线图
 
 ---
@@ -46,12 +46,12 @@ views/system/device/
 ```
 
 **步骤**：
-1. [ ] 创建 `DeviceHeroCard.vue`：设备头像、名称、标签、芯片信息
-2. [ ] 创建 `ResourceMonitorCard.vue`：CPU/内存通用监控卡片
-3. [ ] 创建 `DiskGrid.vue`：硬盘卡片网格 + 操作
-4. [ ] 创建 `NetworkGrid.vue`：网卡卡片网格 + 配置触发
-5. [ ] 创建 `NetworkConfigModal.vue`：IPv4/掩码/网关/DNS/MTU 表单
-6. [ ] 重构 `index.vue`：移除所有内联代码，引用子组件
+1. [x] 创建 `DeviceHeroCard.vue`：设备头像、名称、标签、芯片信息
+2. [x] 创建 `ResourceMonitorCard.vue`：CPU/内存通用监控卡片
+3. [x] 创建 `DiskGrid.vue`：硬盘卡片网格 + 操作
+4. [x] 创建 `NetworkGrid.vue`：网卡卡片网格 + 配置触发
+5. [x] 创建 `NetworkConfigModal.vue`：IPv4/掩码/网关/DNS/MTU 表单
+6. [x] 重构 `index.vue`：移除所有内联代码，引用子组件
 
 ### Task 1.2 拆分 `file/shared-files/index.vue` (1695行)
 **目标文件结构**：
@@ -65,10 +65,10 @@ views/file/shared-files/
 ```
 
 **步骤**：
-1. [ ] 创建 `ShareList.vue`：分享数据表格/列表
-2. [ ] 创建 `ShareListItem.vue`：单个分享项展示
-3. [ ] 创建 `CreateShareModal.vue`：复用 `ShareConfigModal` 并扩展
-4. [ ] 重构 `index.vue`：移除所有内联代码，引用子组件
+1. [x] 创建 `ShareList.vue`：分享数据表格/列表
+2. [x] 创建 `ShareListItem.vue`：单个分享项展示
+3. [x] 创建 `CreateShareModal.vue`：复用 `ShareConfigModal` 并扩展
+4. [x] 重构 `index.vue`：移除所有内联代码，引用子组件
 
 ### Task 1.3 拆分 `storage/volumes/index.vue` (1498行)
 **目标文件结构**：
@@ -84,12 +84,12 @@ views/storage/volumes/
 ```
 
 **步骤**：
-1. [ ] 创建 `VolumeStatsCards.vue`：容量/健康状态统计
-2. [ ] 创建 `StoragePoolCard.vue`：存储池卡片
-3. [ ] 创建 `VolumeCard.vue`：存储卷卡片
-4. [ ] 创建 `CreateVolumeModal.vue`：创建卷表单
-5. [ ] 创建 `ExtendVolumeModal.vue`：扩容表单
-6. [ ] 重构 `index.vue`：移除所有内联代码，引用子组件
+1. [x] 创建 `VolumeStatsCards.vue` → 实际拆分为 `VolumeOverview.vue`
+2. [x] 创建 `StoragePoolCard.vue` → 实际拆分为 `PoolCard.vue`
+3. [x] 创建 `VolumeCard.vue` → 实际拆分为 `VolumeNestCard.vue`
+4. [x] 创建 `CreateVolumeModal.vue`：创建卷表单
+5. [x] 额外拆分 `ConfigUserModal.vue`、`RenameVolumeModal.vue`
+6. [x] 重构 `index.vue`：移除所有内联代码，引用子组件
 
 ### Task 1.4 拆分 `FileExplorer/FileManagerPanel.vue` (1387行)
 **目标文件结构**：
@@ -106,13 +106,12 @@ components/FileExplorer/
 ```
 
 **步骤**：
-1. [ ] 创建 `FileToolbar.vue`：上传/新建/刷新等操作栏
-2. [ ] 创建 `FileBreadcrumb.vue`：路径面包屑
-3. [ ] 创建 `FileListView.vue`：列表视图表格
-4. [ ] 创建 `FileGridView.vue`：网格视图卡片
-5. [ ] 创建 `FileContextMenu.vue`：右键操作菜单
-6. [ ] 创建 `FileQuickPreview.vue`：文件快速预览
-7. [ ] 重构 `FileManagerPanel.vue`：移除所有内联代码
+1. [x] 创建 `FileToolbar.vue`：路径面包屑 + 搜索 + 批量操作 + 视图切换
+2. [x] 创建 `FileListView.vue`：列表视图表格
+3. [x] 创建 `FileGridView.vue`：网格视图卡片
+4. [x] 创建 `FileContextMenu.vue`：右键操作菜单
+5. [x] 重构 `FileManagerPanel.vue`：从 1387 行缩减至约 230 行
+6. [x] 保留原有 Props/Emits 接口，调用方无需修改
 
 ---
 
@@ -196,8 +195,8 @@ views/file/network/
 - [ ] 重构 `DeviceDiagram.vue` ≤180行
 
 ### Task 3.3 拆分 `components/ShareConfigModal/index.vue` (704行)
-- [ ] 创建 `FolderInfoCard.vue`、`ShareUserList.vue`、`ExpireSelector.vue`、`ExternalLinkPanel.vue`
-- [ ] 重构 `index.vue` ≤200行
+- [x] 创建 `FolderInfoCard.vue`、`ShareUserList.vue`、`ExpireSelector.vue`、`ExternalLinkPanel.vue`
+- [x] 重构 `index.vue` ≤200行
 
 ### Task 3.4 拆分 `storage/pools/detail.vue` (686行)
 - [ ] 创建 `PoolBasicInfo.vue`、`PoolDiskList.vue`、`PoolPerformanceChart.vue`
@@ -340,7 +339,7 @@ Phase 3 (P2)
     │
     ├── Task 3.1 (disks/detail) ──→ 独立
     ├── Task 3.2 (DeviceDiagram) ─→ 独立
-    ├── Task 3.3 (ShareConfigModal) → 被 Task 1.2, 2.3 依赖（应在 Phase 1 前或同时完成）
+    ├── Task 3.3 (ShareConfigModal) → 被 Task 1.2, 2.3 依赖（已在 Phase 1 前完成）
     ├── Task 3.4 (pools/detail) ──→ 独立
     ├── Task 3.5 (team-files) ────→ 独立
     └── Task 3.6 (ext-dev/index) ─→ 独立
