@@ -1,5 +1,7 @@
-import { baseRequestClient, requestClient } from '#/api/request';
-
+/**
+ * 认证相关 API — 原型环境 mock 实现
+ * 所有请求直接返回模拟数据，不发送真实 HTTP 请求
+ */
 export namespace AuthApi {
   /** 登录接口参数 */
   export interface LoginParams {
@@ -22,30 +24,35 @@ export namespace AuthApi {
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams) {
-  return requestClient.post<AuthApi.LoginResult>('/auth/login', data);
+  console.log('[MOCK] loginApi called with', data);
+  return {
+    accessToken: 'mock-access-token-for-prototype',
+  } as AuthApi.LoginResult;
 }
 
 /**
  * 刷新accessToken
  */
 export async function refreshTokenApi() {
-  return baseRequestClient.post<AuthApi.RefreshTokenResult>('/auth/refresh', {
-    withCredentials: true,
-  });
+  console.log('[MOCK] refreshTokenApi called');
+  return {
+    data: 'mock-refreshed-token-for-prototype',
+    status: 200,
+  } as AuthApi.RefreshTokenResult;
 }
 
 /**
  * 退出登录
  */
 export async function logoutApi() {
-  return baseRequestClient.post('/auth/logout', {
-    withCredentials: true,
-  });
+  console.log('[MOCK] logoutApi called');
+  return { success: true };
 }
 
 /**
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  return requestClient.get<string[]>('/auth/codes');
+  console.log('[MOCK] getAccessCodesApi called');
+  return ['auth:login', 'auth:logout', 'user:read', 'user:write', 'admin'] as string[];
 }

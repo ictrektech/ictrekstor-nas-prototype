@@ -1,24 +1,20 @@
+/**
+ * 用户相关 API — 原型环境 mock 实现
+ * 所有请求直接返回模拟数据，不发送真实 HTTP 请求
+ */
 import type { UserInfo } from '@vben/types';
-
-import { requestClient } from '#/api/request';
 
 /**
  * 获取用户信息
- * 原型环境：若后端未返回数据，提供默认用户信息
  */
 export async function getUserInfoApi() {
-  try {
-    return await requestClient.get<UserInfo>('/user/info');
-  } catch {
-    // 原型环境兜底：返回默认管理员用户
-    return {
-      userId: '1',
-      username: 'admin',
-      realName: 'admin',
-      avatar: '',
-      homePath: '/dashboard',
-      roles: ['admin'],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
-  }
+  console.log('[MOCK] getUserInfoApi called');
+  return {
+    userId: '1',
+    username: 'admin',
+    realName: '管理员',
+    avatar: '',
+    homePath: '/dashboard',
+    roles: ['admin'],
+  } as UserInfo;
 }

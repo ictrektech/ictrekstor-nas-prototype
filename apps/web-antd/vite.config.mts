@@ -4,7 +4,6 @@ export default defineConfig(async () => {
   return {
     base: './',
     application: {
-      nitroMock: false,
     },
     vite: {
       server: {
