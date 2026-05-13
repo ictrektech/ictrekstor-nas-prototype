@@ -6,13 +6,11 @@ import {
   Form,
   Input,
   message,
-  Select,
-  Checkbox,
-  Radio as AntRadio,
   Dropdown,
   Menu,
 } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
+import TeamFolderModal from './components/TeamFolderModal.vue';
 import {
   FileTreePanel,
   FileManagerPanel,
@@ -123,20 +121,6 @@ const folderModalVisible = ref(false);
 const folderModalTitle = ref('新建团队文件夹');
 const isEdit = ref(false);
 const editingFolderId = ref('');
-const folderFormRef = ref();
-const folderForm = ref({
-  name: '',
-  enableCapacityLimit: false,
-  capacityLimit: undefined as number | undefined,
-  capacityUnit: 'GB',
-  allowShareProtocol: true,
-  recyclePermission: 'admin' as 'admin' | 'all',
-});
-
-const capacityUnitOptions = [
-  { label: 'GB', value: 'GB' },
-  { label: 'TB', value: 'TB' },
-];
 
 // 重命名
 const renameModalVisible = ref(false);
@@ -239,26 +223,15 @@ function openCreateModal() {
   isEdit.value = false;
   editingFolderId.value = '';
   folderModalTitle.value = '新建团队文件夹';
-  folderForm.value = {
-    name: '',
-    enableCapacityLimit: false,
-    capacityLimit: undefined,
-    capacityUnit: 'GB',
-    allowShareProtocol: true,
-    recyclePermission: 'admin',
-  };
   folderModalVisible.value = true;
 }
 
-function handleSaveFolder() {
-  folderFormRef.value?.validate().then(() => {
-    if (isEdit.value) {
-      message.success(`团队文件夹 "${folderForm.value.name}" 已更新`);
-    } else {
-      message.success(`团队文件夹 "${folderForm.value.name}" 创建成功`);
-    }
-    folderModalVisible.value = false;
-  }).catch(() => {});
+function handleSaveFolder(data: any) {
+  if (isEdit.value) {
+    message.success(`团队文件夹 "${data.name}" 已更新`);
+  } else {
+    message.success(`团队文件夹 "${data.name}" 创建成功`);
+  }
 }
 
 // 树节点图标自定义
@@ -370,82 +343,11 @@ onMounted(() => {
     </div>
 
     <!-- 新建/编辑团队文件夹弹窗 -->
-    <Modal
-      v-model:open="folderModalVisible"
+    <TeamFolderModal
+      v-model:visible="folderModalVisible"
       :title="folderModalTitle"
-      width="520px"
-      @ok="handleSaveFolder"
-      class="folder-modal"
-    >
-      <Form
-        ref="folderFormRef"
-        :model="folderForm"
-        layout="vertical"
-        :rules="{
-          name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-        }"
-      >
-        <Form.Item label="名称" name="name">
-          <Input v-model:value="folderForm.name" placeholder="请输入名称">
-            <template #prefix>
-              <IconifyIcon icon="lucide:folder-heart" style="font-size: 14px; color: #bfbfbf;" />
-            </template>
-          </Input>
-        </Form.Item>
-
-        <Form.Item>
-          <Checkbox v-model:checked="folderForm.enableCapacityLimit">
-            <span class="checkbox-label">
-              <IconifyIcon icon="lucide:ruler" style="font-size: 12px;" />
-              限制容量上限
-            </span>
-          </Checkbox>
-          <div v-if="folderForm.enableCapacityLimit" class="capacity-input-row">
-            <Input
-              v-model:value="folderForm.capacityLimit"
-              type="number"
-              placeholder="不限制"
-              class="capacity-input"
-            >
-              <template #prefix>
-                <IconifyIcon icon="lucide:hard-drive" style="font-size: 12px; color: #bfbfbf;" />
-              </template>
-            </Input>
-            <Select
-              v-model:value="folderForm.capacityUnit"
-              :options="capacityUnitOptions"
-              class="capacity-unit-select"
-            />
-          </div>
-        </Form.Item>
-
-        <Form.Item>
-          <Checkbox v-model:checked="folderForm.allowShareProtocol">
-            <span class="checkbox-label">
-              <IconifyIcon icon="lucide:share-2" style="font-size: 12px;" />
-              允许通过文件共享协议挂载到其他设备上
-            </span>
-          </Checkbox>
-        </Form.Item>
-
-        <Form.Item label="回收站权限">
-          <AntRadio.Group v-model:value="folderForm.recyclePermission">
-            <AntRadio value="admin">
-              <span class="radio-label">
-                <IconifyIcon icon="lucide:shield" style="font-size: 12px;" />
-                仅管理员
-              </span>
-            </AntRadio>
-            <AntRadio value="all">
-              <span class="radio-label">
-                <IconifyIcon icon="lucide:users" style="font-size: 12px;" />
-                团队文件夹所有成员
-              </span>
-            </AntRadio>
-          </AntRadio.Group>
-        </Form.Item>
-      </Form>
-    </Modal>
+      @save="handleSaveFolder"
+    />
 
     <!-- 重命名弹窗 -->
     <Modal
