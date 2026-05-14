@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { Card, Tag, Button } from 'ant-design-vue';
+import { Card, Button } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import { formatSpeed } from '#/utils/format';
 import type { NetworkConfig } from '#/api/system';
@@ -36,27 +36,19 @@ const statusColor = computed(() => {
         >
           <IconifyIcon icon="lucide:network" class="disk-icon" :style="{ color: statusColor }" />
         </div>
-        <div class="disk-status-indicator" :style="{ background: statusColor }" />
+        <div class="health-badge" :style="{ color: statusColor, background: `${statusColor}12`, borderColor: `${statusColor}28` }">
+          <span class="health-dot-mini" :style="{ background: statusColor }" />
+          {{ network.connectionStatus }}
+        </div>
       </div>
       <div class="disk-info">
-        <!-- 第一行：名称 + MAC + 状态 + 操作 -->
+        <!-- 第一行：名称 + 速率 + 操作 -->
         <div class="info-header">
           <div class="info-header-left">
             <span class="disk-device-name">{{ network.name }}</span>
             <span class="disk-capacity" :style="{ background: `${statusColor}15`, color: statusColor }">
-              {{ network.macAddress }}
+              {{ network.linkSpeed }}
             </span>
-            <Tag
-              size="small"
-              :style="{
-                color: statusColor,
-                borderColor: `${statusColor}50`,
-                background: `${statusColor}10`,
-              }"
-            >
-              <span class="health-dot-mini" :style="{ background: statusColor }" />
-              {{ network.connectionStatus }}
-            </Tag>
           </div>
           <div class="header-actions">
             <Button size="small" class="action-btn" @click="emit('config', network)">
@@ -80,13 +72,8 @@ const statusColor = computed(() => {
             <span class="bw-pill-label">上传</span>
             <span class="bw-pill-value" style="color: #52c41a;">{{ formatSpeed(network.uploadSpeed) }}</span>
           </div>
-          <div class="bw-pill" style="background: #fff7e6;">
-            <IconifyIcon icon="lucide:zap" style="font-size: 11px; color: #faad14;" />
-            <span class="bw-pill-label">速率</span>
-            <span class="bw-pill-value">{{ network.linkSpeed }}</span>
-          </div>
         </div>
-        <!-- 第三行：网络配置 -->
+        <!-- 第三行：网络配置 + MAC -->
         <div class="net-config-row">
           <span class="net-config-item">
             <span class="net-config-label">IPv4</span>
@@ -107,6 +94,11 @@ const statusColor = computed(() => {
             <span class="net-config-label">DNS</span>
             <span class="net-config-value">{{ network.dns }}</span>
           </span>
+          <span class="net-config-divider" />
+          <span class="net-config-item">
+            <span class="net-config-label">MAC</span>
+            <span class="net-config-value">{{ network.macAddress }}</span>
+          </span>
         </div>
       </div>
     </div>
@@ -117,20 +109,20 @@ const statusColor = computed(() => {
 .disk-card { border-radius: 12px; overflow: hidden; transition: all 0.3s; }
 .disk-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .disk-card-inner { display: flex; }
-.disk-visual { width: 72px; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px 0; border-right: 1px solid #f0f0f0; flex-shrink: 0; }
-.disk-icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid; }
-.disk-icon { font-size: 20px; }
-.disk-status-indicator { width: 8px; height: 8px; border-radius: 50%; }
-.disk-info { flex: 1; min-width: 0; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.disk-visual { width: 72px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 0; border-right: 1px solid #f0f0f0; flex-shrink: 0; }
+.disk-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid; }
+.disk-icon { font-size: 18px; }
+.health-badge { display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; line-height: 1.3; }
+.disk-info { flex: 1; min-width: 0; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
 .info-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.info-header-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.info-header-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .disk-device-name { font-size: 15px; font-weight: 600; color: #262626; }
 .disk-capacity { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 6px; }
 .health-dot-mini { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
-.header-actions { display: flex; gap: 6px; }
-.action-btn { width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-.action-icon { font-size: 13px; }
-.detail-btn { height: 28px; padding: 0 10px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 12px; }
+.header-actions { display: flex; gap: 5px; }
+.action-btn { width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+.action-icon { font-size: 12px; }
+.detail-btn { height: 26px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 11px; }
 .net-bandwidth-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .bw-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 6px; font-size: 11px; }
 .bw-pill-label { color: #595959; }

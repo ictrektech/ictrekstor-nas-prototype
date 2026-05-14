@@ -24,7 +24,7 @@ const props = defineProps<{
 const xLabels = ['-60分', '-45分', '-30分', '-15分', '现在'];
 
 const chartOption = computed(() => ({
-  grid: { left: 36, right: 12, top: 8, bottom: 20 },
+  grid: { left: 28, right: 8, top: 6, bottom: 16 },
   xAxis: {
     type: 'category',
     data: xLabels,
@@ -51,7 +51,7 @@ const chartOption = computed(() => ({
 </script>
 
 <template>
-  <Card class="resource-card" :bordered="true" :body-style="{ padding: '16px' }">
+  <Card class="resource-card" :bordered="true" :body-style="{ padding: '12px' }">
     <div class="resource-header">
       <div class="resource-icon-box" :style="{ background: iconBg }">
         <IconifyIcon :icon="icon" class="resource-icon" />
@@ -72,7 +72,7 @@ const chartOption = computed(() => ({
     </div>
 
     <div class="chart-container">
-      <VChart :option="chartOption" style="width: 100%; height: 140px;" autoresize />
+      <VChart :option="chartOption" style="width: 100%; height: 110px;" autoresize />
       <div class="chart-avg">
         <span class="avg-dot" :style="{ background: colorTheme }" />
         <span class="avg-text">平均使用率 {{ avgPercent }}%</span>
@@ -82,7 +82,7 @@ const chartOption = computed(() => ({
 </template>
 
 <style scoped>
-.resource-card { margin-bottom: 16px; border-radius: 14px; }
+.resource-card { border-radius: 14px; }
 .resource-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .resource-icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .resource-icon { font-size: 20px; color: #fff; }
@@ -96,7 +96,7 @@ const chartOption = computed(() => ({
 .percent-value { font-size: 24px; font-weight: 700; font-family: 'SF Mono', monospace; }
 .percent-label { font-size: 11px; color: #8c8c8c; }
 .chart-container { position: relative; }
-.chart-avg { display: flex; align-items: center; gap: 6px; margin-top: 4px; padding-left: 36px; }
+.chart-avg { display: flex; align-items: center; gap: 6px; margin-top: 2px; padding-left: 28px; }
 .avg-dot { width: 6px; height: 6px; border-radius: 50%; }
 .avg-text { font-size: 11px; color: #8c8c8c; }
 </style>

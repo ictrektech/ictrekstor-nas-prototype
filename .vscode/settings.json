@@ -76,7 +76,7 @@
 
   // files
   "files.eol": "\n",
-  "files.insertFinalNewline": true,
+  // "files.insertFinalNewline": true,
   "files.simpleDialog.enable": true,
   "files.associations": {
     "*.ejs": "html",

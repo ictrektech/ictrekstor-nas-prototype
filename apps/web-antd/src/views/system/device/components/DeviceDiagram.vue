@@ -109,6 +109,9 @@ const tooltip = ref({
   bayIndex: -1,
 });
 
+// 内部高亮状态（支持直接高亮而不依赖 prop 异步更新）
+const highlightedDisk = ref('');
+
 function drawRoundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -262,7 +265,7 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
 
   // 绘制6个磁盘槽位
   bays.value.forEach((bay) => {
-    const isSelected = props.selectedDiskName && bay.disk?.deviceName === props.selectedDiskName;
+    const isSelected = (props.selectedDiskName && bay.disk?.deviceName === props.selectedDiskName) || bay.disk?.deviceName === highlightedDisk.value;
     const isFilled = !!bay.disk;
 
     drawRoundRect(ctx, bay.x, bay.y, bay.width, bay.height, BAY.cornerRadius);
@@ -582,7 +585,7 @@ function hideTooltip() {
 }
 
 watch(() => props.disks, draw, { deep: true });
-watch(() => props.selectedDiskName, draw);
+watch(() => props.selectedDiskName, () => { highlightedDisk.value = props.selectedDiskName || ''; draw(); });
 watch(() => props.mode, draw);
 
 onMounted(() => {
@@ -590,6 +593,7 @@ onMounted(() => {
 });
 
 function highlightBay(deviceName: string) {
+  highlightedDisk.value = deviceName;
   emit('locateDisk', deviceName);
   draw();
 }

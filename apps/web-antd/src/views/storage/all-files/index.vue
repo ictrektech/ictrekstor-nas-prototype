@@ -8,6 +8,7 @@ import {
 } from '#/components/FileExplorer';
 import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
 import { getFileIconClass, buildBreadcrumbPath, findParentKeys, findNodeInTree } from '#/components/FileExplorer';
+import NewFolderModal from '#/views/file/my-files/components/NewFolderModal.vue';
 
 // ─── 页面级类型 ───
 // 复用通用 FileTreeNode / FileItem，类型别名保持兼容
@@ -145,6 +146,12 @@ const renameFormRef = ref();
 const renameForm = ref({ name: '' });
 const editingFile = ref<FileItem | null>(null);
 
+// 新建文件夹
+const newFolderModalVisible = ref(false);
+
+// 上传
+const uploadInputRef = ref<HTMLInputElement | null>(null);
+
 // ─── 计算属性 ───
 const breadcrumbPath = computed(() => {
   const key = selectedKeys.value[0];
@@ -235,6 +242,60 @@ function refresh() {
   message.success('已刷新');
 }
 
+// 新建文件夹
+function handleCreateFolder(name: string) {
+  if (!name) {
+    message.warning('请输入文件夹名称');
+    return;
+  }
+  const newFolder: FileItem = {
+    id: `folder-${Date.now()}`,
+    name,
+    type: 'folder',
+    size: '--',
+    modifyTime: new Date()
+      .toLocaleString('zh-CN', { hour12: false })
+      .replace(/\//g, '-'),
+  };
+  currentFiles.value.unshift(newFolder);
+  message.success(`文件夹「${name}」创建成功`);
+}
+
+// 上传
+function handleUploadClick() {
+  uploadInputRef.value?.click();
+}
+
+function handleFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+  if (!files || files.length === 0) return;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const sizeStr =
+      file.size > 1024 * 1024
+        ? `${(file.size / 1024 / 1024).toFixed(2)} MB`
+        : `${(file.size / 1024).toFixed(1)} KB`;
+    const ext = file.name.split('.').pop() || '';
+
+    const newFile: FileItem = {
+      id: `upload-${Date.now()}-${i}`,
+      name: file.name,
+      type: 'file',
+      size: sizeStr,
+      modifyTime: new Date()
+        .toLocaleString('zh-CN', { hour12: false })
+        .replace(/\//g, '-'),
+      extension: ext,
+    };
+    currentFiles.value.unshift(newFile);
+  }
+
+  message.success(`已上传 ${files.length} 个文件`);
+  input.value = '';
+}
+
 // 树节点图标自定义
 function nodeIconResolver(node: FileTreeNode) {
   if (node.type === 'space') {
@@ -287,6 +348,8 @@ onMounted(() => {
         @open-folder="handleOpenFolder"
         @rename="openRenameModal"
         @delete-file="handleDeleteFile"
+        @new-folder="newFolderModalVisible = true"
+        @upload="handleUploadClick"
       />
     </div>
 
@@ -308,6 +371,21 @@ onMounted(() => {
         </Form.Item>
       </Form>
     </Modal>
+
+    <!-- 新建文件夹弹窗 -->
+    <NewFolderModal
+      v-model:visible="newFolderModalVisible"
+      @confirm="handleCreateFolder"
+    />
+
+    <!-- 隐藏的文件上传 input -->
+    <input
+      ref="uploadInputRef"
+      type="file"
+      multiple
+      style="display: none;"
+      @change="handleFileSelected"
+    />
   </div>
 </template>
 

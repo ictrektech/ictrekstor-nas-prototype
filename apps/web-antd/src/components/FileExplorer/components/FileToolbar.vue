@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { Button, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
+import { Button, Breadcrumb, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
 import { computed } from 'vue';
 
 import type { BreadcrumbItem, FileItem } from '../types';
@@ -77,14 +77,14 @@ const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
       </div>
       <div class="toolbar-breadcrumb-scroll">
         <div class="toolbar-breadcrumb-inner">
-          <a-breadcrumb class="toolbar-breadcrumb">
-            <a-breadcrumb-item v-for="(item, idx) in breadcrumbPath" :key="item.key">
+          <Breadcrumb class="toolbar-breadcrumb">
+            <Breadcrumb.Item v-for="(item, idx) in breadcrumbPath" :key="item.key">
               <a v-if="idx < breadcrumbPath.length - 1" class="breadcrumb-link" @click="emit('breadcrumbClick', item)">
                 {{ item.title }}
               </a>
               <span v-else class="breadcrumb-current">{{ item.title }}</span>
-            </a-breadcrumb-item>
-          </a-breadcrumb>
+            </Breadcrumb.Item>
+          </Breadcrumb>
         </div>
       </div>
     </div>
@@ -261,6 +261,19 @@ const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
 .batch-btn-text { margin-left: 4px; }
 .batch-menu-item { display: flex; align-items: center; gap: 6px; }
 .batch-menu-item--danger { color: #ff4d4f; }
+
+/* 修复 Dropdown Menu danger 项 hover 时背景与前景红色冲突 */
+:global(.ant-dropdown-menu-item-danger:hover) {
+  color: #ff4d4f !important;
+  background: #fff1f0 !important;
+}
+:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-title-content) {
+  color: #ff4d4f !important;
+}
+:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-item-icon) {
+  color: #ff4d4f !important;
+}
+
 .toolbar-actions { display: flex; align-items: center; gap: 8px; }
 .toolbar-search { width: 200px; }
 .toolbar-view-toggle { display: flex; }
