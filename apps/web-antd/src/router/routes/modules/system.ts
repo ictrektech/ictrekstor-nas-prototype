@@ -50,15 +50,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'SystemPublicFiles',
-        path: '/system/public-files',
-        component: () => import('#/views/system/public-files/index.vue'),
-        meta: {
-          icon: 'lucide:folder-heart',
-          title: '公共文件管理',
-        },
-      },
-      {
         name: 'SystemServices',
         path: '/system/services',
         component: () => import('#/views/system/services/index.vue'),
