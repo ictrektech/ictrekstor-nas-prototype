@@ -58,6 +58,15 @@ const routes: RouteRecordRaw[] = [
           title: '公共文件管理',
         },
       },
+      {
+        name: 'SystemServices',
+        path: '/system/services',
+        component: () => import('#/views/system/services/index.vue'),
+        meta: {
+          icon: 'lucide:server-cog',
+          title: '服务设置',
+        },
+      },
     ],
   },
 ];

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { Modal, Card } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
-import type { ProtocolData } from './ProtocolCard.vue';
+import type { ServiceData } from '../types';
 
 defineProps<{
   visible: boolean;
-  protocol: ProtocolData | null;
+  service: ServiceData | null;
 }>();
 
 const emit = defineEmits<{
@@ -16,21 +16,21 @@ const emit = defineEmits<{
 <template>
   <Modal
     :open="visible"
-    :title="`${protocol?.name || ''} 使用指南`"
+    :title="`${service?.name || ''} 使用指南`"
     width="720px"
     :footer="null"
     @update:open="emit('update:visible', $event)"
   >
     <div class="guide-content">
-      <Card v-if="protocol" class="guide-card" size="small" :bordered="false">
+      <Card v-if="service" class="guide-card" size="small" :bordered="false">
         <template #title>
           <IconifyIcon
-            :icon="protocol.icon"
-            :style="{ fontSize: '18px', color: protocol.iconColor, marginRight: '8px' }"
+            :icon="service.icon"
+            :style="{ fontSize: '18px', color: service.iconColor, marginRight: '8px' }"
           />
-          {{ protocol.name }} 配置示例
+          {{ service.name }} 配置示例
         </template>
-        <pre class="guide-code">{{ protocol.guideContent }}</pre>
+        <pre class="guide-code">{{ service.guideContent }}</pre>
       </Card>
     </div>
   </Modal>

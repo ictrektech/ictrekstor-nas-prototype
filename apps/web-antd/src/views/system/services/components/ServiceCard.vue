@@ -1,102 +1,94 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
 import { Switch, Button, Tag } from 'ant-design-vue';
-
-export interface ProtocolData {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  iconColor: string;
-  enabled: boolean;
-  url: string;
-  config: { label: string; value: string }[];
-  guideContent: string;
-}
+import type { ServiceData } from '../types';
 
 const props = defineProps<{
-  protocol: ProtocolData;
+  service: ServiceData;
 }>();
 
 const emit = defineEmits<{
   (e: 'toggle', id: string, enabled: boolean): void;
-  (e: 'guide', p: ProtocolData): void;
-  (e: 'configure', p: ProtocolData): void;
+  (e: 'guide', s: ServiceData): void;
+  (e: 'configure', s: ServiceData): void;
   (e: 'copy', url: string): void;
 }>();
 
 function onToggle(checked: boolean) {
-  emit('toggle', props.protocol.id, checked);
+  emit('toggle', props.service.id, checked);
 }
+
+/** 状态标签配置 */
+const statusConfig: Record<string, { color: string; text: string }> = {
+  running: { color: 'success', text: '运行中' },
+  stopped: { color: 'default', text: '已停止' },
+  error: { color: 'error', text: '异常' },
+};
 </script>
 
 <template>
   <div
-    class="protocol-card"
-    :class="{ 'protocol-card-disabled': !protocol.enabled }"
+    class="service-card"
+    :class="{ 'service-card-disabled': !service.enabled }"
   >
     <!-- 头部 -->
-    <div class="card-header-row">
+    <div class="card-header">
       <div class="header-left">
         <div
-          class="protocol-icon-wrap"
+          class="service-icon-wrap"
           :style="{
-            background: protocol.enabled
-              ? `${protocol.iconColor}18`
+            background: service.enabled
+              ? `${service.iconColor}18`
               : '#f0f0f0',
           }"
         >
           <IconifyIcon
-            :icon="protocol.icon"
-            class="protocol-icon"
+            :icon="service.icon"
+            class="service-icon"
             :style="{
-              color: protocol.enabled ? protocol.iconColor : '#bfbfbf',
+              color: service.enabled ? service.iconColor : '#bfbfbf',
             }"
           />
         </div>
-        <div class="protocol-meta">
-          <div class="protocol-name">
-            {{ protocol.name }}
+        <div class="service-meta">
+          <div class="service-name">
+            {{ service.name }}
             <Tag
-              v-if="protocol.enabled"
               class="status-tag"
-              color="success"
+              :color="statusConfig[service.status]?.color"
             >
-              已启用
+              {{ statusConfig[service.status]?.text }}
             </Tag>
-            <Tag v-else class="status-tag">未启用</Tag>
           </div>
-          <div class="protocol-desc">{{ protocol.description }}</div>
+          <div class="service-desc">{{ service.description }}</div>
         </div>
       </div>
       <div class="header-actions">
         <Button
-          v-if="protocol.enabled"
+          v-if="service.enabled"
           size="small"
-          @click="emit('guide', protocol)"
+          @click="emit('guide', service)"
         >
           <IconifyIcon icon="lucide:book-open" :style="{ fontSize: '14px' }" />
           使用指南
         </Button>
         <Button
-          v-if="protocol.enabled"
+          v-if="service.enabled"
           size="small"
           type="primary"
-          @click="emit('configure', protocol)"
+          @click="emit('configure', service)"
         >
           <IconifyIcon icon="lucide:settings-2" :style="{ fontSize: '14px' }" />
           配置
         </Button>
-        <Switch
-          :checked="protocol.enabled"
-          @update:checked="onToggle"
-        />
+        <Switch :checked="service.enabled" @update:checked="onToggle" />
       </div>
     </div>
 
     <!-- 启用状态内容 -->
-    <div v-if="protocol.enabled" class="card-body-row">
-      <div class="access-url-section">
+    <div v-if="service.enabled" class="card-body">
+      <!-- 访问地址 -->
+      <div v-if="service.url" class="info-section url-section">
         <div class="section-label">
           <IconifyIcon
             icon="lucide:link"
@@ -104,34 +96,35 @@ function onToggle(checked: boolean) {
           />
           访问地址
         </div>
-        <div class="access-url-bar">
-          <input class="access-url" readonly :value="protocol.url" />
+        <div class="url-bar">
+          <input class="url-input" readonly :value="service.url" />
           <Button
             size="small"
             class="copy-btn"
             type="link"
-            @click="emit('copy', protocol.url)"
+            @click="emit('copy', service.url!)"
           >
             <IconifyIcon icon="lucide:copy" :style="{ fontSize: '13px' }" />
           </Button>
         </div>
       </div>
-      <div class="card-config-area">
+      <!-- 快速信息 -->
+      <div class="info-section quick-info-section">
         <div class="section-label">
           <IconifyIcon
-            icon="lucide:settings-2"
+            icon="lucide:info"
             :style="{ fontSize: '13px', color: '#1677ff' }"
           />
           配置信息
         </div>
-        <div class="config-list">
+        <div class="quick-info-list">
           <div
-            v-for="c in protocol.config"
-            :key="c.label"
-            class="config-item"
+            v-for="item in service.quickInfo"
+            :key="item.label"
+            class="quick-info-item"
           >
-            <span class="config-item-label">{{ c.label }}:</span>
-            <span class="config-item-value">{{ c.value }}</span>
+            <span class="quick-info-label">{{ item.label }}:</span>
+            <span class="quick-info-value">{{ item.value }}</span>
           </div>
         </div>
       </div>
@@ -145,7 +138,7 @@ function onToggle(checked: boolean) {
 </template>
 
 <style scoped>
-.protocol-card {
+.service-card {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e8e8e8;
@@ -154,26 +147,28 @@ function onToggle(checked: boolean) {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.protocol-card:hover {
+.service-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   border-color: #d9d9d9;
+  transform: translateY(-2px);
 }
 
-.protocol-card-disabled {
+.service-card-disabled {
   opacity: 0.65;
   background: #fafafa;
 }
 
-.protocol-card-disabled:hover {
+.service-card-disabled:hover {
+  transform: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.protocol-card-disabled .card-header-row {
+.service-card-disabled .card-header {
   background: #f5f5f5;
   border-bottom-color: #e8e8e8;
 }
 
-.card-header-row {
+.card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -198,7 +193,7 @@ function onToggle(checked: boolean) {
   min-width: 0;
 }
 
-.protocol-icon-wrap {
+.service-icon-wrap {
   width: 44px;
   height: 44px;
   border-radius: 10px;
@@ -209,12 +204,12 @@ function onToggle(checked: boolean) {
   transition: background 0.3s ease;
 }
 
-.protocol-icon {
+.service-icon {
   font-size: 22px;
   transition: color 0.3s ease;
 }
 
-.protocol-meta {
+.service-meta {
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -222,7 +217,7 @@ function onToggle(checked: boolean) {
   flex: 1;
 }
 
-.protocol-name {
+.service-name {
   font-size: 15px;
   font-weight: 600;
   color: #141414;
@@ -237,22 +232,26 @@ function onToggle(checked: boolean) {
   font-weight: 500;
 }
 
-.protocol-desc {
+.service-desc {
   font-size: 12px;
   color: #8c8c8c;
   line-height: 1.4;
 }
 
-.card-body-row {
+.card-body {
   display: flex;
   align-items: flex-start;
   gap: 16px;
   padding: 14px 20px;
+  flex-wrap: wrap;
 }
 
-.access-url-section {
-  width: 320px;
+.info-section {
   flex-shrink: 0;
+}
+
+.url-section {
+  width: 320px;
 }
 
 .section-label {
@@ -267,7 +266,7 @@ function onToggle(checked: boolean) {
   gap: 4px;
 }
 
-.access-url-bar {
+.url-bar {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -277,7 +276,7 @@ function onToggle(checked: boolean) {
   padding: 6px 10px;
 }
 
-.access-url {
+.url-input {
   flex: 1;
   font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
   font-size: 13px;
@@ -301,18 +300,18 @@ function onToggle(checked: boolean) {
   background: #d9f7be;
 }
 
-.card-config-area {
-  width: 420px;
-  flex-shrink: 0;
+.quick-info-section {
+  flex: 1;
+  min-width: 240px;
 }
 
-.config-list {
+.quick-info-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.config-item {
+.quick-info-item {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -324,12 +323,12 @@ function onToggle(checked: boolean) {
   flex-shrink: 0;
 }
 
-.config-item-label {
+.quick-info-label {
   color: #8c8c8c;
   flex-shrink: 0;
 }
 
-.config-item-value {
+.quick-info-value {
   color: #262626;
   font-weight: 500;
   font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
@@ -349,11 +348,11 @@ function onToggle(checked: boolean) {
 }
 
 @media (max-width: 768px) {
-  .card-body-row {
+  .card-body {
     flex-direction: column;
   }
-  .access-url-section,
-  .card-config-area {
+  .url-section,
+  .quick-info-section {
     width: 100%;
   }
 }

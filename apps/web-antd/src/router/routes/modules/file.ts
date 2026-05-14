@@ -48,15 +48,6 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
-        name: 'FileNetwork',
-        path: '/file/network',
-        component: () => import('#/views/file/network/index.vue'),
-        meta: {
-          icon: 'lucide:globe',
-          title: '网络访问',
-        },
-      },
-      {
         name: 'FileExternalDevice',
         path: '/file/external-device',
         component: () => import('#/views/file/external-device/index.vue'),
