@@ -34,7 +34,7 @@
   - 状态基于 SMART 综合评估
 - **可用场景**：快速确认磁盘身份和当前健康状态。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName` — 获取磁盘基本信息
+  - 获取磁盘基本信息
 
 ---
 
@@ -51,7 +51,7 @@
   - 部分参数（如温度）实时变化，定时刷新
 - **可用场景**：了解磁盘的硬件规格和使用历史。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/info` — 获取磁盘详细信息
+  - 获取磁盘详细信息
 
 ---
 
@@ -68,7 +68,7 @@
   - 不同厂商的 SMART 属性定义可能有差异
 - **可用场景**：快速判断磁盘是否存在潜在故障风险。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/smart/summary` — 获取 SMART 综合评分
+  - 获取 SMART 综合评分
 
 #### 功能: 关键 SMART 属性列表
 - **功能描述**：展示对磁盘健康最关键的几项 SMART 属性。
@@ -80,7 +80,7 @@
   - 仅展示关键属性，完整属性在弹窗中查看
 - **可用场景**：了解具体哪些 SMART 指标出现异常。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/smart/attributes` — 获取关键 SMART 属性
+  - 获取关键 SMART 属性
 
 ---
 
@@ -98,7 +98,7 @@
   - 属性数量因磁盘厂商而异（通常约 20-30 项）
 - **可用场景**：技术人员进行深度磁盘健康诊断。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/smart/all` — 获取完整 SMART 属性表
+  - 获取完整 SMART 属性表
 
 ---
 
@@ -115,7 +115,7 @@
   - 数据来源于系统 I/O 监控
 - **可用场景**：分析磁盘 I/O 性能，发现性能瓶颈。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/metrics/io` — 获取磁盘 I/O 时间序列数据
+  - 获取磁盘 I/O 时间序列数据
 
 #### 功能: IOPS 趋势图
 - **功能描述**：展示磁盘每秒 I/O 操作数（IOPS）的历史趋势。
@@ -127,7 +127,7 @@
   - 数据与读写速率趋势同步刷新
 - **可用场景**：评估磁盘响应能力。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/metrics/iops` — 获取 IOPS 时间序列数据
+  - 获取 IOPS 时间序列数据
 
 #### 功能: 温度趋势图
 - **功能描述**：展示磁盘温度的历史趋势。
@@ -139,7 +139,7 @@
   - 部分磁盘型号可能不支持温度监控
 - **可用场景**：监控磁盘散热状况，预防过热损坏。
 - **涉及接口**：
-  - `GET /api/storage/disks/:deviceName/metrics/temperature` — 获取温度时间序列数据
+  - 获取温度时间序列数据
 
 ---
 
