@@ -272,7 +272,7 @@ function handleDeleteDir(dir: SharedDir) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 .page-header {
@@ -352,14 +352,12 @@ function handleDeleteDir(dir: SharedDir) {
 .page-body {
   flex: 1;
   overflow: auto;
-  padding: 12px;
 }
 
 .shared-card {
-  border-radius: 12px;
   background: #fff;
-  border: 1px solid #f0f0f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: none;
+  box-shadow: none;
 }
 
 .shared-card :deep(.ant-card-body) {

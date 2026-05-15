@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
 import { Empty } from 'ant-design-vue';
+import { computed } from 'vue';
 import type { FileItem } from '../types';
 import { getFileIconClass } from '../utils';
 
@@ -19,12 +20,42 @@ const emit = defineEmits<{
   toggleSelect: [file: FileItem, event?: MouseEvent];
   contextMenu: [file: FileItem, event: MouseEvent];
   dragStart: [file: FileItem, event: DragEvent];
+  selectAll: [];
+  clearSelection: [];
 }>();
+
+const selectedCount = computed(() => props.selectedIds.length);
+const isAllSelected = computed(
+  () => props.files.length > 0 && props.files.every((f) => props.selectedIds.includes(f.id)),
+);
+const hasSelection = computed(() => selectedCount.value > 0);
+
 function isSelected(file: FileItem) { return props.selectedIds.includes(file.id); }
+
+function onHeaderCheck() {
+  if (isAllSelected.value) {
+    emit('clearSelection');
+  } else {
+    emit('selectAll');
+  }
+}
 </script>
 
 <template>
   <div class="file-grid-view" @click.stop>
+    <!-- 顶部全选栏：始终明示 -->
+    <div v-if="files.length > 0" class="grid-header-bar" @click.stop>
+      <div
+        class="checkbox grid-header-checkbox"
+        :class="{ 'checkbox--checked': isAllSelected, 'checkbox--indeterminate': hasSelection && !isAllSelected }"
+        @click="onHeaderCheck"
+      >
+        <IconifyIcon v-if="isAllSelected" icon="lucide:check" style="font-size: 10px; color: #fff;" />
+        <div v-else-if="hasSelection" class="indeterminate-dot" />
+      </div>
+      <span v-if="!hasSelection" class="grid-header-text">全选</span>
+      <span v-else class="grid-header-text">全选&nbsp;&nbsp;已选中 {{ selectedCount }} 项</span>
+    </div>
     <div v-for="file in files" :key="file.id" class="grid-item" :class="{
       'grid-item--folder': file.type === 'folder',
       'grid-item--draggable': draggable,
@@ -68,4 +99,16 @@ function isSelected(file: FileItem) { return props.selectedIds.includes(file.id)
 .grid-path { font-size: 10px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .grid-empty { grid-column: 1 / -1; }
 .empty-image { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }
+
+/* 顶部全选栏 */
+.grid-header-bar { display: flex; align-items: center; gap: 8px; grid-column: 1 / -1; padding: 0 4px 8px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+.grid-header-checkbox { margin-right: 0; }
+.grid-header-text { font-size: 13px; color: #262626; }
+
+/* 复选框 */
+.checkbox { width: 16px; height: 16px; border: 1.5px solid #d9d9d9; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all 0.15s; background: #fff; }
+.checkbox:hover { border-color: #1677ff; }
+.checkbox--checked { background: #1677ff; border-color: #1677ff; }
+.checkbox--indeterminate { background: #1677ff; border-color: #1677ff; }
+.indeterminate-dot { width: 8px; height: 8px; border-radius: 2px; background: #fff; }
 </style>

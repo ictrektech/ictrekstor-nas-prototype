@@ -13,6 +13,7 @@ import NasDiagram from './components/NasDiagram.vue';
 import DiskStatsCards from './components/DiskStatsCards.vue';
 import DiskCard from './components/DiskCard.vue';
 import DiskDetailModal from './components/DiskDetailModal.vue';
+import { PageHeader } from '#/components/ui-kit';
 
 const router = useRouter();
 const disks = ref<DiskInfo[]>([]);
@@ -180,24 +181,16 @@ onMounted(loadData);
 
 <template>
   <div class="disk-manager">
-    <!-- 页面顶部概览 -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon
-            icon="lucide:hard-drive"
-            style="font-size: 20px; color: #1677ff;"
-          />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">硬盘管理</h1>
-          <p class="page-desc">查看和管理 NAS 中的所有物理硬盘</p>
-        </div>
-      </div>
-      <div class="page-header-right">
+    <!-- 页面顶部概览 —— UI KIT PageHeader -->
+    <PageHeader
+      icon="lucide:hard-drive"
+      title="硬盘管理"
+      description="查看和管理 NAS 中的所有物理硬盘"
+    >
+      <template #extra>
         <DiskStatsCards :disks="filteredDisks" />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 主体区域：设备示意图 + 磁盘列表 横向并列 -->
     <div class="main-layout">
@@ -352,55 +345,6 @@ onMounted(loadData);
 .disk-manager {
   padding: 0 20px 16px;
   width: 100%;
-}
-
-/* 页面顶部概览 */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: #fff;
-  gap: 16px;
-  flex-shrink: 0;
-  margin: 0 -20px 16px;
-}
-
-.page-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.page-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #e6f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin: 2px 0 0;
-}
-
-.page-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 /* 主体横向布局：设备示意图 + 磁盘列表 */

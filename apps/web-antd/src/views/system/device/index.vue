@@ -6,6 +6,7 @@ import { IconifyIcon } from '@vben/icons';
 import { getDisksApi, getStoragePoolsApi, type DiskInfo, type StoragePool } from '#/api/storage';
 import { getNetworksApi, updateNetworkApi, type NetworkConfig } from '#/api/system';
 import { getDashboardSummaryApi, type DashboardSummary } from '#/api/dashboard';
+import { PageHeader, SectionCard } from '#/components/ui-kit';
 
 import DeviceInfoHero from './components/DeviceInfoHero.vue';
 import ResourceUsageCard from './components/ResourceUsageCard.vue';
@@ -77,18 +78,12 @@ onMounted(loadData);
 
 <template>
   <div class="device-manager">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:cpu" style="font-size: 22px; color: #1677ff;" />
-        </div>
-        <div>
-          <h1 class="page-title">设备管理</h1>
-          <p class="page-desc">查看设备信息、CPU/内存资源、硬盘状态和网络配置</p>
-        </div>
-      </div>
-    </div>
+    <!-- 页面标题 —— UI KIT PageHeader -->
+    <PageHeader
+      icon="lucide:cpu"
+      title="设备管理"
+      description="查看设备信息、CPU/内存资源、硬盘状态和网络配置"
+    />
 
     <!-- 设备信息 Hero -->
     <DeviceInfoHero
@@ -144,17 +139,13 @@ onMounted(loadData);
       ]"
     />
 
-    <!-- 硬盘列表 -->
-    <Card class="section-card" :bordered="true" :body-style="{ padding: '16px' }">
-      <template #title>
-        <div class="section-title-bar">
-          <div class="section-title-left">
-            <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
-            <span class="section-title-text">存储设备</span>
-            <Tag size="small" class="count-tag">{{ disks.length }} 块</Tag>
-          </div>
-        </div>
-      </template>
+    <!-- 硬盘列表 —— UI KIT SectionCard -->
+    <SectionCard
+      icon="lucide:hard-drive"
+      icon-color="var(--ict-primary)"
+      title="存储设备"
+      :count="disks.length"
+    >
       <div class="disk-grid">
         <DiskCard
           v-for="disk in disks"
@@ -167,19 +158,15 @@ onMounted(loadData);
           @detail="goToDiskDetail"
         />
       </div>
-    </Card>
+    </SectionCard>
 
-    <!-- 网卡列表 -->
-    <Card class="section-card" :bordered="true" :body-style="{ padding: '16px' }">
-      <template #title>
-        <div class="section-title-bar">
-          <div class="section-title-left">
-            <IconifyIcon icon="lucide:network" style="font-size: 16px; color: #fa8c16;" />
-            <span class="section-title-text">网络接口</span>
-            <Tag size="small" class="count-tag">{{ networks.length }} 个</Tag>
-          </div>
-        </div>
-      </template>
+    <!-- 网卡列表 —— UI KIT SectionCard -->
+    <SectionCard
+      icon="lucide:network"
+      icon-color="var(--ict-warning)"
+      title="网络接口"
+      :count="networks.length"
+    >
       <div class="disk-grid">
         <NetworkCard
           v-for="net in networks"
@@ -189,7 +176,7 @@ onMounted(loadData);
           @detail="goToNetworkDetail"
         />
       </div>
-    </Card>
+    </SectionCard>
 
     <!-- 网卡配置弹窗 -->
     <NetworkConfigModal
@@ -202,16 +189,6 @@ onMounted(loadData);
 
 <style scoped>
 .device-manager { padding: 0 20px 16px; width: 100%; }
-.diagram-section { margin-top: 16px; }
-.page-header { display: flex; align-items: center; padding: 12px 20px; background: #fff; gap: 16px; flex-shrink: 0; margin: 0 -20px 16px; }
-.page-header-left { display: flex; align-items: center; gap: 12px; }
-.page-icon-box { width: 44px; height: 44px; border-radius: 10px; background: #e6f4ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.page-title { font-size: 16px; font-weight: 600; color: #262626; margin: 0; line-height: 1.4; }
-.page-desc { font-size: 12px; color: #8c8c8c; margin: 2px 0 0; }
-.section-card { margin-bottom: 16px; border-radius: 14px; }
-.section-title-bar { display: flex; align-items: center; justify-content: space-between; }
-.section-title-left { display: flex; align-items: center; gap: 10px; }
-.section-title-text { font-size: 15px; font-weight: 600; color: #262626; }
-.count-tag { font-size: 12px; background: #f5f5f5; border-color: #e8e8e8; color: #595959; }
-.disk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: 12px; }
+.diagram-section { margin-top: var(--ict-space-4); }
+.disk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: var(--ict-space-3); }
 </style>

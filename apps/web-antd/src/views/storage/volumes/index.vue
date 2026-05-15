@@ -14,6 +14,7 @@ import PoolCard from './components/PoolCard.vue';
 import RenameVolumeModal from './components/RenameVolumeModal.vue';
 import VolumeNestCard from './components/VolumeNestCard.vue';
 import VolumeOverview from './components/VolumeOverview.vue';
+import { PageHeader } from '#/components/ui-kit';
 import type { PoolCreateForm, StoragePool, StorageVolume, VolumeCreateForm } from './types';
 
 const router = useRouter();
@@ -205,40 +206,35 @@ function handleDeleteVolume(vol: StorageVolume) {
 
 <template>
   <div class="volume-manager">
-    <!-- ═══════ 页面顶部概览 ═══════ -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:box" style="font-size: 20px; color: #1677ff;" />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">存储空间管理</h1>
-          <p class="page-desc">管理基于存储池或目录的存储空间分配与使用</p>
-          <div class="header-actions">
-            <Button type="primary" size="small" @click="openCreatePoolModal">
-              <template #icon>
-                <IconifyIcon icon="lucide:database" />
-              </template>
-              创建存储池
-            </Button>
-            <Button size="small" @click="openCreateModal">
-              <template #icon>
-                <IconifyIcon icon="lucide:plus" />
-              </template>
-              创建存储空间
-            </Button>
-          </div>
-        </div>
-      </div>
-      <div class="page-header-right">
+    <!-- ═══════ 页面顶部概览 —— UI KIT PageHeader ═══════ -->
+    <PageHeader
+      icon="lucide:box"
+      title="存储空间管理"
+      description="管理基于存储池或目录的存储空间分配与使用"
+    >
+      <template #actions>
+        <Button type="primary" size="small" @click="openCreatePoolModal">
+          <template #icon>
+            <IconifyIcon icon="lucide:database" />
+          </template>
+          创建存储池
+        </Button>
+        <Button size="small" @click="openCreateModal">
+          <template #icon>
+            <IconifyIcon icon="lucide:plus" />
+          </template>
+          创建存储空间
+        </Button>
+      </template>
+      <template #extra>
         <VolumeOverview
           :pool-count="pools.length"
           :volume-count="overviewStats.total"
           :total-cap="overviewStats.totalCap"
           :total-used="overviewStats.totalUsed"
         />
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- 存储空间列表 -->
     <div v-if="items.length > 0" class="volumes-list">
@@ -364,63 +360,6 @@ function handleDeleteVolume(vol: StorageVolume) {
 .volume-manager {
   padding: 0 20px 16px;
   width: 100%;
-}
-
-/* ═══ 页面顶部概览 ═══ */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  gap: 16px;
-  flex-shrink: 0;
-  margin: 0 -20px 16px;
-}
-
-.page-header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.page-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #e6f4ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #262626;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
-  margin: 2px 0 0;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.page-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 /* 存储空间列表 */

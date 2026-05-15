@@ -1,0 +1,85 @@
+/**
+ * ICTrek NAS UI KIT — Design Tokens
+ * 设计令牌：色彩、间距、圆角、阴影、字体
+ * 所有页面组件应优先使用这些 CSS 变量，禁止硬编码色值
+ */
+
+:root {
+  /* ═══════════════════════════════════════
+     2.1 色彩系统
+     ═══════════════════════════════════════ */
+
+  /* 主色与品牌色 */
+  --ict-primary: #006BE6;
+  --ict-primary-light: #E6F2FF;
+  --ict-primary-hover: #0052B3;
+
+  /* 语义色（状态色） */
+  --ict-success: #52C41A;
+  --ict-success-light: #F6FFED;
+  --ict-success-hover: #389E0D;
+
+  --ict-warning: #FAAD14;
+  --ict-warning-light: #FFF7E6;
+  --ict-warning-hover: #D48806;
+
+  --ict-danger: #FF4D4F;
+  --ict-danger-light: #FFF1F0;
+  --ict-danger-hover: #CF1322;
+
+  --ict-info: #722ED1;
+  --ict-info-light: #F9F0FF;
+  --ict-info-hover: #5319AC;
+
+  /* 中性色 */
+  --ict-text-emphasis: #0f172a;   /* 强调：标题、核心数据 */
+  --ict-text-primary: #1e293b;    /* 主要：正文、列表项 */
+  --ict-text-secondary: #64748b;  /* 辅助：描述、提示、标签 */
+  --ict-text-disabled: #45484B;   /* 禁用：空状态、不可用 */
+  --ict-text-tertiary: #8C8C8C;   /* 兜底三级灰（旧值保留兼容） */
+
+  --ict-border: #E8E8E8;
+  --ict-border-light: #F0F0F0;
+
+  --ict-bg-page: #F5F5F5;
+  --ict-bg-card: #FFFFFF;
+  --ict-bg-section: #FAFAFA;
+
+  /* ═══════════════════════════════════════
+     2.2 间距系统（4px 基准）
+     ═══════════════════════════════════════ */
+  --ict-space-1: 4px;
+  --ict-space-2: 8px;
+  --ict-space-3: 12px;
+  --ict-space-4: 16px;
+  --ict-space-5: 20px;
+  --ict-space-6: 24px;
+
+  /* ═══════════════════════════════════════
+     2.3 圆角系统
+     ═══════════════════════════════════════ */
+  --ict-radius-sm: 6px;
+  --ict-radius-md: 8px;
+  --ict-radius-lg: 10px;
+  --ict-radius-xl: 12px;
+  --ict-radius-2xl: 14px;
+
+  /* ═══════════════════════════════════════
+     2.4 阴影系统
+     ═══════════════════════════════════════ */
+  --ict-shadow-1: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --ict-shadow-2: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --ict-shadow-3: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --ict-shadow-4: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  /* ═══════════════════════════════════════
+     2.5 字体系统
+     ═══════════════════════════════════════ */
+  --ict-text-xs: 11px;
+  --ict-text-sm: 12px;  /* 辅助提示文本 */
+  --ict-text-base: 14px; /* 主要文本（正文） */
+  --ict-text-md: 15px;
+  --ict-text-lg: 16px;
+  --ict-text-xl: 18px;
+  --ict-text-2xl: 22px;
+}

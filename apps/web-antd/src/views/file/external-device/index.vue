@@ -147,7 +147,7 @@ function ejectDevice(device: ExternalDevice) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 /* 页面顶部概览 */
@@ -232,7 +232,7 @@ function ejectDevice(device: ExternalDevice) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 12px;
-  padding: 16px;
+  padding: 16px 0;
 }
 
 .device-card {

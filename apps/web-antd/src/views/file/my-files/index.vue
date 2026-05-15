@@ -431,15 +431,13 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 .fm-body {
   display: flex;
   flex: 1;
   overflow: hidden;
-  padding: 12px;
-  gap: 12px;
 }
 
 /* 响应式 */

@@ -227,14 +227,14 @@ function handleSaveConfig(data: any) {
 .network-access-page {
   padding-bottom: 32px;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 .protocol-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 0 20px;
+  margin: 0;
 }
 
 </style>

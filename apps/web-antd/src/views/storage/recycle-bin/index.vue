@@ -128,8 +128,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.file-manager-page { display: flex; flex-direction: column; height: 100%; background: #f5f5f5; }
-.fm-body { display: flex; flex: 1; overflow: hidden; padding: 12px; gap: 12px; }
+.file-manager-page { display: flex; flex-direction: column; height: 100%; background: #fff; }
+.fm-body { display: flex; flex: 1; overflow: hidden; }
 .file-manager-panel__path { color: #8c8c8c; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 768px) {

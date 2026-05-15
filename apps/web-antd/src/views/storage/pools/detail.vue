@@ -57,7 +57,7 @@ function goBack() {
           返回
         </Button>
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:database" style="font-size: 20px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:database" style="font-size: 20px; color: var(--ict-primary);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">{{ poolDetail.name }}</h1>

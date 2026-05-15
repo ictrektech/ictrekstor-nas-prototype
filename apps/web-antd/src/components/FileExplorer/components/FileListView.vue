@@ -33,7 +33,23 @@ const emit = defineEmits<{
   share: [file: FileItem];
   copy: [file: FileItem];
   move: [file: FileItem];
+  selectAll: [];
+  clearSelection: [];
 }>();
+
+const selectedCount = computed(() => props.selectedIds.length);
+const isAllSelected = computed(
+  () => props.files.length > 0 && props.files.every((f) => props.selectedIds.includes(f.id)),
+);
+const hasSelection = computed(() => selectedCount.value > 0);
+
+function onHeaderCheck() {
+  if (isAllSelected.value) {
+    emit('clearSelection');
+  } else {
+    emit('selectAll');
+  }
+}
 
 const columns = computed(() => {
   if (props.mode === 'recycle') {
@@ -46,7 +62,7 @@ const columns = computed(() => {
     ];
   }
   return [
-    { title: '名称', dataIndex: 'name', key: 'name', width: 380, ellipsis: true },
+    { title: '名称', dataIndex: 'name', key: 'name', ellipsis: true },
     { title: '类型', dataIndex: 'type', key: 'type', width: 100, align: 'center' as const },
     { title: '大小', dataIndex: 'size', key: 'size', width: 110, align: 'right' as const },
     { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime', width: 180 },
@@ -69,17 +85,36 @@ function customRow(record: any) {
 </script>
 
 <template>
-  <Table
-    :columns="columns"
-    :data-source="files"
-    :loading="loading"
-    row-key="id"
-    size="small"
-    :pagination="false"
-    :row-class-name="rowClassName"
-    :customRow="customRow"
-    class="file-list-view"
-  >
+    <div class="table-wrap">
+      <Table
+      :columns="columns"
+      :data-source="files"
+      :loading="loading"
+      row-key="id"
+      size="small"
+      :pagination="false"
+      :row-class-name="rowClassName"
+      :customRow="customRow"
+      :scroll="{ x: 'max-content' }"
+      class="file-list-view"
+    >
+    <template #headerCell="{ column }">
+      <template v-if="column.key === 'name'">
+        <div class="header-check-wrap" @click.stop>
+          <div
+            class="checkbox header-checkbox"
+            :class="{ 'checkbox--checked': isAllSelected, 'checkbox--indeterminate': hasSelection && !isAllSelected }"
+            @click="onHeaderCheck"
+          >
+            <IconifyIcon v-if="isAllSelected" icon="lucide:check" style="font-size: 10px; color: #fff;" />
+            <div v-else-if="hasSelection" class="indeterminate-dot" />
+          </div>
+          <span v-if="!hasSelection" class="header-text">全选</span>
+          <span v-else class="header-text header-text--active">全选（已选中 {{ selectedCount }} 项）</span>
+        </div>
+      </template>
+      <template v-else>{{ column.title }}</template>
+    </template>
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'name'">
         <div
@@ -131,6 +166,7 @@ function customRow(record: any) {
       </Empty>
     </template>
   </Table>
+  </div>
 </template>
 
 <style scoped>
@@ -190,6 +226,16 @@ function customRow(record: any) {
 /* 文字 */
 .name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #262626; transition: color 0.2s; }
 .size-text, .time-text, .path-text { font-family: 'SF Mono', 'Fira Code', monospace; color: #8c8c8c; font-size: 12px; }
+
+/* 表头 checkbox */
+.header-check-wrap { display: inline-flex; align-items: center; gap: 8px; cursor: default; user-select: none; }
+.header-checkbox { margin-right: 0; }
+.header-text { font-size: 12px; color: #595959; font-weight: 600; }
+.header-text--active { color: #262626; }
+.indeterminate-dot { width: 8px; height: 8px; border-radius: 2px; background: #fff; }
+
+/* 表格外层容器：确保列表区域占满宽度 */
+.table-wrap { width: 100%; }
 
 /* 空状态 */
 .empty-image { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }

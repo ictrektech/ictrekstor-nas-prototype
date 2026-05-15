@@ -22,8 +22,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   showLine: true,
-  defaultWidth: 220,
-  minWidth: 160,
+  defaultWidth: 280,
+  minWidth: 200,
   maxWidth: 600,
 });
 
@@ -315,8 +315,8 @@ watch(
   align-items: center;
   padding: 14px 0;
   background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
+  border: none;
+  border-right: 1px solid #f0f0f0;
   cursor: pointer;
   gap: 10px;
   transition: all 0.2s ease;
@@ -325,8 +325,6 @@ watch(
 
 .drawer-trigger:hover {
   background: #f0f5ff;
-  border-color: #bae0ff;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.08);
 }
 
 .trigger-label {
@@ -342,8 +340,8 @@ watch(
 .drawer-panel {
   height: 100%;
   background: #fff;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
+  border: none;
+  border-right: 1px solid #f0f0f0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -438,7 +436,7 @@ watch(
 .panel-content {
   flex: 1;
   overflow: auto;
-  padding: 8px 4px;
+  padding: 20px;
   /* 隐藏滚动条但保留滚动能力 */
   scrollbar-width: thin;
   scrollbar-color: #d9d9d9 transparent;

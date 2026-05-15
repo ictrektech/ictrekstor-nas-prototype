@@ -153,7 +153,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.public-dirs-page { display: flex; flex-direction: column; height: 100%; background: #f5f5f5; }
+.public-dirs-page { display: flex; flex-direction: column; height: 100%; background: #fff; }
 
 /* ═══ 页面顶部概览 ═══ */
 .page-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #fff; border-bottom: 1px solid #f0f0f0; gap: 16px; flex-shrink: 0; }
@@ -169,8 +169,8 @@ onMounted(() => {
 .overview-value { font-size: 16px; font-weight: 600; color: #262626; font-family: 'SF Mono', 'Fira Code', monospace; }
 
 /* ═══ 主体内容 ═══ */
-.page-body { flex: 1; overflow: auto; padding: 12px; }
-.dirs-card { border-radius: 12px; background: #fff; border: 1px solid #f0f0f0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); }
+.page-body { flex: 1; overflow: auto; }
+.dirs-card { background: #fff; border: none; box-shadow: none; }
 .dirs-card :deep(.ant-card-body) { padding: 16px; }
 
 /* ═══ 工具栏 ═══ */

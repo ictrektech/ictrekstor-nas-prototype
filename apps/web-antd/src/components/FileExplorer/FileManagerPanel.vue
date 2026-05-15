@@ -179,11 +179,13 @@ function onDrop(event: DragEvent) {
       <FileListView v-if="viewMode === 'list'" :files="sortedFiles" :loading="loading"
         :selected-ids="selectedFileIds" :draggable="draggable" :mode="mode" :empty-description="emptyDescription"
         @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart"
+        @select-all="selectAll" @clear-selection="clearSelection"
         @rename="$emit('rename', $event)" @delete-file="$emit('deleteFile', $event)" @restore="$emit('restore', $event)"
         @share="$emit('share', $event)" @copy="$emit('copy', $event)" @move="$emit('move', $event)" />
       <FileGridView v-else :files="sortedFiles" :loading="loading" :selected-ids="selectedFileIds"
         :draggable="draggable" :mode="mode" :empty-description="emptyDescription"
-        @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart" />
+        @item-click="handleItemClick" @toggle-select="toggleSelect" @context-menu="onContextMenu" @drag-start="onDragStart"
+        @select-all="selectAll" @clear-selection="clearSelection" />
     </div>
 
     <FileContextMenu v-model:visible="ctxVisible" :x="ctxPos.x" :y="ctxPos.y" :file="ctxFile" :mode="mode"
@@ -192,9 +194,9 @@ function onDrop(event: DragEvent) {
 </template>
 
 <style scoped>
-.fmp { display: flex; flex-direction: column; flex: 1; height: 100%; border-radius: 8px; border: 1px solid #f0f0f0; overflow: hidden; background: #fff; position: relative; }
+.fmp { display: flex; flex-direction: column; flex: 1; height: 100%; overflow: hidden; background: #fff; position: relative; }
 .fmp--drop-zone { border-style: dashed; border-color: #d9d9d9; }
 .fmp--drag-over { border-color: #1677ff; background: #e6f7ff; }
 .fmp-drop-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(22,119,255,0.06); z-index: 10; pointer-events: none; font-size: 16px; color: #1677ff; font-weight: 500; }
-.fmp-body { flex: 1; overflow: auto; padding: 8px 12px 12px; }
+.fmp-body { flex: 1; overflow: auto; padding: 20px; }
 </style>

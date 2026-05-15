@@ -304,7 +304,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 .page-header {
@@ -387,8 +387,6 @@ onMounted(() => {
   display: flex;
   flex: 1;
   overflow: hidden;
-  padding: 12px;
-  gap: 12px;
 }
 
 .custom-actions {
