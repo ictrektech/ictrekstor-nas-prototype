@@ -14,6 +14,16 @@ npm config set registry https://registry.npmmirror.com/
 npm install -g corepack
 ```
 
+## 启动开发环境
+
+克隆代码：
+```
+git clone http://gitlab.ictrek.internal/ictrek/ictrekstor-nas-prototype.git
+cd ictrekstor-nas-prototype
+```
+注意：如果你的电脑无法访问 http://gitlab.ictrek.internal/ictrek/ictrekstor-nas-prototype，
+可以改成 http://192.168.100.99/ictrek/ictrekstor-nas-prototype
+
 然后安装依赖：
 ```
 pnpm install

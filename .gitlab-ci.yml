@@ -1,0 +1,45 @@
+# GitLab CI/CD Pipeline for ictrekstor-nas-prototype
+# 触发条件：main 分支推送
+# Runner 标签：docker
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: registry.ictrek.internal/library/node:24
+  tags:
+    - docker
+  only:
+    - main
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+  before_script:
+    # 配置 pnpm 环境变量
+    - export PNPM_HOME="$CI_PROJECT_DIR/.pnpm"
+    - export PATH="$PNPM_HOME:$PATH"
+    # 安装 pnpm
+    - corepack enable
+    - corepack prepare pnpm@10.28.2 --activate
+    # 配置 pnpm 缓存
+    - pnpm config set store-dir .pnpm-store
+    # 安装 sshpass（用于非交互式密码传递）
+    - apt-get update && apt-get install -y sshpass
+  script:
+    # 安装依赖
+    - pnpm install --frozen-lockfile
+    # 构建 antd 前端项目（产物输出到 apps/web-antd/dist/）
+    - pnpm run build:antd
+    # 使用 sshpass + scp 推送构建产物到目标服务器
+    # SCP_PASSWORD 从 GitLab CI/CD Variables 中获取
+    - |
+      REMOTE_DIR="/home/ictrek/release-build/vst/ci/$CI_PROJECT_PATH"
+      sshpass -p "$SCP_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        ictrek@192.168.1.199 "mkdir -p $REMOTE_DIR"
+      sshpass -p "$SCP_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        -r apps/web-antd/dist/* \
+        ictrek@192.168.1.199:$REMOTE_DIR
