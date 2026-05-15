@@ -5,11 +5,6 @@
 stages:
   - build
 
-variables:
-  # pnpm 配置
-  PNPM_HOME: "$CI_PROJECT_DIR/.pnpm"
-  PATH: "$PNPM_HOME:$PATH"
-
 build:
   stage: build
   image: registry.ictrek.internal/library/node:24
@@ -24,6 +19,9 @@ build:
     paths:
       - .pnpm-store
   before_script:
+    # 配置 pnpm 环境变量
+    - export PNPM_HOME="$CI_PROJECT_DIR/.pnpm"
+    - export PATH="$PNPM_HOME:$PATH"
     # 安装 pnpm
     - corepack enable
     - corepack prepare pnpm@10.28.2 --activate
