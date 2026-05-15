@@ -1,12 +1,7 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-<<<<<<< HEAD
 import { Button, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
 import { computed, ref } from 'vue';
-=======
-import { Button, Breadcrumb, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
-import { computed } from 'vue';
->>>>>>> 052356bb2fc685856e6fd8659f2fefe3e8fd1cce
 
 import type { BreadcrumbItem, FileItem } from '../types';
 
@@ -126,7 +121,6 @@ const handleGoForward = () => {
       <!-- 面包屑 -->
       <div class="toolbar-breadcrumb-scroll">
         <div class="toolbar-breadcrumb-inner">
-<<<<<<< HEAD
           <div class="toolbar-breadcrumb">
             <template v-for="(item, idx) in breadcrumbPath" :key="item.key">
               <a v-if="idx < breadcrumbPath.length - 1" class="breadcrumb-link" @click="onBreadcrumbClick(item)">
@@ -136,91 +130,6 @@ const handleGoForward = () => {
               <IconifyIcon v-if="idx < breadcrumbPath.length - 1" icon="lucide:chevron-right" class="breadcrumb-separator" />
             </template>
           </div>
-=======
-          <Breadcrumb class="toolbar-breadcrumb">
-            <Breadcrumb.Item v-for="(item, idx) in breadcrumbPath" :key="item.key">
-              <a v-if="idx < breadcrumbPath.length - 1" class="breadcrumb-link" @click="emit('breadcrumbClick', item)">
-                {{ item.title }}
-              </a>
-              <span v-else class="breadcrumb-current">{{ item.title }}</span>
-            </Breadcrumb.Item>
-          </Breadcrumb>
-        </div>
-      </div>
-    </div>
-
-    <!-- 操作行 -->
-    <div class="toolbar-actions-row">
-      <!-- 批量操作栏 -->
-      <div v-if="hasSelection" class="batch-bar" @click.stop>
-        <span class="batch-bar__text">已选中 <strong>{{ selectionCount }}</strong> 项</span>
-        <div class="batch-bar__actions">
-          <template v-if="mode === 'recycle'">
-            <Button size="small" @click="emit('selectAll')">
-              <IconifyIcon icon="lucide:check-square" style="font-size: 12px;" />
-              {{ isAllSelected ? '反全选' : '全选' }}
-            </Button>
-            <Button size="small" @click="emit('batchRestore')">
-              <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px;" />
-              批量还原
-            </Button>
-            <Dropdown placement="bottomRight">
-              <Button size="small"><IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" /> 更多</Button>
-              <template #overlay>
-                <Menu>
-                  <Menu.Item key="batch-delete" danger @click="emit('batchDelete')">
-                    <span class="batch-menu-item batch-menu-item--danger">
-                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      彻底删除
-                    </span>
-                  </Menu.Item>
-                </Menu>
-              </template>
-            </Dropdown>
-          </template>
-          <template v-else>
-            <Button size="small" @click="isAllSelected ? emit('clearSelection') : emit('selectAll')">
-              <IconifyIcon icon="lucide:check-square" style="font-size: 12px;" />
-              {{ isAllSelected ? '反全选' : '全选' }}
-            </Button>
-            <Button size="small" @click="emit('clearSelection')">
-              <IconifyIcon icon="lucide:x" style="font-size: 12px;" />
-              取消选择
-            </Button>
-            <Button v-if="isSingleSelection" size="small" @click="singleSelectedFile && emit('rename', singleSelectedFile)">
-              <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
-              重命名
-            </Button>
-            <Button v-if="canShare" size="small" @click="singleSelectedFile && emit('share', singleSelectedFile)">
-              <IconifyIcon icon="lucide:share-2" style="font-size: 12px;" />
-              <span class="batch-btn-text">分享</span>
-            </Button>
-            <Button size="small" @click="emit('batchCopy')">
-              <IconifyIcon icon="lucide:copy" style="font-size: 12px;" />
-              <span class="batch-btn-text">复制</span>
-            </Button>
-            <Button size="small" @click="emit('batchMove')">
-              <IconifyIcon icon="lucide:move" style="font-size: 12px;" />
-              <span class="batch-btn-text">移动</span>
-            </Button>
-            <Dropdown placement="bottomRight">
-              <Button size="small">
-                <IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" />
-                <span class="batch-btn-text">更多</span>
-              </Button>
-              <template #overlay>
-                <Menu>
-                  <Menu.Item key="batch-delete" danger @click="emit('batchDelete')">
-                    <span class="batch-menu-item batch-menu-item--danger">
-                      <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
-                      <span class="batch-btn-text">批量删除</span>
-                    </span>
-                  </Menu.Item>
-                </Menu>
-              </template>
-            </Dropdown>
-          </template>
->>>>>>> 052356bb2fc685856e6fd8659f2fefe3e8fd1cce
         </div>
       </div>
 
@@ -414,33 +323,9 @@ const handleGoForward = () => {
   white-space: nowrap;
   font-size: 12px;
 }
-<<<<<<< HEAD
 
 /* 搜索 */
 .toolbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-=======
-.toolbar-actions-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
-.batch-bar { display: flex; align-items: center; gap: 12px; }
-.batch-bar__text { font-size: 13px; color: #595959; }
-.batch-bar__actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.batch-btn-text { margin-left: 4px; }
-.batch-menu-item { display: flex; align-items: center; gap: 6px; }
-.batch-menu-item--danger { color: #ff4d4f; }
-
-/* 修复 Dropdown Menu danger 项 hover 时背景与前景红色冲突 */
-:global(.ant-dropdown-menu-item-danger:hover) {
-  color: #ff4d4f !important;
-  background: #fff1f0 !important;
-}
-:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-title-content) {
-  color: #ff4d4f !important;
-}
-:global(.ant-dropdown-menu-item-danger:hover .ant-dropdown-menu-item-icon) {
-  color: #ff4d4f !important;
-}
-
-.toolbar-actions { display: flex; align-items: center; gap: 8px; }
->>>>>>> 052356bb2fc685856e6fd8659f2fefe3e8fd1cce
 .toolbar-search { width: 200px; }
 
 /* 第二行 */
