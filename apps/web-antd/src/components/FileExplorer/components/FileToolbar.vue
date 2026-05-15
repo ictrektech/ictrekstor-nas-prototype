@@ -40,6 +40,7 @@ const emit = defineEmits<{
   batchRestore: [];
   batchCopy: [];
   batchMove: [];
+  batchDownload: [];
 }>();
 
 const internalSearch = computed({
@@ -104,17 +105,17 @@ const handleGoForward = () => {
       <!-- 前进后退按钮 -->
       <div class="toolbar-nav-buttons">
         <Button class="nav-btn" :disabled="!canGoBack" @click="handleGoBack">
-          <IconifyIcon icon="lucide:chevron-left" style="font-size: 14px;" />
+          <IconifyIcon icon="lucide:chevron-left" style="font-size: var(--ict-body-medium);" />
         </Button>
         <Button class="nav-btn" :disabled="!canGoForward" @click="handleGoForward">
-          <IconifyIcon icon="lucide:chevron-right" style="font-size: 14px;" />
+          <IconifyIcon icon="lucide:chevron-right" style="font-size: var(--ict-body-medium);" />
         </Button>
       </div>
 
       <!-- 刷新按钮 -->
       <Tooltip title="刷新">
         <Button class="refresh-btn" @click="emit('refresh')">
-          <IconifyIcon icon="lucide:refresh-cw" style="font-size: 14px;" />
+          <IconifyIcon icon="lucide:refresh-cw" style="font-size: var(--ict-body-medium);" />
         </Button>
       </Tooltip>
 
@@ -137,7 +138,7 @@ const handleGoForward = () => {
       <div class="toolbar-actions" @click.stop>
         <Input v-model:value="internalSearch" placeholder="搜索文件" class="toolbar-search" allow-clear>
           <template #prefix>
-            <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+            <IconifyIcon icon="lucide:search" style="font-size: var(--ict-body-medium); color: var(--ict-text-disabled);" />
           </template>
         </Input>
       </div>
@@ -149,11 +150,11 @@ const handleGoForward = () => {
       <div class="toolbar-left-actions" @click.stop>
         <template v-if="mode !== 'recycle'">
           <Button type="primary" size="small" class="action-btn-primary" @click="emit('newFolder')">
-            <IconifyIcon icon="lucide:folder-plus" style="font-size: 14px;" />
+            <IconifyIcon icon="lucide:folder-plus" style="font-size: var(--ict-body-medium);" />
             <span>新建</span>
           </Button>
           <Button size="small" class="action-btn-outline" @click="emit('upload')">
-            <IconifyIcon icon="lucide:upload" style="font-size: 14px;" />
+            <IconifyIcon icon="lucide:upload" style="font-size: var(--ict-body-medium);" />
             <span>上传</span>
           </Button>
         </template>
@@ -166,16 +167,16 @@ const handleGoForward = () => {
           <div class="batch-bar__actions">
             <template v-if="mode === 'recycle'">
               <Button @click="emit('batchRestore')">
-                <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 12px;" />
+                <IconifyIcon icon="lucide:rotate-ccw" style="font-size: var(--ict-body-small);" />
                 批量还原
               </Button>
               <Dropdown placement="bottomRight">
-                <Button><IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" /> 更多</Button>
+                <Button><IconifyIcon icon="lucide:more-horizontal" style="font-size: var(--ict-body-small);" /> 更多</Button>
                 <template #overlay>
                   <Menu>
                     <Menu.Item key="batch-delete" danger @click="emit('batchDelete')">
                       <span class="batch-menu-item batch-menu-item--danger">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium);" />
                         彻底删除
                       </span>
                     </Menu.Item>
@@ -185,31 +186,35 @@ const handleGoForward = () => {
             </template>
             <template v-else>
               <Button v-if="isSingleSelection" @click="singleSelectedFile && emit('rename', singleSelectedFile)">
-                <IconifyIcon icon="lucide:pencil" style="font-size: 12px;" />
+                <IconifyIcon icon="lucide:pencil" style="font-size: var(--ict-body-small);" />
                 重命名
               </Button>
+              <Button @click="emit('batchDownload')">
+                <IconifyIcon icon="lucide:download" style="font-size: var(--ict-body-small);" />
+                <span class="batch-btn-text">下载</span>
+              </Button>
               <Button v-if="canShare" @click="singleSelectedFile && emit('share', singleSelectedFile)">
-                <IconifyIcon icon="lucide:share-2" style="font-size: 12px;" />
+                <IconifyIcon icon="lucide:share-2" style="font-size: var(--ict-body-small);" />
                 <span class="batch-btn-text">分享</span>
               </Button>
               <Button @click="emit('batchCopy')">
-                <IconifyIcon icon="lucide:copy" style="font-size: 12px;" />
+                <IconifyIcon icon="lucide:copy" style="font-size: var(--ict-body-small);" />
                 <span class="batch-btn-text">复制</span>
               </Button>
               <Button @click="emit('batchMove')">
-                <IconifyIcon icon="lucide:move" style="font-size: 12px;" />
+                <IconifyIcon icon="lucide:move" style="font-size: var(--ict-body-small);" />
                 <span class="batch-btn-text">移动</span>
               </Button>
               <Dropdown placement="bottomRight">
                 <Button>
-                  <IconifyIcon icon="lucide:more-horizontal" style="font-size: 12px;" />
+                  <IconifyIcon icon="lucide:more-horizontal" style="font-size: var(--ict-body-small);" />
                   <span class="batch-btn-text">更多</span>
                 </Button>
                 <template #overlay>
                   <Menu>
                     <Menu.Item key="batch-delete" danger @click="emit('batchDelete')">
                       <span class="batch-menu-item batch-menu-item--danger">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: 13px;" />
+                        <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium);" />
                         <span class="batch-btn-text">批量删除</span>
                       </span>
                     </Menu.Item>
@@ -223,8 +228,8 @@ const handleGoForward = () => {
         <!-- 视图切换 -->
         <div class="toolbar-view-actions">
           <Radio.Group v-model:value="internalViewMode" class="toolbar-view-toggle">
-            <Radio.Button value="list"><IconifyIcon icon="lucide:list" style="font-size: 14px;" /></Radio.Button>
-            <Radio.Button value="grid"><IconifyIcon icon="lucide:layout-grid" style="font-size: 14px;" /></Radio.Button>
+            <Radio.Button value="list"><IconifyIcon icon="lucide:list" style="font-size: var(--ict-body-medium);" /></Radio.Button>
+            <Radio.Button value="grid"><IconifyIcon icon="lucide:layout-grid" style="font-size: var(--ict-body-medium);" /></Radio.Button>
           </Radio.Group>
         </div>
       </div>
@@ -233,7 +238,7 @@ const handleGoForward = () => {
 </template>
 
 <style scoped>
-.file-toolbar { display: flex; flex-direction: column; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f5f5f5; flex-shrink: 0; }
+.file-toolbar { display: flex; flex-direction: column; gap: 16px; padding: 20px; border-bottom: 1px solid var(--ict-deliver); flex-shrink: 0; }
 .toolbar-path-row { display: flex; align-items: center; gap: 8px; min-height: 32px; }
 
 /* 前进后退按钮 */
@@ -287,7 +292,7 @@ const handleGoForward = () => {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  background: #fff;
+  background: var(--ict-bg-card);
   border: 1px solid #e9ecef;
   border-radius: 8px;
   padding: 0 14px;
@@ -297,12 +302,12 @@ const handleGoForward = () => {
 .toolbar-breadcrumb {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   white-space: nowrap;
   gap: 4px;
 }
 .breadcrumb-separator {
-  font-size: 10px;
+  font-size: var(--ict-mark-small);
   color: #d1d5db;
   flex-shrink: 0;
 }
@@ -311,7 +316,7 @@ const handleGoForward = () => {
   cursor: pointer;
   transition: color 0.2s ease;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 .breadcrumb-link:hover {
   color: #374151;
@@ -321,7 +326,7 @@ const handleGoForward = () => {
   color: #1f2937;
   font-weight: 500;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 /* 搜索 */
@@ -341,7 +346,7 @@ const handleGoForward = () => {
   gap: 4px;
   height: 32px;
   padding: 0 12px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 
 /* 右侧组：批量操作 + 视图切换 */
@@ -360,7 +365,7 @@ const handleGoForward = () => {
 
 /* 批量操作栏 */
 .batch-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.batch-bar__text { font-size: 14px; color: #595959; }
+.batch-bar__text { font-size: var(--ict-body-medium); color: var(--ict-text-secondary); }
 .batch-bar__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .batch-bar__actions :deep(.ant-btn) {
   display: inline-flex;
@@ -368,9 +373,9 @@ const handleGoForward = () => {
   justify-content: center;
   height: 32px;
   padding: 0 10px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 .batch-btn-text { margin-left: 4px; }
 .batch-menu-item { display: flex; align-items: center; gap: 6px; }
-.batch-menu-item--danger { color: #ff4d4f; }
+.batch-menu-item--danger { color: var(--ict-danger); }
 </style>

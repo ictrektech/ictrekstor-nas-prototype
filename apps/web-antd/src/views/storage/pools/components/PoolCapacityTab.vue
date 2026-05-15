@@ -15,37 +15,37 @@ const capacityPercent = computed(() => {
 });
 
 function getCapacityColor(percent: number): string {
-  if (percent >= 90) return '#ff4d4f';
-  if (percent >= 70) return '#faad14';
-  return '#1677ff';
+  if (percent >= 90) return 'var(--ict-danger)';
+  if (percent >= 70) return 'var(--ict-warning)';
+  return 'var(--ict-primary)';
 }
 
 const capacityStats = computed(() => [
   {
     icon: 'lucide:hard-drive',
-    iconColor: '#1677ff',
-    bgColor: '#e6f4ff',
+    iconColor: 'var(--ict-primary)',
+    bgColor: 'var(--ict-primary-light)',
     title: '总容量',
     value: props.poolDetail.totalCapacity,
   },
   {
     icon: 'lucide:database',
-    iconColor: '#52c41a',
-    bgColor: '#f6ffed',
+    iconColor: 'var(--ict-success)',
+    bgColor: 'var(--ict-success-light)',
     title: '已用容量',
     value: props.poolDetail.usedCapacity,
   },
   {
     icon: 'lucide:folder-open',
-    iconColor: '#faad14',
+    iconColor: 'var(--ict-warning)',
     bgColor: '#fffbe6',
     title: '可用容量',
     value: props.poolDetail.availableCapacity,
   },
   {
     icon: 'lucide:percent',
-    iconColor: '#ff4d4f',
-    bgColor: '#fff1f0',
+    iconColor: 'var(--ict-danger)',
+    bgColor: 'var(--ict-danger-light)',
     title: '使用率',
     value: `${capacityPercent.value}%`,
   },
@@ -67,7 +67,7 @@ const capacityStats = computed(() => [
         >
           <IconifyIcon
             :icon="stat.icon"
-            style="font-size: 18px;"
+            style="font-size: var(--ict-title-large);"
             :style="{ color: stat.iconColor }"
           />
         </div>
@@ -86,7 +86,7 @@ const capacityStats = computed(() => [
     <!-- 容量进度条 -->
     <div class="capacity-progress-section">
       <h3 class="section-title">
-        <IconifyIcon icon="lucide:pie-chart" style="font-size: 14px; color: #1677ff;" />
+        <IconifyIcon icon="lucide:pie-chart" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
         容量分布
       </h3>
       <Progress
@@ -98,17 +98,17 @@ const capacityStats = computed(() => [
       />
       <div class="capacity-detail">
         <div class="capacity-detail-item">
-          <span class="detail-dot" style="background: #1677ff;" />
+          <span class="detail-dot" style="background: var(--ict-primary);" />
           <span class="detail-label">已用</span>
           <span class="detail-value">{{ poolDetail.usedCapacity }}</span>
         </div>
         <div class="capacity-detail-item">
-          <span class="detail-dot" style="background: #52c41a;" />
+          <span class="detail-dot" style="background: var(--ict-success);" />
           <span class="detail-label">可用</span>
           <span class="detail-value">{{ poolDetail.availableCapacity }}</span>
         </div>
         <div class="capacity-detail-item">
-          <span class="detail-dot" style="background: #d9d9d9;" />
+          <span class="detail-dot" style="background: var(--ict-text-disabled);" />
           <span class="detail-label">总容量</span>
           <span class="detail-value">{{ poolDetail.totalCapacity }}</span>
         </div>
@@ -118,7 +118,7 @@ const capacityStats = computed(() => [
     <!-- 各卷容量 -->
     <div class="volume-capacity-section">
       <h3 class="section-title">
-        <IconifyIcon icon="lucide:layers" style="font-size: 14px; color: #1677ff;" />
+        <IconifyIcon icon="lucide:layers" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
         存储卷容量分布
       </h3>
       <div class="volume-capacity-list">
@@ -158,7 +158,7 @@ const capacityStats = computed(() => [
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: #fafafa;
+  background: var(--ict-bg-section);
   border-radius: 8px;
 }
 
@@ -173,24 +173,24 @@ const capacityStats = computed(() => [
 }
 
 .capacity-stat-info { flex: 1; }
-.capacity-stat-title { font-size: 12px; color: #8c8c8c; margin-bottom: 2px; }
-.capacity-stat-value { font-size: 18px; font-weight: 700; font-family: 'SF Mono', 'Fira Code', monospace; }
+.capacity-stat-title { font-size: var(--ict-body-small); color: var(--ict-text-secondary); margin-bottom: 2px; }
+.capacity-stat-value { font-size: var(--ict-title-large); font-weight: 700; font-family: var(--ict-font-family); }
 
 .capacity-progress-section { margin-bottom: 20px; }
-.section-title { font-size: 14px; font-weight: 600; color: #262626; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px; }
+.section-title { font-size: var(--ict-body-medium); font-weight: 600; color: var(--ict-text-emphasis); margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px; }
 
-.capacity-detail { display: flex; gap: 24px; margin-top: 12px; padding: 12px; background: #fafafa; border-radius: 8px; }
+.capacity-detail { display: flex; gap: 24px; margin-top: 12px; padding: 12px; background: var(--ict-bg-section); border-radius: 8px; }
 .capacity-detail-item { display: flex; align-items: center; gap: 6px; }
 .detail-dot { width: 10px; height: 10px; border-radius: 3px; }
-.detail-label { font-size: 12px; color: #8c8c8c; }
-.detail-value { font-size: 13px; font-weight: 600; color: #262626; }
+.detail-label { font-size: var(--ict-body-small); color: var(--ict-text-secondary); }
+.detail-value { font-size: var(--ict-mark-medium); font-weight: 600; color: var(--ict-text-emphasis); }
 
 .volume-capacity-section {}
 .volume-capacity-list { display: flex; flex-direction: column; gap: 10px; }
-.volume-capacity-item { padding: 10px 12px; background: #fafafa; border-radius: 8px; }
+.volume-capacity-item { padding: 10px 12px; background: var(--ict-bg-section); border-radius: 8px; }
 .volume-capacity-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.volume-name { font-size: 13px; font-weight: 500; color: #262626; }
-.volume-ratio { font-size: 12px; color: #8c8c8c; font-family: 'SF Mono', 'Fira Code', monospace; }
+.volume-name { font-size: var(--ict-mark-medium); font-weight: 500; color: var(--ict-text-emphasis); }
+.volume-ratio { font-size: var(--ict-body-small); color: var(--ict-text-secondary); font-family: var(--ict-font-family); }
 
 @media (max-width: 1200px) {
   .capacity-overview { grid-template-columns: repeat(2, 1fr); }

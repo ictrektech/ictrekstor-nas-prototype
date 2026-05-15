@@ -83,16 +83,16 @@ function formatHours(hours?: number): string {
 }
 
 function getSmartHealthColor(health: string): string {
-  if (health === 'PASSED') return '#52c41a';
-  if (health === 'FAILED') return '#ff4d4f';
-  return '#faad14';
+  if (health === 'PASSED') return 'var(--ict-success)';
+  if (health === 'FAILED') return 'var(--ict-danger)';
+  return 'var(--ict-warning)';
 }
 
 function getTempColor(temp?: number): string {
-  if (!temp) return '#8c8c8c';
-  if (temp < 40) return '#52c41a';
-  if (temp < 50) return '#faad14';
-  return '#ff4d4f';
+  if (!temp) return 'var(--ict-text-secondary)';
+  if (temp < 40) return 'var(--ict-success)';
+  if (temp < 50) return 'var(--ict-warning)';
+  return 'var(--ict-danger)';
 }
 </script>
 
@@ -100,11 +100,11 @@ function getTempColor(temp?: number): string {
   <Card class="smart-panel" :bordered="true" :body-style="{ padding: '16px' }">
     <div class="panel-title smart-title">
       <div class="smart-title-left">
-        <IconifyIcon icon="lucide:activity" style="font-size: 14px;" />
+        <IconifyIcon icon="lucide:activity" style="font-size: var(--ict-body-medium);" />
         健康状态
       </div>
       <Button size="small" class="view-raw-btn" @click="emit('show-detail')">
-        <IconifyIcon icon="lucide:file-text" style="font-size: 11px;" />
+        <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-mark-small);" />
         查看完整信息
       </Button>
     </div>
@@ -126,19 +126,19 @@ function getTempColor(temp?: number): string {
       </div>
       <div class="smart-cell">
         <span class="smart-cell-label">重映射扇区</span>
-        <span class="smart-cell-value" :style="{ color: smartSummary.reallocatedSectors > 0 ? '#ff4d4f' : '#52c41a' }">
+        <span class="smart-cell-value" :style="{ color: smartSummary.reallocatedSectors > 0 ? 'var(--ict-danger)' : 'var(--ict-success)' }">
           {{ smartSummary.reallocatedSectors }}
         </span>
       </div>
       <div class="smart-cell">
         <span class="smart-cell-label">待处理扇区</span>
-        <span class="smart-cell-value" :style="{ color: smartSummary.pendingSectors > 0 ? '#ff4d4f' : '#52c41a' }">
+        <span class="smart-cell-value" :style="{ color: smartSummary.pendingSectors > 0 ? 'var(--ict-danger)' : 'var(--ict-success)' }">
           {{ smartSummary.pendingSectors }}
         </span>
       </div>
       <div class="smart-cell">
         <span class="smart-cell-label">不可修复扇区</span>
-        <span class="smart-cell-value" :style="{ color: smartSummary.uncorrectableSectors > 0 ? '#ff4d4f' : '#52c41a' }">
+        <span class="smart-cell-value" :style="{ color: smartSummary.uncorrectableSectors > 0 ? 'var(--ict-danger)' : 'var(--ict-success)' }">
           {{ smartSummary.uncorrectableSectors }}
         </span>
       </div>
@@ -150,7 +150,7 @@ function getTempColor(temp?: number): string {
       </div>
       <div class="smart-cell">
         <span class="smart-cell-label">CRC 错误</span>
-        <span class="smart-cell-value" :style="{ color: smartSummary.udmaCrcErrors > 0 ? '#ff4d4f' : '#52c41a' }">
+        <span class="smart-cell-value" :style="{ color: smartSummary.udmaCrcErrors > 0 ? 'var(--ict-danger)' : 'var(--ict-success)' }">
           {{ smartSummary.udmaCrcErrors }}
         </span>
       </div>
@@ -169,7 +169,7 @@ function getTempColor(temp?: number): string {
     </div>
 
     <div v-else class="smart-empty">
-      <IconifyIcon icon="lucide:activity" style="font-size: 32px; color: #d9d9d9;" />
+      <IconifyIcon icon="lucide:activity" style="font-size: 32px; color: var(--ict-text-disabled);" />
       <span>暂无 SMART 信息</span>
     </div>
   </Card>
@@ -181,9 +181,9 @@ function getTempColor(temp?: number): string {
 }
 
 .panel-title {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -201,7 +201,7 @@ function getTempColor(temp?: number): string {
 }
 
 .view-raw-btn {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   display: inline-flex;
   align-items: center;
   gap: 3px;
@@ -221,21 +221,21 @@ function getTempColor(temp?: number): string {
   flex-direction: column;
   gap: 3px;
   padding: 8px 10px;
-  background: #fafafa;
+  background: var(--ict-bg-section);
   border-radius: 8px;
-  border-left: 3px solid #d9d9d9;
+  border-left: 3px solid var(--ict-text-disabled);
 }
 
 .smart-cell-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .smart-cell-value {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 .smart-empty {
@@ -244,8 +244,8 @@ function getTempColor(temp?: number): string {
   align-items: center;
   gap: 8px;
   padding: 40px 0;
-  color: #8c8c8c;
-  font-size: 13px;
+  color: var(--ict-text-secondary);
+  font-size: var(--ict-mark-medium);
 }
 
 @media (max-width: 768px) {

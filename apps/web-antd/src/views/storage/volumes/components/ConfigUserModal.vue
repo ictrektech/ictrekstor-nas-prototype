@@ -120,20 +120,20 @@ function handleCancel() {
             <Radio.Group v-model:value="addUserForm.permission">
               <Radio value="read-write">
                 <span class="perm-label">
-                  <IconifyIcon icon="lucide:edit-3" style="font-size: 12px;" />
+                  <IconifyIcon icon="lucide:edit-3" style="font-size: var(--ict-body-small);" />
                   读写
                 </span>
               </Radio>
               <Radio value="read-only">
                 <span class="perm-label">
-                  <IconifyIcon icon="lucide:eye" style="font-size: 12px;" />
+                  <IconifyIcon icon="lucide:eye" style="font-size: var(--ict-body-small);" />
                   只读
                 </span>
               </Radio>
             </Radio.Group>
           </div>
           <Button type="primary" @click="handleAddUser">
-            <IconifyIcon icon="lucide:plus" style="font-size: 12px;" />
+            <IconifyIcon icon="lucide:plus" style="font-size: var(--ict-body-small);" />
             添加
           </Button>
         </div>
@@ -155,8 +155,8 @@ function handleCancel() {
   gap: 12px;
 }
 .form-label {
-  font-size: 13px;
-  color: #595959;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-secondary);
   min-width: 70px;
 }
 .perm-label {

@@ -195,11 +195,11 @@ function handleSave(file: FileItem) {
 function nodeIconResolver(node: FileTreeNode) {
   switch (node.type) {
     case 'shared-user':
-      return { icon: 'lucide:user-circle', color: '#722ed1' };
+      return { icon: 'lucide:user-circle', color: 'var(--ict-info)' };
     case 'folder':
       return { icon: 'lucide:folder-symlink', color: '#a855f7' };
     default:
-      return { icon: 'lucide:folder', color: '#faad14' };
+      return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
   }
 }
 
@@ -214,7 +214,7 @@ onMounted(() => {
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:share-2" style="font-size: 20px; color: #722ed1;" />
+          <IconifyIcon icon="lucide:share-2" style="font-size: var(--ict-title-large); color: var(--ict-info);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">他人分享</h1>
@@ -223,14 +223,14 @@ onMounted(() => {
       </div>
       <div class="page-header-right">
         <div class="overview-card">
-          <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #722ed1;" />
+          <IconifyIcon icon="lucide:users" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
           <div class="overview-info">
             <span class="overview-label">分享者</span>
             <span class="overview-value">{{ overviewStats.users }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
           <div class="overview-info">
             <span class="overview-label">分享文件夹</span>
             <span class="overview-value">{{ treeData.reduce((sum, s) => sum + (s.children?.length || 0), 0) }}</span>
@@ -267,11 +267,11 @@ onMounted(() => {
         <template #action-cell="{ file }">
           <div class="custom-actions">
             <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
-              <IconifyIcon icon="lucide:download" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:download" style="font-size: var(--ict-mark-medium);" />
               下载
             </Button>
             <Button size="small" type="link" class="action-link" @click="handleSave(file)">
-              <IconifyIcon icon="lucide:folder-input" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:folder-input" style="font-size: var(--ict-mark-medium);" />
               保存
             </Button>
           </div>
@@ -286,7 +286,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 .page-header {
@@ -294,8 +294,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -310,7 +310,7 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #f9f0ff;
+  background: var(--ict-info-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -318,16 +318,16 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -342,7 +342,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -354,15 +354,15 @@ onMounted(() => {
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 .fm-body {

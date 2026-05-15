@@ -116,7 +116,7 @@ const emit = defineEmits<{
             class="detail-btn"
             @click="emit('go-detail', disk)"
           >
-            <IconifyIcon icon="lucide:file-text" style="font-size: 11px;" />
+            <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-mark-small);" />
             详细信息
           </Button>
         </div>
@@ -148,7 +148,7 @@ const emit = defineEmits<{
               >
                 <IconifyIcon
                   icon="lucide:copy"
-                  style="font-size: 10px;"
+                  style="font-size: var(--ict-mark-small);"
                 />
               </span>
             </Tooltip>
@@ -172,7 +172,7 @@ const emit = defineEmits<{
           >
             <IconifyIcon
               icon="lucide:database"
-              style="font-size: 10px; margin-right: 2px;"
+              style="font-size: var(--ict-mark-small); margin-right: 2px;"
             />
             {{ pools.find((p) => p.id === pid)?.name || pid }}
           </Tag>
@@ -218,14 +218,14 @@ const emit = defineEmits<{
 }
 
 .disk-icon {
-  font-size: 22px;
+  font-size: var(--ict-headline-small);
 }
 
 .disk-status-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: 0 0 0 2px var(--ict-bg-card);
 }
 
 /* 右侧信息区 */
@@ -256,21 +256,21 @@ const emit = defineEmits<{
 }
 
 .disk-device-name {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 700;
-  color: #141414;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
   line-height: 1;
   flex-shrink: 0;
   letter-spacing: 0.3px;
 }
 
 .disk-capacity {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   font-weight: 600;
-  color: #1677ff;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  background: #e6f4ff;
+  color: var(--ict-primary);
+  font-family: var(--ict-font-family);
+  background: var(--ict-primary-light);
   padding: 1px 6px;
   border-radius: 4px;
   flex-shrink: 0;
@@ -280,7 +280,7 @@ const emit = defineEmits<{
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   margin-right: 0;
   padding: 0 6px;
   border: 1px solid;
@@ -303,7 +303,7 @@ const emit = defineEmits<{
 }
 
 .detail-btn {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -324,19 +324,19 @@ const emit = defineEmits<{
 }
 
 .action-icon {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 .blink-active {
-  background: #fff7e6;
+  background: var(--ict-warning-light);
   border-color: #ffd591;
   color: #d46b08;
 }
 
 .locate-active {
-  background: #e6f4ff;
-  border-color: #1677ff;
-  color: #1677ff;
+  background: var(--ict-primary-light);
+  border-color: var(--ict-primary);
+  color: var(--ict-primary);
 }
 
 .blink-pulse {
@@ -367,14 +367,14 @@ const emit = defineEmits<{
 }
 
 .attr-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
   flex-shrink: 0;
 }
 
 .attr-value {
-  font-size: 12px;
-  color: #262626;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-emphasis);
   font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -385,11 +385,11 @@ const emit = defineEmits<{
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 .copy-icon {
-  color: #bfbfbf;
+  color: var(--ict-text-disabled);
   cursor: pointer;
   transition: color 0.2s;
   display: inline-flex;
@@ -397,7 +397,7 @@ const emit = defineEmits<{
 }
 
 .copy-icon:hover {
-  color: #1677ff;
+  color: var(--ict-primary);
 }
 
 /* 存储池 */
@@ -416,7 +416,7 @@ const emit = defineEmits<{
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   margin-right: 0;
 }
 
@@ -430,8 +430,8 @@ const emit = defineEmits<{
 }
 
 .pool-empty-text {
-  font-size: 11px;
-  color: #bfbfbf;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-disabled);
   font-style: italic;
 }
 
@@ -447,11 +447,11 @@ const emit = defineEmits<{
   }
 
   .disk-icon {
-    font-size: 18px;
+    font-size: var(--ict-title-large);
   }
 
   .disk-device-name {
-    font-size: 14px;
+    font-size: var(--ict-body-medium);
   }
 
   .info-attrs {
@@ -465,7 +465,7 @@ const emit = defineEmits<{
   .detail-btn {
     padding: 0 6px;
     height: 26px;
-    font-size: 10px;
+    font-size: var(--ict-mark-small);
   }
 
   .action-btn {

@@ -32,7 +32,7 @@ const emit = defineEmits<{
   padding: 16px;
   border-radius: 6px;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   line-height: 1.6;
   overflow-x: auto;
   max-height: 600px;

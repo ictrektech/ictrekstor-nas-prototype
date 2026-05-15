@@ -25,10 +25,10 @@ const emit = defineEmits<{
   <div class="link-section">
     <div class="link-section-header">
       <Checkbox :checked="enabled" @update:checked="emit('update:enabled', $event)">
-        <span style="font-weight: 500; font-size: 13px;">启用外链分享</span>
+        <span style="font-weight: 500; font-size: var(--ict-mark-medium);">启用外链分享</span>
       </Checkbox>
       <Tooltip title="开启后，未登录用户也可通过链接访问">
-        <IconifyIcon icon="lucide:circle-help" style="font-size: 13px; color: #bfbfbf; cursor: help;" />
+        <IconifyIcon icon="lucide:circle-help" style="font-size: var(--ict-mark-medium); color: var(--ict-text-disabled); cursor: help;" />
       </Tooltip>
     </div>
 
@@ -48,7 +48,7 @@ const emit = defineEmits<{
         <Form.Item label="访问密码" class="config-item">
           <Input :value="password" placeholder="公开访问" size="small" type="password" @update:value="emit('update:password', $event)">
             <template #prefix>
-              <IconifyIcon icon="lucide:lock" style="font-size: 12px; color: #bfbfbf;" />
+              <IconifyIcon icon="lucide:lock" style="font-size: var(--ict-body-small); color: var(--ict-text-disabled);" />
             </template>
           </Input>
         </Form.Item>
@@ -59,7 +59,7 @@ const emit = defineEmits<{
 
 <style scoped>
 .link-section {
-  background: #fafafa;
+  background: var(--ict-bg-section);
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -73,7 +73,7 @@ const emit = defineEmits<{
 .link-config {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--ict-border-light);
 }
 
 .config-grid {
@@ -88,11 +88,11 @@ const emit = defineEmits<{
 
 .config-item :deep(.ant-form-item-label) {
   padding-bottom: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 .config-item :deep(.ant-form-item-label > label) {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 @media (max-width: 768px) {

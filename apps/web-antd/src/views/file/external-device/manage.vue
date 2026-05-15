@@ -271,21 +271,21 @@ function refreshLocal() {
 // 树节点图标
 function nodeIconResolver(node: FileTreeNode) {
   const device = currentDevice.value;
-  if (!device) return { icon: 'lucide:usb', color: '#1677ff' };
+  if (!device) return { icon: 'lucide:usb', color: 'var(--ict-primary)' };
   if (node.type?.startsWith('device-')) {
     if (node.type === 'device-disconnected') {
-      return { icon: 'lucide:usb', color: '#bfbfbf' };
+      return { icon: 'lucide:usb', color: 'var(--ict-text-disabled)' };
     }
-    return { icon: 'lucide:usb', color: '#1677ff' };
+    return { icon: 'lucide:usb', color: 'var(--ict-primary)' };
   }
-  return { icon: 'lucide:folder', color: '#faad14' };
+  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
 }
 
 function localNodeIconResolver(node: FileTreeNode) {
   if (node.type === 'local-root') {
-    return { icon: 'lucide:server', color: '#52c41a' };
+    return { icon: 'lucide:server', color: 'var(--ict-success)' };
   }
-  return { icon: 'lucide:folder', color: '#faad14' };
+  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
 }
 
 // 返回列表
@@ -423,7 +423,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   overflow: hidden;
 }
 
@@ -470,7 +470,7 @@ onMounted(() => {
   width: 2px;
   height: 64px;
   border-radius: 2px;
-  background: #d9d9d9;
+  background: var(--ict-text-disabled);
   display: block;
 }
 

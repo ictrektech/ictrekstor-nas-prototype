@@ -35,7 +35,7 @@ defineExpose({
   <Card class="diagram-card" :bordered="true" :body-style="{ padding: 0 }">
     <div class="diagram-card-header">
       <div class="diagram-card-title">
-        <IconifyIcon icon="lucide:layout-grid" style="font-size: 16px; color: #595959;" />
+        <IconifyIcon icon="lucide:layout-grid" style="font-size: var(--ict-title-medium); color: var(--ict-text-secondary);" />
         硬件示意图
       </div>
       <span class="diagram-hint">点击插槽可查看对应硬盘信息</span>
@@ -44,7 +44,7 @@ defineExpose({
       <!-- 前面板 -->
       <div class="diagram-panel">
         <div class="diagram-panel-label">
-          <IconifyIcon icon="lucide:square" style="font-size: 12px; color: #8c8c8c;" />
+          <IconifyIcon icon="lucide:square" style="font-size: var(--ict-body-small); color: var(--ict-text-secondary);" />
           前面板
         </div>
         <DeviceDiagram
@@ -59,7 +59,7 @@ defineExpose({
       <!-- 后面板 -->
       <div class="diagram-panel">
         <div class="diagram-panel-label">
-          <IconifyIcon icon="lucide:square" style="font-size: 12px; color: #8c8c8c;" />
+          <IconifyIcon icon="lucide:square" style="font-size: var(--ict-body-small); color: var(--ict-text-secondary);" />
           后面板
         </div>
         <DeviceDiagram
@@ -76,9 +76,9 @@ defineExpose({
 </template>
 
 <style scoped>
-.diagram-card { background: #ffffff; border-radius: 14px; border: 1px solid #e8e8e8; box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow: hidden; }
-.diagram-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
-.diagram-card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: #262626; }
-.diagram-hint { font-size: 12px; color: #bfbfbf; }
+.diagram-card { background: var(--ict-bg-card); border-radius: 14px; border: 1px solid var(--ict-border); box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow: hidden; }
+.diagram-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--ict-border-light); background: var(--ict-bg-section); }
+.diagram-card-title { display: flex; align-items: center; gap: 10px; font-size: var(--ict-title-small); font-weight: 600; color: var(--ict-text-emphasis); }
+.diagram-hint { font-size: var(--ict-body-small); color: var(--ict-text-disabled); }
 .diagram-panels { display: flex; align-items: stretch; justify-content: center; gap: 0; }
 </style>

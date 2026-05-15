@@ -71,7 +71,7 @@ function onGoToDisk(deviceName: string) {
             class="action-btn"
             @click="onGoToDisk(record.deviceName)"
           >
-            <IconifyIcon icon="lucide:external-link" style="font-size: 12px;" />
+            <IconifyIcon icon="lucide:external-link" style="font-size: var(--ict-body-small);" />
             详情
           </Button>
         </template>
@@ -83,9 +83,9 @@ function onGoToDisk(deviceName: string) {
 <style scoped>
 .disk-tab-content { padding: 12px 16px 20px; }
 :deep(.ant-table) { border-radius: 8px; overflow: hidden; }
-:deep(.ant-table-thead > tr > th) { background: #fafafa; font-weight: 600; }
+:deep(.ant-table-thead > tr > th) { background: var(--ict-bg-section); font-weight: 600; }
 :deep(.ant-table-tbody > tr) { transition: all 0.2s ease; border-left: 3px solid transparent; }
 :deep(.ant-table-tbody > tr:hover > td) { background: #f0f7ff; }
-:deep(.ant-table-tbody > tr:hover) { border-left-color: #1677ff; }
-.action-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; border-radius: 6px; }
+:deep(.ant-table-tbody > tr:hover) { border-left-color: var(--ict-primary); }
+.action-btn { display: inline-flex; align-items: center; gap: 4px; font-size: var(--ict-body-small); border-radius: 6px; }
 </style>

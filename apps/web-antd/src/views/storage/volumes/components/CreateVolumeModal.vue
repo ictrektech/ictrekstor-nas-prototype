@@ -76,7 +76,7 @@ function handleCancel() {
     class="create-volume-modal"
   >
     <template #title>
-      <IconifyIcon icon="lucide:plus-circle" style="font-size: 18px; color: #1677ff;" />
+      <IconifyIcon icon="lucide:plus-circle" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
       创建存储空间
     </template>
     <Form ref="formRef" :model="formState" :rules="rules" layout="vertical">
@@ -88,13 +88,13 @@ function handleCancel() {
         <Radio.Group v-model:value="formState.sourceType">
           <Radio value="pool">
             <span class="radio-label">
-              <IconifyIcon icon="lucide:database" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:database" style="font-size: var(--ict-mark-medium);" />
               存储池
             </span>
           </Radio>
           <Radio value="directory">
             <span class="radio-label">
-              <IconifyIcon icon="lucide:folder" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:folder" style="font-size: var(--ict-mark-medium);" />
               目录
             </span>
           </Radio>

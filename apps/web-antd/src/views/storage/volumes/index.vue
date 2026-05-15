@@ -257,7 +257,7 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 存储空间表头 -->
         <div class="volumes-section-header">
           <div class="volumes-section-title">
-            <IconifyIcon icon="lucide:box" style="font-size: 14px; color: #1677ff;" />
+            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
             <span>存储空间</span>
             <span class="volumes-count">{{ getVolumesByPool(pool.id).length }}</span>
           </div>
@@ -276,7 +276,7 @@ function handleDeleteVolume(vol: StorageVolume) {
 
           <!-- 空状态 -->
           <div v-if="getVolumesByPool(pool.id).length === 0" class="pool-empty">
-            <IconifyIcon icon="lucide:inbox" style="font-size: 20px; color: #d9d9d9;" />
+            <IconifyIcon icon="lucide:inbox" style="font-size: var(--ict-title-large); color: var(--ict-text-disabled);" />
             <span>该存储池下暂无存储空间</span>
           </div>
         </div>
@@ -287,8 +287,8 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 目录头部信息 -->
         <div class="pool-header directory-header">
           <div class="pool-header-main">
-            <div class="pool-icon-box" style="background: #f6ffed;">
-              <IconifyIcon icon="lucide:folder-open" style="font-size: 22px; color: #52c41a;" />
+            <div class="pool-icon-box" style="background: var(--ict-success-light);">
+              <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-headline-small); color: var(--ict-success);" />
             </div>
             <div class="pool-header-body">
               <div class="ph-row ph-row-name">
@@ -301,7 +301,7 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 存储空间表头 -->
         <div class="volumes-section-header">
           <div class="volumes-section-title">
-            <IconifyIcon icon="lucide:box" style="font-size: 14px; color: #1677ff;" />
+            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
             <span>存储空间</span>
             <span class="volumes-count">{{ directoryVolumes.length }}</span>
           </div>
@@ -324,11 +324,11 @@ function handleDeleteVolume(vol: StorageVolume) {
     <!-- 全部为空 -->
     <div v-else-if="!loading" class="empty-state">
       <Empty
-        :image="h('div', { class: 'empty-image' }, h(IconifyIcon, { icon: 'lucide:database', style: 'font-size: 64px; color: #d9d9d9;' }))"
+        :image="h('div', { class: 'empty-image' }, h(IconifyIcon, { icon: 'lucide:database', style: 'font-size: 64px; color: var(--ict-text-disabled);' }))"
         description="暂无存储空间"
       >
         <Button type="primary" size="small" @click="openCreateModal">
-          <IconifyIcon icon="lucide:plus" style="font-size: 14px;" />
+          <IconifyIcon icon="lucide:plus" style="font-size: var(--ict-body-medium);" />
           立即创建
         </Button>
       </Empty>
@@ -371,9 +371,9 @@ function handleDeleteVolume(vol: StorageVolume) {
 
 /* 外层大卡片：存储池包裹 */
 .pool-wrapper-card {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 12px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--ict-text-disabled);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
@@ -386,7 +386,7 @@ function handleDeleteVolume(vol: StorageVolume) {
 }
 
 .directory-wrapper {
-  border-color: #b7eb8f;
+  border-color: var(--ict-success-disabled);
   box-shadow: 0 2px 10px rgba(82, 196, 26, 0.06);
 }
 
@@ -401,7 +401,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  background: linear-gradient(135deg, var(--ict-success-light) 0%, #d9f7be 100%);
   border-bottom: 1px solid #e6e6e6;
   transition: all 0.2s ease;
   gap: 24px;
@@ -409,7 +409,7 @@ function handleDeleteVolume(vol: StorageVolume) {
 }
 
 .directory-header:hover {
-  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  background: linear-gradient(135deg, var(--ict-success-light) 0%, #d9f7be 100%);
 }
 
 /* 存储空间表头 */
@@ -418,17 +418,17 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e8e8e8;
+  background: var(--ict-bg-page);
+  border-bottom: 1px solid var(--ict-border);
 }
 
 .volumes-section-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .volumes-count {
@@ -438,10 +438,10 @@ function handleDeleteVolume(vol: StorageVolume) {
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   font-weight: 700;
-  color: #fff;
-  background: #1677ff;
+  color: var(--ict-bg-card);
+  background: var(--ict-primary);
   border-radius: 9px;
 }
 
@@ -449,7 +449,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   border-radius: 6px;
 }
 
@@ -459,7 +459,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 12px;
-  background: #fafafa;
+  background: var(--ict-bg-section);
 }
 
 .pool-empty {
@@ -469,8 +469,8 @@ function handleDeleteVolume(vol: StorageVolume) {
   justify-content: center;
   gap: 8px;
   padding: 24px;
-  color: #bfbfbf;
-  font-size: 13px;
+  color: var(--ict-text-disabled);
+  font-size: var(--ict-mark-medium);
 }
 
 /* 空状态 */

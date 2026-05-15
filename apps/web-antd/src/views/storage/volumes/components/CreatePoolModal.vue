@@ -100,9 +100,9 @@ function isDiskSelected(diskId: string): boolean {
 }
 
 function getHealthColor(status?: string): string {
-  if (status === '正常') return '#52c41a';
-  if (status === '警告') return '#faad14';
-  return '#8c8c8c';
+  if (status === '正常') return 'var(--ict-success)';
+  if (status === '警告') return 'var(--ict-warning)';
+  return 'var(--ict-text-secondary)';
 }
 </script>
 
@@ -117,7 +117,7 @@ function getHealthColor(status?: string): string {
     class="create-pool-modal"
   >
     <template #title>
-      <IconifyIcon icon="lucide:database" style="font-size: 18px; color: #1677ff;" />
+      <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
       创建存储池
     </template>
     <Form ref="formRef" :model="formState" :rules="rules" layout="vertical">
@@ -167,7 +167,7 @@ function getHealthColor(status?: string): string {
         :validate-status="diskHelpStatus"
       >
         <div v-if="availableDisks.length === 0" class="disks-empty">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 20px; color: #d9d9d9;" />
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-large); color: var(--ict-text-disabled);" />
           <span>暂无可用的未使用磁盘</span>
         </div>
         <div v-else class="disks-grid">
@@ -186,7 +186,7 @@ function getHealthColor(status?: string): string {
             />
             <div class="disk-info">
               <div class="disk-name-row">
-                <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
+                <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
                 <span class="disk-device">{{ disk.deviceName }}</span>
                 <span
                   class="disk-health"
@@ -223,11 +223,11 @@ function getHealthColor(status?: string): string {
 }
 .raid-name {
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 .raid-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
 .disks-empty {
@@ -236,11 +236,11 @@ function getHealthColor(status?: string): string {
   justify-content: center;
   gap: 8px;
   padding: 24px;
-  color: #bfbfbf;
-  font-size: 13px;
-  background: #fafafa;
+  color: var(--ict-text-disabled);
+  font-size: var(--ict-mark-medium);
+  background: var(--ict-bg-section);
   border-radius: 8px;
-  border: 1px dashed #d9d9d9;
+  border: 1px dashed var(--ict-text-disabled);
 }
 
 .disks-grid {
@@ -254,8 +254,8 @@ function getHealthColor(status?: string): string {
   align-items: flex-start;
   gap: 8px;
   padding: 10px 12px;
-  background: #fafafa;
-  border: 1px solid #e8e8e8;
+  background: var(--ict-bg-section);
+  border: 1px solid var(--ict-border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -267,8 +267,8 @@ function getHealthColor(status?: string): string {
 }
 
 .disk-select-card.selected {
-  background: #e6f4ff;
-  border-color: #1677ff;
+  background: var(--ict-primary-light);
+  border-color: var(--ict-primary);
 }
 
 .disk-checkbox {
@@ -288,16 +288,16 @@ function getHealthColor(status?: string): string {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 
 .disk-device {
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .disk-health {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   margin-left: auto;
 }
 
@@ -305,8 +305,8 @@ function getHealthColor(status?: string): string {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
 .disk-model {
@@ -319,7 +319,7 @@ function getHealthColor(status?: string): string {
 .disk-size {
   flex-shrink: 0;
   font-weight: 600;
-  color: #595959;
+  color: var(--ict-text-secondary);
 }
 
 @media (max-width: 576px) {

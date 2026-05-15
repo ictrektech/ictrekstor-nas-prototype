@@ -23,19 +23,19 @@ import { IconifyIcon } from '@vben/icons';
 
 .construction-icon {
   font-size: 64px;
-  color: #faad14;
+  color: var(--ict-warning);
   margin-bottom: 16px;
 }
 
 .construction-title {
-  font-size: 20px;
+  font-size: var(--ict-title-large);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin-bottom: 8px;
 }
 
 .construction-desc {
-  font-size: 14px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-medium);
+  color: var(--ict-text-secondary);
 }
 </style>

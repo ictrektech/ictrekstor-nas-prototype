@@ -114,11 +114,11 @@ onMounted(loadData);
     <ResourceUsageCard
       title="CPU 使用率"
       icon="lucide:cpu"
-      icon-bg="#1677ff"
+      icon-bg="var(--ict-primary)"
       :usage-percent="Math.round(cpuHistory[cpuHistory.length-1])"
       :avg-percent="cpuAvg"
       :history-data="cpuHistory"
-      :color-theme="'#1677ff'"
+      :color-theme="'var(--ict-primary)'"
       :specs="[
         { label: '型号', value: summary?.cpuModel || 'Intel Celeron J4125' },
         { label: '核心', value: '4 核' },
@@ -130,11 +130,11 @@ onMounted(loadData);
     <ResourceUsageCard
       title="内存使用率"
       icon="lucide:memory-stick"
-      icon-bg="#52c41a"
+      icon-bg="var(--ict-success)"
       :usage-percent="Math.round(memHistory[memHistory.length-1])"
       :avg-percent="memAvg"
       :history-data="memHistory"
-      :color-theme="'#52c41a'"
+      :color-theme="'var(--ict-success)'"
       :specs="[
         { label: '总量', value: summary?.memorySize || '8 GB' },
         { label: '已用', value: '3.2 GB' },

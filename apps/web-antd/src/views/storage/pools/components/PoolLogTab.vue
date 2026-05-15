@@ -49,7 +49,7 @@ function getLogTagText(level: PoolLog['level']): string {
           <Tag :color="getLogTagColor(record.level)" size="small">
             <IconifyIcon
               :icon="record.level === 'info' ? 'lucide:info' : record.level === 'warning' ? 'lucide:alert-triangle' : 'lucide:alert-circle'"
-              style="font-size: 11px; margin-right: 4px; display: inline-flex; align-items: center;"
+              style="font-size: var(--ict-mark-small); margin-right: 4px; display: inline-flex; align-items: center;"
             />
             {{ getLogTagText(record.level) }}
           </Tag>
@@ -62,6 +62,6 @@ function getLogTagText(level: PoolLog['level']): string {
 <style scoped>
 .log-tab-content { padding: 12px 16px 20px; }
 :deep(.ant-table) { border-radius: 8px; overflow: hidden; }
-:deep(.ant-table-thead > tr > th) { background: #fafafa; font-weight: 600; }
+:deep(.ant-table-thead > tr > th) { background: var(--ict-bg-section); font-weight: 600; }
 :deep(.ant-table-tbody > tr:hover > td) { background: #f0f7ff; }
 </style>

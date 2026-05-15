@@ -208,7 +208,7 @@ watch(
 }
 
 .ai-fab-inner {
-  font-size: 28px;
+  font-size: var(--ict-headline-medium);
   z-index: 2;
   pointer-events: none;
 }

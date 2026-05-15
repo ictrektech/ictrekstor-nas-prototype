@@ -29,14 +29,14 @@ const emit = defineEmits<{
       <div class="transfer-modal-icon">
         <IconifyIcon
           icon="lucide:arrow-left-right"
-          style="font-size: 32px; color: #1677ff;"
+          style="font-size: 32px; color: var(--ict-primary);"
         />
       </div>
       <div class="transfer-modal-info">
         <p class="transfer-modal-file">
           <IconifyIcon
             icon="lucide:file"
-            style="font-size: 14px; color: #8c8c8c;"
+            style="font-size: var(--ict-body-medium); color: var(--ict-text-secondary);"
           />
           <span>{{ fileName }}</span>
         </p>
@@ -66,7 +66,7 @@ const emit = defineEmits<{
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #e6f4ff;
+  background: var(--ict-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,19 +81,19 @@ const emit = defineEmits<{
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: var(--ict-title-small);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0 0 8px;
 }
 
 .transfer-modal-direction {
-  font-size: 13px;
-  color: #595959;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-secondary);
   margin: 0;
 }
 
 .transfer-modal-direction strong {
-  color: #1677ff;
+  color: var(--ict-primary);
 }
 </style>

@@ -47,13 +47,13 @@ function formatHours(hours?: number): string {
 }
 
 .device-info :deep(.ant-descriptions-item-label) {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   width: 80px;
 }
 
 .device-info :deep(.ant-descriptions-item-content) {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 500;
 }
 </style>

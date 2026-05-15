@@ -317,22 +317,22 @@ function handleFileSelected(event: Event) {
 function nodeIconResolver(node: FileTreeNode) {
   switch (node.type) {
     case 'category':
-      if (node.key === 'spaces') return { icon: 'lucide:database', color: '#1677ff' };
-      if (node.key === 'team') return { icon: 'lucide:users', color: '#fa8c16' };
-      if (node.key === 'shared-from-others') return { icon: 'lucide:share-2', color: '#722ed1' };
-      return { icon: 'lucide:folder-kanban', color: '#595959' };
+      if (node.key === 'spaces') return { icon: 'lucide:database', color: 'var(--ict-primary)' };
+      if (node.key === 'team') return { icon: 'lucide:users', color: 'var(--ict-warning)' };
+      if (node.key === 'shared-from-others') return { icon: 'lucide:share-2', color: 'var(--ict-info)' };
+      return { icon: 'lucide:folder-kanban', color: 'var(--ict-text-secondary)' };
     case 'space':
-      return { icon: 'lucide:hard-drive', color: '#1677ff' };
+      return { icon: 'lucide:hard-drive', color: 'var(--ict-primary)' };
     case 'team-folder':
-      return { icon: 'lucide:folder-heart', color: '#fa8c16' };
+      return { icon: 'lucide:folder-heart', color: 'var(--ict-warning)' };
     case 'shared-user':
-      return { icon: 'lucide:user-circle', color: '#722ed1' };
+      return { icon: 'lucide:user-circle', color: 'var(--ict-info)' };
     case 'shared-folder':
       return { icon: 'lucide:folder-symlink', color: '#a855f7' };
     case 'subfolder':
-      return { icon: 'lucide:folder-open', color: '#faad14' };
+      return { icon: 'lucide:folder-open', color: 'var(--ict-warning)' };
     default:
-      return { icon: 'lucide:folder', color: '#faad14' };
+      return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
   }
 }
 
@@ -431,7 +431,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 .fm-body {

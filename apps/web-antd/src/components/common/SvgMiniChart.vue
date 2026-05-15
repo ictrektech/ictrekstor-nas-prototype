@@ -14,7 +14,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   width: 400,
   height: 80,
-  color: '#1677ff',
+  color: 'var(--ict-primary)',
   areaColor: 'rgba(22, 119, 255, 0.1)',
   showAxes: true,
   xLabels: () => ['-60分', '-45分', '-30分', '-15分', '现在'],
@@ -62,7 +62,7 @@ const areaPath = computed(() => generateAreaPath(props.data, innerWidth.value, i
         :y1="padding.top + innerHeight - (tick / 100) * innerHeight"
         :x2="padding.left + innerWidth"
         :y2="padding.top + innerHeight - (tick / 100) * innerHeight"
-        stroke="#f0f0f0"
+        stroke="var(--ict-border-light)"
         stroke-width="1"
       />
     </g>

@@ -35,7 +35,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
     <!-- 左侧主信息 -->
     <div class="pool-header-main">
       <div class="pool-icon-box">
-        <IconifyIcon icon="lucide:database" style="font-size: 22px; color: #1677ff;" />
+        <IconifyIcon icon="lucide:database" style="font-size: var(--ict-headline-small); color: var(--ict-primary);" />
       </div>
       <div class="pool-header-body">
         <div class="ph-row ph-row-name">
@@ -47,15 +47,15 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
         </div>
         <div class="ph-row ph-row-meta">
           <span class="meta-chip">
-            <IconifyIcon icon="lucide:layers" style="font-size: 11px;" />
+            <IconifyIcon icon="lucide:layers" style="font-size: var(--ict-mark-small);" />
             {{ pool.raidType }}
           </span>
           <span class="meta-chip">
-            <IconifyIcon icon="lucide:hard-drive" style="font-size: 11px;" />
+            <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-mark-small);" />
             {{ pool.diskCount }} 块硬盘
           </span>
           <span class="meta-chip">
-            <IconifyIcon icon="lucide:box" style="font-size: 11px;" />
+            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-mark-small);" />
             {{ volumeCount || 0 }} 个存储空间
           </span>
         </div>
@@ -93,28 +93,28 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
       </div>
       <div class="ph-panel-actions">
         <Button size="small" class="detail-btn" @click.stop="emit('detail', pool.id)">
-          <IconifyIcon icon="lucide:file-text" style="font-size: 12px;" />
+          <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-body-small);" />
           详细信息
         </Button>
         <Dropdown>
           <Button size="small" class="action-dropdown-btn">
-            <IconifyIcon icon="lucide:settings" style="font-size: 12px;" />
+            <IconifyIcon icon="lucide:settings" style="font-size: var(--ict-body-small);" />
             高级动作
-            <IconifyIcon icon="lucide:chevron-down" style="font-size: 10px;" />
+            <IconifyIcon icon="lucide:chevron-down" style="font-size: var(--ict-mark-small);" />
           </Button>
           <template #overlay>
             <div class="pool-action-menu">
               <div class="menu-item" @click.stop="emit('replaceDisk', pool)">
-                <IconifyIcon icon="lucide:refresh-cw" style="font-size: 13px; color: #faad14;" />
+                <IconifyIcon icon="lucide:refresh-cw" style="font-size: var(--ict-mark-medium); color: var(--ict-warning);" />
                 <span>换盘</span>
               </div>
               <div class="menu-item" @click.stop="emit('rebuildPool', pool)">
-                <IconifyIcon icon="lucide:rotate-ccw" style="font-size: 13px; color: #1677ff;" />
+                <IconifyIcon icon="lucide:rotate-ccw" style="font-size: var(--ict-mark-medium); color: var(--ict-primary);" />
                 <span>重构</span>
               </div>
               <div class="menu-divider" />
               <div class="menu-item danger" @click.stop="emit('deletePool', pool)">
-                <IconifyIcon icon="lucide:trash-2" style="font-size: 13px; color: #ff4d4f;" />
+                <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium); color: var(--ict-danger);" />
                 <span>删除</span>
               </div>
             </div>
@@ -149,7 +149,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--ict-bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,7 +175,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
 .ph-row-name { gap: 10px; }
 
 .pool-name {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 700;
   color: #1a1a1a;
 }
@@ -194,8 +194,8 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  color: #595959;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   background: rgba(255, 255, 255, 0.7);
   padding: 3px 10px;
   border-radius: 4px;
@@ -208,8 +208,8 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  color: #1677ff;
+  font-size: var(--ict-body-small);
+  color: var(--ict-primary);
   background: rgba(22, 119, 255, 0.08);
   padding: 3px 10px;
   border-radius: 4px;
@@ -237,26 +237,26 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   white-space: nowrap;
 }
 
 .cap-used {
   font-weight: 700;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
-.cap-div { color: #bfbfbf; }
+.cap-div { color: var(--ict-text-disabled); }
 
 .cap-total {
-  color: #8c8c8c;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-secondary);
+  font-family: var(--ict-font-family);
 }
 
 .cap-percent {
   font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
   margin-left: 6px;
 }
 
@@ -279,7 +279,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   border-radius: 6px;
 }
 
@@ -287,16 +287,16 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   border-radius: 6px;
 }
 
 /* 下拉菜单 */
 .pool-action-menu {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--ict-border-light);
   padding: 4px;
   min-width: 120px;
 }
@@ -308,22 +308,22 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  color: #262626;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-emphasis);
   transition: all 0.2s ease;
 }
 
 .menu-item:hover {
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
 }
 
 .menu-item.danger:hover {
-  background: #fff1f0;
+  background: var(--ict-danger-light);
 }
 
 .menu-divider {
   height: 1px;
-  background: #f0f0f0;
+  background: var(--ict-border-light);
   margin: 4px 0;
 }
 

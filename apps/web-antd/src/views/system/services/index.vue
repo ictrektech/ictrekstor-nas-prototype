@@ -79,7 +79,7 @@ const serviceList = ref<ServiceData[]>([
     name: 'SMB 共享',
     description: 'Windows 系统原生支持的文件共享协议，局域网内传输速度快',
     icon: 'lucide:monitor',
-    iconColor: '#1677ff',
+    iconColor: 'var(--ict-primary)',
     enabled: true,
     category: 'file-sharing',
     status: 'running',
@@ -108,7 +108,7 @@ const serviceList = ref<ServiceData[]>([
     name: 'NFS 共享',
     description: 'Linux / Unix 系统原生支持的文件共享协议，性能优异',
     icon: 'lucide:terminal',
-    iconColor: '#52c41a',
+    iconColor: 'var(--ict-success)',
     enabled: true,
     category: 'file-sharing',
     status: 'running',
@@ -134,7 +134,7 @@ const serviceList = ref<ServiceData[]>([
     name: 'WebDAV',
     description: '基于 HTTP 的文件共享协议，支持跨平台远程访问',
     icon: 'lucide:globe',
-    iconColor: '#722ed1',
+    iconColor: 'var(--ict-info)',
     enabled: true,
     category: 'file-sharing',
     status: 'running',
@@ -160,7 +160,7 @@ const serviceList = ref<ServiceData[]>([
     name: 'FTP 共享',
     description: '传统文件传输协议，兼容性好，适合大文件批量传输',
     icon: 'lucide:upload',
-    iconColor: '#faad14',
+    iconColor: 'var(--ict-warning)',
     enabled: false,
     category: 'file-sharing',
     status: 'stopped',
@@ -363,7 +363,7 @@ function syncQuickInfo(s: ServiceData) {
         <div class="page-icon-box">
           <IconifyIcon
             icon="lucide:server-cog"
-            style="font-size: 22px; color: #1677ff;"
+            style="font-size: var(--ict-headline-small); color: var(--ict-primary);"
           />
         </div>
         <div>
@@ -376,7 +376,7 @@ function syncQuickInfo(s: ServiceData) {
         <div class="stat-card">
           <IconifyIcon
             icon="lucide:activity"
-            style="font-size: 16px; color: #52c41a;"
+            style="font-size: var(--ict-title-medium); color: var(--ict-success);"
           />
           <div class="stat-info">
             <span class="stat-label">运行中</span>
@@ -386,7 +386,7 @@ function syncQuickInfo(s: ServiceData) {
         <div class="stat-card">
           <IconifyIcon
             icon="lucide:toggle-right"
-            style="font-size: 16px; color: #1677ff;"
+            style="font-size: var(--ict-title-medium); color: var(--ict-primary);"
           />
           <div class="stat-info">
             <span class="stat-label">已启用</span>
@@ -396,7 +396,7 @@ function syncQuickInfo(s: ServiceData) {
         <div class="stat-card">
           <IconifyIcon
             icon="lucide:layers"
-            style="font-size: 16px; color: #8c8c8c;"
+            style="font-size: var(--ict-title-medium); color: var(--ict-text-secondary);"
           />
           <div class="stat-info">
             <span class="stat-label">总服务</span>
@@ -443,7 +443,7 @@ function syncQuickInfo(s: ServiceData) {
     <!-- 服务列表 -->
     <div class="service-list">
       <div v-if="filteredServices.length === 0" class="empty-placeholder">
-        <IconifyIcon icon="lucide:inbox" style="font-size: 48px; color: #d9d9d9;" />
+        <IconifyIcon icon="lucide:inbox" style="font-size: 48px; color: var(--ict-text-disabled);" />
         <p>该分类下暂无服务</p>
       </div>
       <ServiceCard
@@ -476,7 +476,7 @@ function syncQuickInfo(s: ServiceData) {
 .service-settings-page {
   padding-bottom: 32px;
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
 }
 
 .page-header {
@@ -484,8 +484,8 @@ function syncQuickInfo(s: ServiceData) {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   margin-bottom: 0;
   gap: 16px;
   flex-wrap: wrap;
@@ -501,7 +501,7 @@ function syncQuickInfo(s: ServiceData) {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #e6f4ff;
+  background: var(--ict-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -509,16 +509,16 @@ function syncQuickInfo(s: ServiceData) {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -534,7 +534,7 @@ function syncQuickInfo(s: ServiceData) {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -546,21 +546,21 @@ function syncQuickInfo(s: ServiceData) {
 }
 
 .stat-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .stat-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 /* 分类 Tabs */
 .category-tabs-wrapper {
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
 }
 
 .category-tabs :deep(.ant-tabs-nav) {
@@ -586,15 +586,15 @@ function syncQuickInfo(s: ServiceData) {
   align-items: center;
   justify-content: center;
   padding: 64px 20px;
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
-  color: #8c8c8c;
+  border: 1px solid var(--ict-border);
+  color: var(--ict-text-secondary);
 }
 
 .empty-placeholder p {
   margin-top: 12px;
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
 }
 
 @media (max-width: 768px) {

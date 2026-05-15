@@ -50,7 +50,7 @@ function handleSave() {
       <div class="link-folder-card">
         <IconifyIcon
           icon="lucide:folder-open"
-          style="font-size: 18px; color: #d48806; flex-shrink: 0;"
+          style="font-size: var(--ict-title-large); color: var(--ict-warning-active); flex-shrink: 0;"
         />
         <span class="link-folder-name">{{ dir?.name }}</span>
       </div>
@@ -63,7 +63,7 @@ function handleSave() {
         <Tooltip title="开启后，任何人可通过链接访问此文件夹">
           <IconifyIcon
             icon="lucide:circle-help"
-            style="font-size: 13px; color: #bfbfbf; cursor: help;"
+            style="font-size: var(--ict-mark-medium); color: var(--ict-text-disabled); cursor: help;"
           />
         </Tooltip>
       </div>
@@ -162,16 +162,16 @@ function handleSave() {
   align-items: center;
   gap: 10px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+  background: linear-gradient(135deg, #fffbe6 0%, var(--ict-warning-light) 100%);
   border: 1px solid #ffd591;
   border-radius: 10px;
   margin-bottom: 16px;
 }
 
 .link-folder-name {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .link-enable-row {
@@ -180,12 +180,12 @@ function handleSave() {
   gap: 6px;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
 }
 
 .link-enable-label {
-  font-size: 14px;
-  color: #262626;
+  font-size: var(--ict-body-medium);
+  color: var(--ict-text-emphasis);
 }
 
 .link-section {
@@ -197,9 +197,9 @@ function handleSave() {
 }
 
 .link-section-title {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 500;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin-bottom: 6px;
 }
 
@@ -213,15 +213,15 @@ function handleSave() {
 }
 
 .link-url-input :deep(.ant-input) {
-  background: #fafafa;
-  color: #595959;
+  background: var(--ict-bg-section);
+  color: var(--ict-text-secondary);
 }
 
 .link-stat-num {
-  font-size: 20px;
+  font-size: var(--ict-title-large);
   font-weight: 700;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 .link-expire-radio {
@@ -235,7 +235,7 @@ function handleSave() {
 .link-disabled-hint {
   padding: 24px 0;
   text-align: center;
-  font-size: 13px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-secondary);
 }
 </style>

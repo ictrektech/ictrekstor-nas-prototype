@@ -106,7 +106,7 @@ function customRow(record: any) {
             :class="{ 'checkbox--checked': isAllSelected, 'checkbox--indeterminate': hasSelection && !isAllSelected }"
             @click="onHeaderCheck"
           >
-            <IconifyIcon v-if="isAllSelected" icon="lucide:check" style="font-size: 10px; color: #fff;" />
+            <IconifyIcon v-if="isAllSelected" icon="lucide:check" style="font-size: var(--ict-mark-small); color: var(--ict-bg-card);" />
             <div v-else-if="hasSelection" class="indeterminate-dot" />
           </div>
           <span v-if="!hasSelection" class="header-text">全选</span>
@@ -125,14 +125,14 @@ function customRow(record: any) {
           @dragstart="emit('dragStart', record as FileItem, $event)"
         >
           <div class="checkbox" :class="{ 'checkbox--checked': isSelected(record) }" @click.stop="emit('toggleSelect', record as FileItem, $event)">
-            <IconifyIcon v-if="isSelected(record)" icon="lucide:check" style="font-size: 10px; color: #fff;" />
+            <IconifyIcon v-if="isSelected(record)" icon="lucide:check" style="font-size: var(--ict-mark-small); color: var(--ict-bg-card);" />
           </div>
           <div class="icon-wrap">
             <div class="icon-box" :style="{ background: getFileIconClass(record).bg }">
               <IconifyIcon :icon="getFileIconClass(record).icon" :style="{ fontSize: '16px', color: getFileIconClass(record).color }" />
             </div>
             <div v-if="record.isShared" class="shared-badge" title="已分享">
-              <IconifyIcon icon="lucide:link" style="font-size: 9px; color: #fff;" />
+              <IconifyIcon icon="lucide:link" style="font-size: 9px; color: var(--ict-bg-card);" />
             </div>
           </div>
           <span class="name-text" :title="record.name">{{ record.name }}</span>
@@ -160,7 +160,7 @@ function customRow(record: any) {
       <Empty :description="emptyDescription">
         <template #image>
           <div class="empty-image">
-            <IconifyIcon icon="lucide:folder-open" style="font-size: 48px; color: #d9d9d9;" />
+            <IconifyIcon icon="lucide:folder-open" style="font-size: 48px; color: var(--ict-text-disabled);" />
           </div>
         </template>
       </Empty>
@@ -176,63 +176,66 @@ function customRow(record: any) {
   overflow: hidden;
 }
 .file-list-view :deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
+  background: var(--ict-bg-section);
   font-weight: 600;
-  font-size: 12px;
-  color: #595959;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   padding: 10px 12px;
 }
 .file-list-view :deep(.ant-table-tbody > tr > td) {
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 .file-list-view :deep(.ant-table-tbody > tr:hover > td) {
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
 }
 
 /* 选中行 */
-:deep(.file-list-row--selected) { background: #e6f4ff !important; }
+:deep(.file-list-row--selected) { background: var(--ict-primary-light) !important; }
 :deep(.file-list-row--selected:hover) { background: #bae0ff !important; }
 
 /* 名称单元格 */
 .name-cell { display: inline-flex; align-items: center; gap: 8px; cursor: default; user-select: none; }
 .name-cell--folder { cursor: pointer; }
 .name-cell--draggable[draggable="true"] { cursor: grab; }
-.name-cell--folder:hover .name-text { color: #1677ff; }
+.name-cell--folder:hover .name-text { color: var(--ict-primary); }
 
 /* 复选框 */
 .checkbox {
-  width: 18px;
-  height: 18px;
-  border-radius: 5px;
-  border: 1.5px solid #d9d9d9;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--ict-radius-sm);
+  border: 1.5px solid var(--ict-border);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   cursor: pointer;
   transition: all 0.15s;
-  background: #fff;
-  margin-right: 2px;
+  background: var(--ict-bg-card);
 }
-.checkbox:hover { border-color: #1677ff; }
-.checkbox--checked { background: #1677ff; border-color: #1677ff; }
+.checkbox:hover { border-color: var(--ict-primary); }
+.checkbox--checked { background: var(--ict-primary); border-color: var(--ict-primary); }
+.checkbox--indeterminate { background: var(--ict-primary); border-color: var(--ict-primary); }
+.checkbox--disabled { background: var(--ict-bg-page); border-color: var(--ict-border); cursor: not-allowed; }
+.checkbox--disabled.checkbox--checked .indeterminate-dot,
+.checkbox--disabled.checkbox--indeterminate .indeterminate-dot { background: var(--ict-text-tertiary); }
 
 /* 图标 */
 .icon-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
 .icon-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-.shared-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: #1677ff; display: flex; align-items: center; justify-content: center; border: 1.5px solid #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+.shared-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ict-primary); display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ict-bg-card); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
 
 /* 文字 */
-.name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #262626; transition: color 0.2s; }
-.size-text, .time-text, .path-text { font-family: 'SF Mono', 'Fira Code', monospace; color: #8c8c8c; font-size: 12px; }
+.name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ict-text-primary); transition: color 0.2s; }
+.size-text, .time-text, .path-text { font-family: var(--ict-font-family); color: var(--ict-text-primary); font-size: var(--ict-body-medium); }
 
 /* 表头 checkbox */
 .header-check-wrap { display: inline-flex; align-items: center; gap: 8px; cursor: default; user-select: none; }
 .header-checkbox { margin-right: 0; }
-.header-text { font-size: 12px; color: #595959; font-weight: 600; }
-.header-text--active { color: #262626; }
-.indeterminate-dot { width: 8px; height: 8px; border-radius: 2px; background: #fff; }
+.header-text { font-size: var(--ict-body-medium); color: var(--ict-text-primary); font-weight: 400; }
+.header-text--active { color: var(--ict-text-emphasis); }
+.indeterminate-dot { width: 8px; height: 8px; border-radius: 2px; background: var(--ict-bg-card); }
 
 /* 表格外层容器：确保列表区域占满宽度 */
 .table-wrap { width: 100%; }

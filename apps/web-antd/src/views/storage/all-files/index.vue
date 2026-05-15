@@ -299,9 +299,9 @@ function handleFileSelected(event: Event) {
 // 树节点图标自定义
 function nodeIconResolver(node: FileTreeNode) {
   if (node.type === 'space') {
-    return { icon: 'lucide:hard-drive', color: '#1677ff' };
+    return { icon: 'lucide:hard-drive', color: 'var(--ict-primary)' };
   }
-  return { icon: 'lucide:folder', color: '#faad14' };
+  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
 }
 
 onMounted(() => {
@@ -315,7 +315,7 @@ onMounted(() => {
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">设备全部文件</h1>
@@ -394,7 +394,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 /* ═══ 页面顶部概览 ═══ */
@@ -403,8 +403,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -419,7 +419,7 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #e6f4ff;
+  background: var(--ict-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -427,16 +427,16 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -451,7 +451,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 100px;
 }
@@ -463,15 +463,15 @@ onMounted(() => {
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 /* ═══ 主体区域 ═══ */

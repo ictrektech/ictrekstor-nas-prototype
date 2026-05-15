@@ -39,14 +39,14 @@ const statusConfig: Record<string, { color: string; text: string }> = {
           :style="{
             background: service.enabled
               ? `${service.iconColor}18`
-              : '#f0f0f0',
+              : 'var(--ict-border-light)',
           }"
         >
           <IconifyIcon
             :icon="service.icon"
             class="service-icon"
             :style="{
-              color: service.enabled ? service.iconColor : '#bfbfbf',
+              color: service.enabled ? service.iconColor : 'var(--ict-text-disabled)',
             }"
           />
         </div>
@@ -92,7 +92,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
         <div class="section-label">
           <IconifyIcon
             icon="lucide:link"
-            :style="{ fontSize: '13px', color: '#52c41a' }"
+            :style="{ fontSize: '13px', color: 'var(--ict-success)' }"
           />
           访问地址
         </div>
@@ -113,7 +113,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
         <div class="section-label">
           <IconifyIcon
             icon="lucide:info"
-            :style="{ fontSize: '13px', color: '#1677ff' }"
+            :style="{ fontSize: '13px', color: 'var(--ict-primary)' }"
           />
           配置信息
         </div>
@@ -139,9 +139,9 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 
 <style scoped>
 .service-card {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 12px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--ict-border);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -149,13 +149,13 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 
 .service-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-color: #d9d9d9;
+  border-color: var(--ict-text-disabled);
   transform: translateY(-2px);
 }
 
 .service-card-disabled {
   opacity: 0.65;
-  background: #fafafa;
+  background: var(--ict-bg-section);
 }
 
 .service-card-disabled:hover {
@@ -164,8 +164,8 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .service-card-disabled .card-header {
-  background: #f5f5f5;
-  border-bottom-color: #e8e8e8;
+  background: var(--ict-bg-page);
+  border-bottom-color: var(--ict-border);
 }
 
 .card-header {
@@ -174,8 +174,8 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   justify-content: space-between;
   padding: 14px 20px;
   gap: 12px;
-  border-bottom: 1px solid #f0f0f0;
-  background: #fafafa;
+  border-bottom: 1px solid var(--ict-border-light);
+  background: var(--ict-bg-section);
 }
 
 .header-actions {
@@ -205,7 +205,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .service-icon {
-  font-size: 22px;
+  font-size: var(--ict-headline-small);
   transition: color 0.3s ease;
 }
 
@@ -218,9 +218,9 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .service-name {
-  font-size: 15px;
+  font-size: var(--ict-title-small);
   font-weight: 600;
-  color: #141414;
+  color: var(--ict-text-emphasis);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -228,13 +228,13 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .status-tag {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   font-weight: 500;
 }
 
 .service-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   line-height: 1.4;
 }
 
@@ -255,9 +255,9 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .section-label {
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   font-weight: 600;
-  color: #8c8c8c;
+  color: var(--ict-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 6px;
@@ -270,17 +270,17 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: var(--ict-success-light);
+  border: 1px solid var(--ict-success-disabled);
   border-radius: 8px;
   padding: 6px 10px;
 }
 
 .url-input {
   flex: 1;
-  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
-  font-size: 13px;
-  color: #135200;
+  font-family: var(--ict-font-family);
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-success-active);
   background: transparent;
   border: none;
   overflow: hidden;
@@ -289,14 +289,14 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .copy-btn {
-  color: #52c41a;
+  color: var(--ict-success);
   padding: 2px 6px;
   height: auto;
   flex-shrink: 0;
 }
 
 .copy-btn:hover {
-  color: #389e0d;
+  color: var(--ict-success-active);
   background: #d9f7be;
 }
 
@@ -316,22 +316,22 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   align-items: center;
   gap: 4px;
   padding: 3px 10px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
+  background: var(--ict-bg-page);
+  border: 1px solid var(--ict-border);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   flex-shrink: 0;
 }
 
 .quick-info-label {
-  color: #8c8c8c;
+  color: var(--ict-text-secondary);
   flex-shrink: 0;
 }
 
 .quick-info-value {
-  color: #262626;
+  color: var(--ict-text-emphasis);
   font-weight: 500;
-  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-family: var(--ict-font-family);
 }
 
 .card-body-disabled {
@@ -342,8 +342,8 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .disabled-hint {
-  font-size: 13px;
-  color: #bfbfbf;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-disabled);
   font-style: italic;
 }
 

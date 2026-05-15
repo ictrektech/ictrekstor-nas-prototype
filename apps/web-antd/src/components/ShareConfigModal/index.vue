@@ -190,10 +190,10 @@ function handleCancel() {
 .tree-wrap {
   max-height: 180px;
   overflow: auto;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--ict-border-light);
   border-radius: 8px;
   padding: 6px 8px;
-  background: #fafafa;
+  background: var(--ict-bg-section);
 }
 
 .share-dir-tree :deep(.ant-tree-treenode) {
@@ -213,8 +213,8 @@ function handleCancel() {
 }
 
 .share-dir-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
-  background: #e6f4ff !important;
-  color: #1677ff;
+  background: var(--ict-primary-light) !important;
+  color: var(--ict-primary);
   font-weight: 500;
 }
 
@@ -222,7 +222,7 @@ function handleCancel() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   white-space: nowrap;
 }
 
@@ -237,11 +237,11 @@ function handleCancel() {
 
 .share-users-form-item :deep(.ant-form-item-label) {
   padding-bottom: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 .share-users-form-item :deep(.ant-form-item-label > label) {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 /* 有效期 */
@@ -251,10 +251,10 @@ function handleCancel() {
 
 .expire-form-item :deep(.ant-form-item-label) {
   padding-bottom: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 
 .expire-form-item :deep(.ant-form-item-label > label) {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 </style>

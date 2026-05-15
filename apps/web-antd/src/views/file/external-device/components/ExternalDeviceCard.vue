@@ -28,7 +28,7 @@ function getDeviceIcon(type: string): string {
 }
 
 function getDeviceIconColor(type: string): string {
-  return '#1677ff';
+  return 'var(--ict-primary)';
 }
 
 function getDeviceTypeLabel(type: string): string {
@@ -55,15 +55,15 @@ function getStatusLabel(status: string): string {
 }
 
 function getCapacityColor(percent: number): string {
-  if (percent >= 90) return '#ff4d4f';
-  if (percent >= 70) return '#faad14';
-  return '#1677ff';
+  if (percent >= 90) return 'var(--ict-danger)';
+  if (percent >= 70) return 'var(--ict-warning)';
+  return 'var(--ict-primary)';
 }
 
 function getCapacityBg(percent: number): string {
-  if (percent >= 90) return '#fff1f0';
+  if (percent >= 90) return 'var(--ict-danger-light)';
   if (percent >= 70) return '#fffbe6';
-  return '#e6f7ff';
+  return 'var(--ict-primary-light)';
 }
 
 function onManage() {
@@ -97,7 +97,7 @@ function onEject() {
       </div>
       <div
         class="device-status-dot"
-        :style="{ background: device.status === 'connected' ? '#52c41a' : '#bfbfbf' }"
+        :style="{ background: device.status === 'connected' ? 'var(--ict-success)' : 'var(--ict-text-disabled)' }"
       />
     </div>
 
@@ -110,7 +110,7 @@ function onEject() {
           <Tag :color="getStatusColor(device.status)" size="small">
             <span
               class="status-dot"
-              :style="{ background: device.status === 'connected' ? '#52c41a' : '#bfbfbf' }"
+              :style="{ background: device.status === 'connected' ? 'var(--ict-success)' : 'var(--ict-text-disabled)' }"
             />
             {{ getStatusLabel(device.status) }}
           </Tag>
@@ -120,11 +120,11 @@ function onEject() {
       <!-- 第二行：类型 / 文件系统 -->
       <div class="info-meta">
         <span class="meta-chip">
-          <IconifyIcon :icon="getDeviceIcon(device.type)" style="font-size: 11px;" />
+          <IconifyIcon :icon="getDeviceIcon(device.type)" style="font-size: var(--ict-mark-small);" />
           {{ getDeviceTypeLabel(device.type) }}
         </span>
         <span v-if="device.status === 'connected'" class="meta-chip">
-          <IconifyIcon icon="lucide:folder-tree" style="font-size: 11px;" />
+          <IconifyIcon icon="lucide:folder-tree" style="font-size: var(--ict-mark-small);" />
           {{ device.fileSystem }}
         </span>
       </div>
@@ -154,7 +154,7 @@ function onEject() {
       </div>
       <div v-else class="info-capacity-disconnected">
         <span class="disconnected-hint">
-          <IconifyIcon icon="lucide:unplug" style="font-size: 12px; color: #bfbfbf;" />
+          <IconifyIcon icon="lucide:unplug" style="font-size: var(--ict-body-small); color: var(--ict-text-disabled);" />
           设备未连接
         </span>
       </div>
@@ -168,7 +168,7 @@ function onEject() {
           :disabled="device.status !== 'connected'"
           @click="onManage"
         >
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 12px;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-body-small);" />
           文件管理
         </Button>
         <Tooltip title="安全弹出">
@@ -178,7 +178,7 @@ function onEject() {
             :disabled="device.status !== 'connected'"
             @click="onEject"
           >
-            <IconifyIcon icon="lucide:log-out" style="font-size: 12px;" />
+            <IconifyIcon icon="lucide:log-out" style="font-size: var(--ict-body-small);" />
           </Button>
         </Tooltip>
       </div>
@@ -218,14 +218,14 @@ function onEject() {
 }
 
 .device-icon {
-  font-size: 22px;
+  font-size: var(--ict-headline-small);
 }
 
 .device-status-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid var(--ict-bg-card);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
 
@@ -255,9 +255,9 @@ function onEject() {
 }
 
 .device-name {
-  font-size: 15px;
+  font-size: var(--ict-title-small);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -284,10 +284,10 @@ function onEject() {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 4px;
-  font-size: 12px;
-  color: #595959;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
 /* 容量行 */
@@ -304,28 +304,28 @@ function onEject() {
 }
 
 .capacity-text {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
 .cap-used {
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .cap-div {
   margin: 0 3px;
-  color: #bfbfbf;
+  color: var(--ict-text-disabled);
 }
 
 .cap-total {
-  color: #8c8c8c;
+  color: var(--ict-text-secondary);
 }
 
 .cap-percent {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 .info-capacity-disconnected {
@@ -336,8 +336,8 @@ function onEject() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #bfbfbf;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-disabled);
 }
 
 /* 操作按钮行 */

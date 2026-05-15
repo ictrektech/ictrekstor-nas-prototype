@@ -26,8 +26,8 @@ const DEVICE = {
   width: 300,
   height: 480,
   cornerRadius: 16,
-  bodyColor: '#f5f5f5',
-  borderColor: '#d9d9d9',
+  bodyColor: 'var(--ict-bg-page)',
+  borderColor: 'var(--ict-text-disabled)',
   shadowColor: 'rgba(0,0,0,0.08)',
 };
 
@@ -38,7 +38,7 @@ const FRONT_PANEL = {
   width: 56,
   height: 340,
   cornerRadius: 8,
-  color: '#262626',
+  color: 'var(--ict-text-emphasis)',
 };
 
 // 6个磁盘槽位参数（前面板）
@@ -49,11 +49,11 @@ const BAY = {
   height: 52,
   gap: 8,
   cornerRadius: 8,
-  borderColor: '#bfbfbf',
-  filledColor: '#1677ff',
-  filledBgColor: '#e6f4ff',
-  emptyBgColor: '#fafafa',
-  highlightColor: '#faad14',
+  borderColor: 'var(--ict-text-disabled)',
+  filledColor: 'var(--ict-primary)',
+  filledBgColor: 'var(--ict-primary-light)',
+  emptyBgColor: 'var(--ict-bg-section)',
+  highlightColor: 'var(--ict-warning)',
 };
 
 // 底部接口区域（前面板）
@@ -63,7 +63,7 @@ const FRONT_BOTTOM = {
   width: 276,
   height: 54,
   cornerRadius: 8,
-  bgColor: '#f0f0f0',
+  bgColor: 'var(--ict-border-light)',
 };
 
 // 后面板参数
@@ -141,16 +141,16 @@ function drawFan(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: nu
   // 风扇外框
   ctx.beginPath();
   ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#e8e8e8';
+  ctx.fillStyle = 'var(--ict-border)';
   ctx.fill();
-  ctx.strokeStyle = '#bfbfbf';
+  ctx.strokeStyle = 'var(--ict-text-disabled)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
   // 风扇中心
   ctx.beginPath();
   ctx.arc(0, 0, size / 10, 0, Math.PI * 2);
-  ctx.fillStyle = '#d9d9d9';
+  ctx.fillStyle = 'var(--ict-text-disabled)';
   ctx.fill();
 
   // 风扇叶片
@@ -180,21 +180,21 @@ function drawPort(
   ledColor?: string,
 ) {
   drawRoundRect(ctx, x, y, width, height, 4);
-  ctx.fillStyle = '#e8e8e8';
+  ctx.fillStyle = 'var(--ict-border)';
   ctx.fill();
-  ctx.strokeStyle = '#bfbfbf';
+  ctx.strokeStyle = 'var(--ict-text-disabled)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
   // 内部金属触点
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   for (let i = 0; i < 4; i++) {
     ctx.fillRect(x + 4 + i * 4, y + 4, 2, height - 8);
   }
 
   // 标签
   ctx.font = '9px sans-serif';
-  ctx.fillStyle = '#595959';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.textAlign = 'center';
   ctx.fillText(label, x + width / 2, y + height + 14);
 
@@ -215,7 +215,7 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 8;
   drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.fill();
   ctx.restore();
 
@@ -240,7 +240,7 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
   ctx.translate(FRONT_PANEL.x + FRONT_PANEL.width / 2, FRONT_PANEL.y + FRONT_PANEL.height / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.font = 'bold 16px sans-serif';
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('VIVIBIT', 0, 0);
@@ -256,10 +256,10 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
   ctx.stroke();
   ctx.beginPath();
   ctx.arc(FRONT_PANEL.x + 16, screenY + 14, 3, 0, Math.PI * 2);
-  ctx.fillStyle = '#52c41a';
+  ctx.fillStyle = 'var(--ict-success)';
   ctx.fill();
   ctx.font = '9px monospace';
-  ctx.fillStyle = '#52c41a';
+  ctx.fillStyle = 'var(--ict-success)';
   ctx.textAlign = 'left';
   ctx.fillText('RUN', FRONT_PANEL.x + 24, screenY + 17);
 
@@ -270,7 +270,7 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
 
     drawRoundRect(ctx, bay.x, bay.y, bay.width, bay.height, BAY.cornerRadius);
     if (isSelected) {
-      ctx.fillStyle = '#fff7e6';
+      ctx.fillStyle = 'var(--ict-warning-light)';
       ctx.fill();
       ctx.strokeStyle = BAY.highlightColor;
       ctx.lineWidth = 2.5;
@@ -302,35 +302,35 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
 
       ctx.beginPath();
       ctx.arc(iconX + 5, iconY + 4, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = 'var(--ict-bg-card)';
       ctx.fill();
 
       // 磁盘名称
       ctx.font = 'bold 13px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : '#141414';
+      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-text-emphasis)';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(bay.disk.deviceName, bay.x + 34, bay.y + 18);
 
       // 磁盘容量
       ctx.font = '11px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : '#1677ff';
+      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-primary)';
       ctx.fillText(bay.disk.size || '', bay.x + 34, bay.y + 38);
 
       // 状态点
-      const dotColor = bay.disk.status === '运行中' ? '#52c41a' : bay.disk.status === '休眠' ? '#faad14' : '#bfbfbf';
+      const dotColor = bay.disk.status === '运行中' ? 'var(--ict-success)' : bay.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)';
       ctx.beginPath();
       ctx.arc(bay.x + bay.width - 16, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
       ctx.fillStyle = dotColor;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(bay.x + bay.width - 16, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = 'var(--ict-bg-card)';
       ctx.lineWidth = 2;
       ctx.stroke();
     } else {
       ctx.font = '12px sans-serif';
-      ctx.fillStyle = '#bfbfbf';
+      ctx.fillStyle = 'var(--ict-text-disabled)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`槽位 ${bay.index + 1}`, bay.x + bay.width / 2, bay.y + bay.height / 2);
@@ -341,24 +341,24 @@ function drawFrontPanel(ctx: CanvasRenderingContext2D) {
   drawRoundRect(ctx, FRONT_BOTTOM.x, FRONT_BOTTOM.y, FRONT_BOTTOM.width, FRONT_BOTTOM.height, FRONT_BOTTOM.cornerRadius);
   ctx.fillStyle = FRONT_BOTTOM.bgColor;
   ctx.fill();
-  ctx.strokeStyle = '#d9d9d9';
+  ctx.strokeStyle = 'var(--ict-text-disabled)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
   // 底部接口
   const portY = FRONT_BOTTOM.y + FRONT_BOTTOM.height / 2;
-  const portColors = ['#1677ff', '#1677ff', '#52c41a', '#faad14'];
+  const portColors = ['var(--ict-primary)', 'var(--ict-primary)', 'var(--ict-success)', 'var(--ict-warning)'];
   const portLabels = ['LAN', 'LAN', 'USB', 'PWR'];
   for (let i = 0; i < 4; i++) {
     const portX = FRONT_BOTTOM.x + 30 + i * 66;
     drawRoundRect(ctx, portX - 18, portY - 10, 36, 20, 4);
-    ctx.fillStyle = '#e8e8e8';
+    ctx.fillStyle = 'var(--ict-border)';
     ctx.fill();
-    ctx.strokeStyle = '#bfbfbf';
+    ctx.strokeStyle = 'var(--ict-text-disabled)';
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.font = '9px sans-serif';
-    ctx.fillStyle = '#8c8c8c';
+    ctx.fillStyle = 'var(--ict-text-secondary)';
     ctx.textAlign = 'center';
     ctx.fillText(portLabels[i], portX, portY + 18);
     ctx.beginPath();
@@ -376,7 +376,7 @@ function drawRearPanel(ctx: CanvasRenderingContext2D) {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 8;
   drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.fill();
   ctx.restore();
 
@@ -388,15 +388,15 @@ function drawRearPanel(ctx: CanvasRenderingContext2D) {
 
   // 绘制设备内部背景
   drawRoundRect(ctx, DEVICE.x + 1, DEVICE.y + 1, DEVICE.width - 2, DEVICE.height - 2, DEVICE.cornerRadius - 1);
-  ctx.fillStyle = '#fafafa';
+  ctx.fillStyle = 'var(--ict-bg-section)';
   ctx.fill();
 
   // 顶部标题区
-  ctx.fillStyle = '#f0f0f0';
+  ctx.fillStyle = 'var(--ict-border-light)';
   drawRoundRect(ctx, DEVICE.x + 8, DEVICE.y + 8, DEVICE.width - 16, 32, 6);
   ctx.fill();
   ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = '#595959';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('VIVIBIT NAS - 后面板', DEVICE.x + DEVICE.width / 2, DEVICE.y + 24);
@@ -411,60 +411,60 @@ function drawRearPanel(ctx: CanvasRenderingContext2D) {
 
   // 风扇标签
   ctx.font = '10px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.textAlign = 'center';
   ctx.fillText('系统风扇 ×2', DEVICE.x + DEVICE.width / 2, fan1Y + 65);
 
   // 接口区域背景
   const ioAreaY = DEVICE.y + 170;
   drawRoundRect(ctx, DEVICE.x + 16, ioAreaY, DEVICE.width - 32, 280, 8);
-  ctx.fillStyle = '#f5f5f5';
+  ctx.fillStyle = 'var(--ict-bg-page)';
   ctx.fill();
-  ctx.strokeStyle = '#e0e0e0';
+  ctx.strokeStyle = 'var(--ict-border)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
   // 区域标题
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.textAlign = 'left';
   ctx.fillText('网络接口', DEVICE.x + 28, ioAreaY + 20);
 
   // 网口（2个千兆网口）
-  drawPort(ctx, DEVICE.x + 28, ioAreaY + 30, 44, 32, 'LAN1', '#1677ff', '#52c41a');
-  drawPort(ctx, DEVICE.x + 86, ioAreaY + 30, 44, 32, 'LAN2', '#1677ff', '#52c41a');
+  drawPort(ctx, DEVICE.x + 28, ioAreaY + 30, 44, 32, 'LAN1', 'var(--ict-primary)', 'var(--ict-success)');
+  drawPort(ctx, DEVICE.x + 86, ioAreaY + 30, 44, 32, 'LAN2', 'var(--ict-primary)', 'var(--ict-success)');
 
   // USB接口
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.fillText('USB 接口', DEVICE.x + 28, ioAreaY + 90);
 
   for (let i = 0; i < 3; i++) {
     const usbX = DEVICE.x + 28 + i * 50;
-    drawPort(ctx, usbX, ioAreaY + 100, 36, 24, `USB${i + 1}`, '#faad14');
+    drawPort(ctx, usbX, ioAreaY + 100, 36, 24, `USB${i + 1}`, 'var(--ict-warning)');
   }
 
   // HDMI接口
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.fillText('视频输出', DEVICE.x + 28, ioAreaY + 155);
   drawPort(ctx, DEVICE.x + 28, ioAreaY + 165, 40, 28, 'HDMI', '#eb2f96');
 
   // 电源接口
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.fillText('电源', DEVICE.x + 180, ioAreaY + 155);
   drawRoundRect(ctx, DEVICE.x + 180, ioAreaY + 165, 50, 32, 4);
-  ctx.fillStyle = '#595959';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.fill();
   ctx.font = '9px sans-serif';
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.textAlign = 'center';
   ctx.fillText('DC IN', DEVICE.x + 205, ioAreaY + 184);
 
   // 接地螺丝
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = '#8c8c8c';
+  ctx.fillStyle = 'var(--ict-text-secondary)';
   ctx.textAlign = 'left';
   ctx.fillText('扩展', DEVICE.x + 28, ioAreaY + 220);
 
@@ -472,13 +472,13 @@ function drawRearPanel(ctx: CanvasRenderingContext2D) {
   for (let i = 0; i < 2; i++) {
     const slotX = DEVICE.x + 28 + i * 130;
     drawRoundRect(ctx, slotX, ioAreaY + 230, 110, 24, 3);
-    ctx.fillStyle = '#e0e0e0';
+    ctx.fillStyle = 'var(--ict-border)';
     ctx.fill();
-    ctx.strokeStyle = '#bfbfbf';
+    ctx.strokeStyle = 'var(--ict-text-disabled)';
     ctx.lineWidth = 1;
     ctx.stroke();
     ctx.font = '9px sans-serif';
-    ctx.fillStyle = '#8c8c8c';
+    ctx.fillStyle = 'var(--ict-text-secondary)';
     ctx.textAlign = 'center';
     ctx.fillText(`PCIe x4 插槽 ${i + 1}`, slotX + 55, ioAreaY + 245);
   }
@@ -643,7 +643,7 @@ defineExpose({ highlightBay });
           <span
             class="tooltip-status"
             :style="{
-              color: tooltip.disk.status === '运行中' ? '#52c41a' : tooltip.disk.status === '休眠' ? '#faad14' : '#bfbfbf',
+              color: tooltip.disk.status === '运行中' ? 'var(--ict-success)' : tooltip.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)',
             }"
           >
             {{ tooltip.disk.status || '--' }}
@@ -671,8 +671,8 @@ defineExpose({ highlightBay });
 
 .bay-tooltip {
   position: absolute;
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-border);
   border-radius: 10px;
   padding: 12px 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -699,14 +699,14 @@ defineExpose({ highlightBay });
   gap: 8px;
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
 }
 
 .tooltip-title {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 700;
-  color: #141414;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 .tooltip-body {
@@ -723,14 +723,14 @@ defineExpose({ highlightBay });
 }
 
 .tooltip-label {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   flex-shrink: 0;
 }
 
 .tooltip-value {
-  font-size: 12px;
-  color: #262626;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-emphasis);
   font-weight: 500;
   text-align: right;
   overflow: hidden;
@@ -740,7 +740,7 @@ defineExpose({ highlightBay });
 }
 
 .tooltip-status {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   font-weight: 600;
 }
 </style>

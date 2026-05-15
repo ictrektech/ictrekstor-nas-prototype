@@ -30,12 +30,12 @@ const selectedUserKeys = computed(() =>
 
 function getUserColor(user: string) {
   const colors: Record<string, string> = {
-    zhangsan: '#1677ff',
-    lisi: '#52c41a',
-    wangwu: '#fa8c16',
-    admin: '#722ed1',
+    zhangsan: 'var(--ict-primary)',
+    lisi: 'var(--ict-success)',
+    wangwu: 'var(--ict-warning)',
+    admin: 'var(--ict-info)',
   };
-  return colors[user] || '#595959';
+  return colors[user] || 'var(--ict-text-secondary)';
 }
 
 function getUserInitial(user: string) {
@@ -114,13 +114,13 @@ function handleSave() {
             >
               <Radio.Button value="readonly">
                 <span class="radio-with-icon">
-                  <IconifyIcon icon="lucide:eye" style="font-size: 10px; margin-right: 2px;" />
+                  <IconifyIcon icon="lucide:eye" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
                   只读
                 </span>
               </Radio.Button>
               <Radio.Button value="readwrite">
                 <span class="radio-with-icon">
-                  <IconifyIcon icon="lucide:pencil" style="font-size: 10px; margin-right: 2px;" />
+                  <IconifyIcon icon="lucide:pencil" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
                   读写
                 </span>
               </Radio.Button>
@@ -132,7 +132,7 @@ function handleSave() {
               class="user-remove-btn"
               @click="removeShareUser(su.user)"
             >
-              <IconifyIcon icon="lucide:x" style="font-size: 12px;" />
+              <IconifyIcon icon="lucide:x" style="font-size: var(--ict-body-small);" />
             </Button>
           </div>
         </div>
@@ -155,8 +155,8 @@ function handleSave() {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 10px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: var(--ict-success-light);
+  border: 1px solid var(--ict-success-disabled);
   border-radius: 8px;
 }
 
@@ -175,15 +175,15 @@ function handleSave() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: var(--ict-mark-small);
   font-weight: 600;
   border: 1.5px solid;
   flex-shrink: 0;
 }
 
 .user-perm-name {
-  font-size: 13px;
-  color: #262626;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-emphasis);
   font-weight: 500;
 }
 
@@ -200,6 +200,6 @@ function handleSave() {
 .radio-with-icon {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 </style>

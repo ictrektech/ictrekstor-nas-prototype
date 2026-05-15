@@ -14,8 +14,8 @@ defineProps<Props>();
 <template>
   <div class="share-overview">
     <div class="overview-card">
-      <div class="overview-icon-wrap" style="background: #f6ffed;">
-        <IconifyIcon icon="lucide:folder-heart" style="font-size: 16px; color: #52c41a;" />
+      <div class="overview-icon-wrap" style="background: var(--ict-success-light);">
+        <IconifyIcon icon="lucide:folder-heart" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
       </div>
       <div class="overview-info">
         <span class="overview-label">有效共享</span>
@@ -23,8 +23,8 @@ defineProps<Props>();
       </div>
     </div>
     <div class="overview-card">
-      <div class="overview-icon-wrap" style="background: #e6f7ff;">
-        <IconifyIcon icon="lucide:link" style="font-size: 16px; color: #1677ff;" />
+      <div class="overview-icon-wrap" style="background: var(--ict-primary-light);">
+        <IconifyIcon icon="lucide:link" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
       </div>
       <div class="overview-info">
         <span class="overview-label">有效外链</span>
@@ -32,8 +32,8 @@ defineProps<Props>();
       </div>
     </div>
     <div class="overview-card">
-      <div class="overview-icon-wrap" style="background: #f9f0ff;">
-        <IconifyIcon icon="lucide:users" style="font-size: 16px; color: #722ed1;" />
+      <div class="overview-icon-wrap" style="background: var(--ict-info-light);">
+        <IconifyIcon icon="lucide:users" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
       </div>
       <div class="overview-info">
         <span class="overview-label">共享用户</span>
@@ -41,8 +41,8 @@ defineProps<Props>();
       </div>
     </div>
     <div class="overview-card">
-      <div class="overview-icon-wrap" style="background: #fff7e6;">
-        <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #fa8c16;" />
+      <div class="overview-icon-wrap" style="background: var(--ict-warning-light);">
+        <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
       </div>
       <div class="overview-info">
         <span class="overview-label">共享总数</span>
@@ -64,9 +64,9 @@ defineProps<Props>();
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 10px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--ict-border-light);
   min-width: 100px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
@@ -94,14 +94,14 @@ defineProps<Props>();
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 </style>
