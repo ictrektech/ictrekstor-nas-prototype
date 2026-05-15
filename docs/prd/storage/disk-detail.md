@@ -5,9 +5,7 @@
 | 属性 | 值 |
 |------|-----|
 | 路由 | `/storage/disks/detail/:deviceName` |
-| 页面组件 | `apps/web-antd/src/views/storage/disks/detail.vue` |
 | 菜单标题 | 磁盘详情（隐藏菜单） |
-| 当前状态 | ✅ 已实现 |
 
 ## 需求概述
 
@@ -15,15 +13,7 @@
 
 ## 功能行为
 
-### 1. 页面布局
-
-- **顶部**：`DiskDetailHeader` 磁盘详情头部（含返回按钮）
-- **主体**：三列纵向堆叠
-  - `DiskInfoCard`：设备基本信息
-  - `SmartHealthPanel`：SMART 健康评估
-  - `MonitorCharts`：性能监控图表
-
-### 2. 磁盘详情头部
+### 1. 磁盘详情头部
 
 显示：
 - 返回按钮（返回磁盘列表）
@@ -31,7 +21,7 @@
 - 型号、序列号
 - 状态标签（正常/警告/故障）
 
-### 3. 设备信息卡片
+### 2. 设备信息卡片
 
 展示磁盘技术参数：
 - 设备名称、型号、序列号
@@ -39,33 +29,22 @@
 - 固件版本、通电次数、通电时间
 - 温度
 
-### 4. SMART 健康面板
+### 3. SMART 健康面板
 
 - 综合健康评分（百分比）
 - 关键 SMART 属性列表
 - 点击查看完整 SMART 详情
 
-### 5. SMART 详情弹窗
+### 4. SMART 详情弹窗
 
-- `SmartDetailModal` 展示所有 SMART 属性的完整表格
+- 展示所有 SMART 属性的完整表格
 - 包含原始值、当前值、阈值、状态
 
-### 6. 性能监控图表
+### 5. 性能监控图表
 
 - 磁盘读写速率趋势图
 - IOPS 趋势图
 - 温度趋势图
-- 使用 `vue-echarts` 绘制
-
-## 子组件
-
-| 组件 | 路径 | 说明 |
-|------|------|------|
-| DiskDetailHeader | `./components/DiskDetailHeader.vue` | 详情页头部 |
-| DiskInfoCard | `./components/DiskInfoCard.vue` | 设备信息卡片 |
-| SmartHealthPanel | `./components/SmartHealthPanel.vue` | SMART 健康面板 |
-| MonitorCharts | `./components/MonitorCharts.vue` | 性能监控图表 |
-| SmartDetailModal | `./components/SmartDetailModal.vue` | SMART 完整详情弹窗 |
 
 ## 预期交互
 
@@ -73,11 +52,11 @@
 - 点击 SMART 面板的"查看详情"展开完整弹窗
 - 图表支持时间范围切换（如最近1小时/24小时/7天）
 
-## 相关接口
+## 数据需求（Mock）
 
-| 接口 | 说明 |
-|------|------|
-| `GET /api/storage/disks` | 获取磁盘列表（从中筛选目标磁盘） |
+- 磁盘基本信息数据（名称、型号、序列号、容量、接口类型、固件版本、通电次数、通电时间、温度等）
+- SMART 健康数据（综合评分、关键属性列表、完整属性表格）
+- 性能监控时间序列数据（读写速率、IOPS、温度）
 
 ## 关联页面
 

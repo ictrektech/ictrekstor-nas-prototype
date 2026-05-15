@@ -5,10 +5,8 @@
 | 属性 | 值 |
 |------|-----|
 | 路由 | `/file/shared` |
-| 页面组件 | `apps/web-antd/src/views/file/shared-files/index.vue` |
 | 菜单标题 | 我的分享 |
 | 菜单图标 | `lucide:link` |
-| 当前状态 | ✅ 已实现 |
 
 ## 需求概述
 
@@ -16,27 +14,22 @@
 
 ## 功能行为
 
-### 1. 页面布局
-
-- **顶部**：统计概览卡片（`ShareOverview`）+ 搜索框 + 创建分享按钮
-- **主体**：共享目录表格（`ShareDirTable`）
-
-### 2. 统计概览
+### 1. 统计概览
 
 显示以下指标：
-- 有效共享数（`status === 'active'`）
-- 有效链接数（`linkEnabled && linkStatus === 'active'`）
+- 有效共享数
+- 有效链接数
 - 共享用户数（去重统计）
 - 共享目录总数
 
-### 3. 创建分享
+### 2. 创建分享
 
-- 点击"创建分享"按钮，弹出 `ShareConfigModal`
+- 点击"创建分享"按钮，弹出分享配置弹窗
 - 在弹窗中选择源目录（从"我的文件"目录树中选择）
 - 配置共享用户、权限、有效期
 - 支持生成共享链接
 
-### 4. 共享目录管理
+### 3. 共享目录管理
 
 表格列包含：
 - 共享名称
@@ -46,24 +39,15 @@
 - 有效期
 - 操作（编辑、删除、复制链接）
 
-### 5. 编辑共享用户
+### 4. 编辑共享用户
 
-- 点击"管理用户"，弹出 `EditUsersModal`
+- 点击"管理用户"，弹出编辑用户弹窗
 - 可添加/删除共享用户，修改用户权限
 
-### 6. 链接管理
+### 5. 链接管理
 
-- 点击"链接管理"，弹出 `LinkManageModal`
+- 点击"链接管理"，弹出链接管理弹窗
 - 可启用/禁用链接、复制链接地址、设置链接密码
-
-## 子组件
-
-| 组件 | 路径 | 说明 |
-|------|------|------|
-| ShareOverview | `./components/ShareOverview.vue` | 统计概览卡片 |
-| ShareDirTable | `./components/ShareDirTable.vue` | 共享目录表格 |
-| EditUsersModal | `./components/EditUsersModal.vue` | 编辑共享用户弹窗 |
-| LinkManageModal | `./components/LinkManageModal.vue` | 链接管理弹窗 |
 
 ## 预期交互
 
@@ -72,13 +56,13 @@
 - 删除分享需二次确认
 - 链接复制成功后显示提示
 
-## 相关数据
+## 数据需求（Mock）
 
-- Mock 数据：`./components/mockData.ts`
-- 树数据：`myFilesTreeData`
-- 用户选项：`userOptions`
+- 共享目录列表数据（共享名称、源路径、用户列表、链接状态、有效期等）
+- 用户列表数据（用于配置共享用户）
+- "我的文件"目录树数据（用于选择源目录）
 
 ## 关联页面
 
-- 复用全局组件 `ShareConfigModal`
-- 源目录选择依赖 `FileExplorer` 组件的目录树数据
+- 复用全局分享配置弹窗组件
+- 源目录选择依赖文件浏览器的目录树数据
