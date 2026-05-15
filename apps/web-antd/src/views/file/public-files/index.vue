@@ -305,11 +305,11 @@ function handleDownload(file: FileItem) {
 function nodeIconResolver(node: FileTreeNode) {
   switch (node.type) {
     case 'public-folder':
-      return { icon: 'lucide:folder-heart', color: '#fa8c16' };
+      return { icon: 'lucide:folder-heart', color: 'var(--ict-warning)' };
     case 'folder':
-      return { icon: 'lucide:folder-open', color: '#faad14' };
+      return { icon: 'lucide:folder-open', color: 'var(--ict-warning)' };
     default:
-      return { icon: 'lucide:folder', color: '#faad14' };
+      return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
   }
 }
 
@@ -324,14 +324,14 @@ onMounted(() => {
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-heart" style="font-size: 20px; color: #fa8c16;" />
+          <IconifyIcon icon="lucide:folder-heart" style="font-size: var(--ict-title-large); color: var(--ict-warning);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">公共文件</h1>
           <div class="page-title-actions">
             <p class="page-desc">团队公共文件资源，所有成员均可访问</p>
             <Button type="primary" class="create-btn" size="small" @click="openCreateModal">
-              <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:folder-plus" style="font-size: var(--ict-mark-medium);" />
               创建公共文件夹
             </Button>
           </div>
@@ -340,12 +340,12 @@ onMounted(() => {
       <div class="page-header-right">
         <!-- 存储池状态显示 -->
         <div v-if="currentStoragePool" class="pool-badge">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 14px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
           <span class="pool-badge-label">所属存储池</span>
           <span class="pool-badge-value">{{ currentStoragePool }}</span>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
           <div class="overview-info">
             <span class="overview-label">公共文件夹</span>
             <span class="overview-value">{{ overviewStats.folders }}</span>
@@ -412,7 +412,7 @@ onMounted(() => {
         <template #action-cell="{ file }">
           <div class="custom-actions">
             <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
-              <IconifyIcon icon="lucide:download" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:download" style="font-size: var(--ict-mark-medium);" />
               下载
             </Button>
           </div>
@@ -427,7 +427,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 .page-header {
@@ -435,8 +435,8 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -451,7 +451,7 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #fff7e6;
+  background: var(--ict-warning-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -459,16 +459,16 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 0;
 }
 
@@ -490,7 +490,7 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -502,15 +502,15 @@ onMounted(() => {
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 /* 存储池徽章 */
@@ -519,19 +519,19 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #e6f4ff;
-  border: 1px solid #91caff;
+  background: var(--ict-primary-light);
+  border: 1px solid var(--ict-primary-disabled);
   border-radius: 8px;
 }
 
 .pool-badge-label {
-  font-size: 11px;
-  color: #1677ff;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-primary);
   font-weight: 500;
 }
 
 .pool-badge-value {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 600;
   color: #0958d9;
 }

@@ -25,23 +25,51 @@
 ### 2.1 色彩系统
 
 #### 主色与品牌色
-| 名称 | 色值 | 用途 |
-|------|------|------|
-| `primary` | `#006BE6` | 品牌主色、主按钮、链接、选中态、图标强调 |
-| `primary-light` | `#E6F2FF` | 主色轻背景、图标容器背景 |
-| `primary-hover` | `#0052B3` | 主色悬停态 |
+
+基于品牌色阶梯（Brand1 → Brand10）定义：
+
+| 名称 | 色值 | 来源 | 用途 |
+|------|------|------|------|
+| `primary` | `#006BE6` | Brand6 | 品牌主色、主按钮、链接、选中态、图标强调（常规态） |
+| `primary-hover` | `#2B8BEB` | Brand5 | 主色悬浮态（Hover） |
+| `primary-active` | `#0053C0` | Brand7 | 主色点击态（Active / Press） |
+| `primary-light` | `#E8F7FF` | Brand1 | 主色浅色背景、图标容器背景、浅色填充场景 |
+| `primary-disabled` | `#86C5F5` | Brand3 | 主色禁用态 |
+| `primary-bg` | `#B6DFFA` | Brand2 | 特殊场景背景 |
+
+> **品牌色阶梯完整映射**：Brand1 `#E8F7FF` → Brand2 `#B6DFFA` → Brand3 `#86C5F5` → Brand4 `#57A9F0` → Brand5 `#2B8BEB` → Brand6 `#006BE6` → Brand7 `#0053C0` → Brand8 `#003D99` → Brand9 `#002A73` → Brand10 `#001A4D`
 
 #### 语义色（状态色）
-| 名称 | 色值 | 用途 |
-|------|------|------|
-| `success` | `#52C41A` | 正常、已启用、健康、成功提示 |
-| `success-light` | `#F6FFED` | 成功态轻背景 |
-| `warning` | `#FAAD14` | 警告、休眠、注意 |
-| `warning-light` | `#FFF7E6` | 警告态轻背景 |
-| `danger` | `#FF4D4F` | 错误、危险操作、异常 |
-| `danger-light` | `#FFF1F0` | 危险态轻背景 |
-| `info` | `#722ED1` | 信息提示、紫色强调 |
-| `info-light` | `#F9F0FF` | 信息态轻背景 |
+
+基于语义色阶梯定义（Success / Warning / Danger）：
+
+| 名称 | 色值 | 来源 | 用途 |
+|------|------|------|------|
+| `success` | `#10BA64` | Succes6 | 成功、正常、已启用、健康（常规态） |
+| `success-hover` | `#32C878` | Succes5 | 成功态悬浮（Hover） |
+| `success-active` | `#0A9F59` | Succes7 | 成功态点击（Active / Press） |
+| `success-light` | `#E8FFF0` | Succes1 | 成功态浅色背景 |
+| `success-disabled` | `#84E3AA` | Succes3 | 成功态禁用 |
+| `success-bg` | `#B4F1CA` | Succes2 | 成功态特殊场景背景 |
+| `warning` | `#F77234` | Warning6 | 警告、休眠、注意（常规态） |
+| `warning-hover` | `#F99057` | Warning5 | 警告态悬浮（Hover） |
+| `warning-active` | `#CC5120` | Warning7 | 警告态点击（Active / Press） |
+| `warning-light` | `#FFF3E8` | Warning1 | 警告态浅色背景 |
+| `warning-disabled` | `#FCC59F` | Warning3 | 警告态禁用 |
+| `warning-bg` | `#FDDDC3` | Warning2 | 警告态特殊场景背景 |
+| `danger` | `#F53F3F` | Danger6 | 错误、危险操作、异常（常规态） |
+| `danger-hover` | `#F76560` | Danger5 | 危险态悬浮（Hover） |
+| `danger-active` | `#CB272D` | Danger7 | 危险态点击（Active / Press） |
+| `danger-light` | `#FFECE8` | Danger1 | 危险态浅色背景 |
+| `danger-disabled` | `#FBACA3` | Danger3 | 危险态禁用 |
+| `danger-bg` | `#FDCDC5` | Danger2 | 危险态特殊场景背景 |
+| `info` | `#722ED1` | — | 信息提示、紫色强调 |
+| `info-light` | `#F9F0FF` | — | 信息态轻背景 |
+
+> **语义色阶梯完整映射**：
+> - **Success**：Succes1 `#E8FFF0` → Succes2 `#B4F1CA` → Succes3 `#84E3AA` → Succes4 `#59D68F` → Succes5 `#32C878` → Succes6 `#10BA64` → Succes7 `#0A9F59` → Succes8 `#06834D` → Succes9 `#02683F` → Succes10 `#004D30`
+> - **Warning**：Warning1 `#FFF3E8` → Warning2 `#FDDDC3` → Warning3 `#FCC59F` → Warning4 `#FAAC7B` → Warning5 `#F99057` → Warning6 `#F77234` → Warning7 `#CC5120` → Warning8 `#A23511` → Warning9 `#771F06` → Warning10 `#4D0E00`
+> - **Danger**：Danger1 `#FFECE8` → Danger2 `#FDCDC5` → Danger3 `#FBACA3` → Danger4 `#F98981` → Danger5 `#F76560` → Danger6 `#F53F3F` → Danger7 `#CB272D` → Danger8 `#A1151E` → Danger9 `#770813` → Danger10 `#4D000A`
 
 #### 中性色
 | 名称 | 色值 | 用途 |
@@ -51,7 +79,8 @@
 | `text-secondary` | `#64748b` | 辅助：描述、提示、标签 |
 | `text-disabled` | `#45484B` | 禁用：空状态、不可用 |
 | `text-tertiary` | `#8C8C8C` | 兜底三级灰（旧值保留兼容） |
-| `border` | `#E8E8E8` | 卡片边框、分割线 |
+| `border` | `#E9ECEF` | 卡片边框 |
+| `deliver` | `#F0F0F0` | 分割线 |
 | `border-light` | `#F0F0F0` | 内部边框、表头底边 |
 | `bg-page` | `#F5F5F5` | 页面背景 |
 | `bg-card` | `#FFFFFF` | 卡片背景 |
@@ -84,26 +113,39 @@
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| `shadow-1` | `0 1px 3px rgba(0,0,0,0.04)` | 默认卡片、静态状态 |
-| `shadow-2` | `0 2px 8px rgba(0,0,0,0.06)` | 卡片 hover 初态 |
-| `shadow-3` | `0 4px 16px rgba(0,0,0,0.08)` | 卡片 hover 深态 |
-| `shadow-4` | `0 8px 24px rgba(0,0,0,0.10)` | 弹窗、Drawer、重要浮层 |
-
-> **规则**：同一页面中卡片阴影必须从 `shadow-1` → `shadow-3` 渐进，禁止跳跃使用 `shadow-4`。
+| `shadow-1` | `0 1px 10px rgba(0,0,0,0.05), 0 4px 5px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.12)` | 基础投影：组件 Hover 状态、表格和树拖动 |
+| `shadow-2` | `0 3px 14px 2px rgba(0,0,0,0.05), 0 8px 10px 1px rgba(0,0,0,0.06), 0 5px 5px -3px rgba(0,0,0,0.10)` | 中层投影：下拉菜单、气泡确认框、选择器等下拉组件 |
+| `shadow-3` | `0 6px 30px 5px rgba(0,0,0,0.05), 0 16px 24px 2px rgba(0,0,0,0.04), 0 8px 10px -5px rgba(0,0,0,0.08)` | 上层投影：全局提示、消息通知、弹窗、Drawer 等浮层 |
 
 ### 2.5 字体系统（Typography）
 
+#### 字体栈
+```css
+font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+```
+- 优先使用系统字体，确保各平台原生体验
+- 中文优先 `PingFang SC`（macOS/iOS）→ `Hiragino Sans GB`（部分日/中场景）→ `Microsoft YaHei`（Windows）
+- 西文回退 `Helvetica Neue` → `Helvetica` → `Arial`
+- 最终兜底 `sans-serif`
+
+#### 字号 Token
+
 | Token | 大小 | 字重 | 用途 |
 |-------|------|------|------|
-| `text-xs` | 11px | 400 | 角标、极小标签 |
-| `text-sm` | 12px | 400 | 辅助提示文本、描述、时间戳 |
-| `text-base` | 14px | 400 | 主要文本：正文、列表项 |
-| `text-base-bold` | 14px | 600 | 卡片内标题、属性名、数值 |
-| `text-md` | 15px | 500 | 副标题、区块标题 |
-| `text-md-bold` | 15px | 600 | 弹窗标题、表单标签 |
-| `text-lg` | 16px | 600 | 卡片标题、页面分区标题 |
-| `text-xl` | 18px | 600 | 页面主标题 |
-| `text-2xl` | 22px | 700 | Hero 设备名、大标题 |
+| `headline-large` | 36px | 700 | 页面级大标题、Hero 标题 |
+| `headline-medium` | 28px | 700 | 区块大标题 |
+| `headline-small` | 24px | 700 | 模块标题 |
+| `title-large` | 20px | 600 | 卡片标题、页面分区标题 |
+| `title-medium` | 16px | 600 | 子区块标题 |
+| `title-small` | 14px | 600 | 表单标签、列表标题 |
+| `body-large` | 16px | 400 | 强调正文 |
+| `body-medium` | 14px | 400 | 主要文本：正文、列表项 |
+| `body-small` | 12px | 400 | 辅助提示文本、描述、时间戳 |
+| `mark-medium` | 14px | 600 | 卡片内属性名、数值、标记 |
+| `mark-small` | 12px | 600 | 角标、极小标签 |
+| `link-large` | 16px | 400 | 大链接 |
+| `link-medium` | 14px | 400 | 常规链接 |
+| `link-small` | 12px | 400 | 小链接 |
 
 > **规则**：禁止使用以上标准字号以外的非标准字号（如 13.5px）。
 

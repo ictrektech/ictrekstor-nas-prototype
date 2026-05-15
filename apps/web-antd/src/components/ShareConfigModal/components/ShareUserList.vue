@@ -37,7 +37,7 @@ function updatePermission(user: string, permission: 'readonly' | 'readwrite') {
   emit('update:modelValue', users);
 }
 
-const USER_COLORS = ['#1677ff', '#52c41a', '#fa8c16', '#eb2f96', '#722ed1', '#13c2c2'];
+const USER_COLORS = ['var(--ict-primary)', 'var(--ict-success)', 'var(--ict-warning)', '#eb2f96', 'var(--ict-info)', '#13c2c2'];
 
 function getUserColor(user: string): string {
   let hash = 0;
@@ -78,19 +78,19 @@ function getUserInitial(user: string): string {
         <Radio.Group :value="su.permission" size="small" @change="updatePermission(su.user, $event.target.value)">
           <Radio.Button value="readonly">
             <span class="radio-with-icon">
-              <IconifyIcon icon="lucide:eye" style="font-size: 10px; margin-right: 2px;" />
+              <IconifyIcon icon="lucide:eye" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
               只读
             </span>
           </Radio.Button>
           <Radio.Button value="readwrite">
             <span class="radio-with-icon">
-              <IconifyIcon icon="lucide:pencil" style="font-size: 10px; margin-right: 2px;" />
+              <IconifyIcon icon="lucide:pencil" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
               读写
             </span>
           </Radio.Button>
         </Radio.Group>
         <Button type="text" size="small" danger class="user-remove-btn" @click="removeUser(su.user)">
-          <IconifyIcon icon="lucide:x" style="font-size: 12px;" />
+          <IconifyIcon icon="lucide:x" style="font-size: var(--ict-body-small);" />
         </Button>
       </div>
     </div>
@@ -111,8 +111,8 @@ function getUserInitial(user: string): string {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 10px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: var(--ict-success-light);
+  border: 1px solid var(--ict-success-disabled);
   border-radius: 8px;
 }
 
@@ -131,15 +131,15 @@ function getUserInitial(user: string): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: var(--ict-mark-small);
   font-weight: 600;
   border: 1.5px solid;
   flex-shrink: 0;
 }
 
 .user-perm-name {
-  font-size: 13px;
-  color: #262626;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-emphasis);
   font-weight: 500;
 }
 
@@ -156,6 +156,6 @@ function getUserInitial(user: string): string {
 .radio-with-icon {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
 }
 </style>

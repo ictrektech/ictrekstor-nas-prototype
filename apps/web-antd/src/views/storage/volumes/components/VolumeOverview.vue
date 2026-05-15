@@ -24,28 +24,28 @@ const usageColor = computed(() => getCapacityColor(usagePercent.value));
 <template>
   <div class="vol-overview">
     <div class="overview-card">
-      <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #1677ff;" />
+      <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
       <div class="overview-info">
         <span class="overview-label">存储池</span>
         <span class="overview-value">{{ poolCount }}</span>
       </div>
     </div>
     <div class="overview-card">
-      <IconifyIcon icon="lucide:box" style="font-size: 16px; color: #1677ff;" />
+      <IconifyIcon icon="lucide:box" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
       <div class="overview-info">
         <span class="overview-label">存储空间</span>
         <span class="overview-value">{{ volumeCount }}</span>
       </div>
     </div>
     <div class="overview-card">
-      <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #52c41a;" />
+      <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
       <div class="overview-info">
         <span class="overview-label">总容量</span>
         <span class="overview-value">{{ totalCap }}</span>
       </div>
     </div>
     <div class="overview-card">
-      <IconifyIcon icon="lucide:pie-chart" style="font-size: 16px;" :style="{ color: usageColor }" />
+      <IconifyIcon icon="lucide:pie-chart" style="font-size: var(--ict-title-medium);" :style="{ color: usageColor }" />
       <div class="overview-info">
         <span class="overview-label">使用率</span>
         <span class="overview-value" :style="{ color: usageColor }">{{ usagePercent }}%</span>
@@ -66,7 +66,7 @@ const usageColor = computed(() => getCapacityColor(usagePercent.value));
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -78,14 +78,14 @@ const usageColor = computed(() => getCapacityColor(usagePercent.value));
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 </style>

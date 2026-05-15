@@ -353,12 +353,12 @@ function onCancel() {
 }
 
 .form-section-title {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 16px 0 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
 }
 
 .form-section-title:first-child {
@@ -379,7 +379,7 @@ function onCancel() {
 
 .switch-label {
   margin-left: 8px;
-  font-size: 13px;
-  color: #595959;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-secondary);
 }
 </style>

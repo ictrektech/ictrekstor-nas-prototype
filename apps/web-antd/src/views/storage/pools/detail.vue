@@ -53,11 +53,11 @@ function goBack() {
     <div v-if="poolDetail" class="page-header">
       <div class="page-header-left">
         <Button size="small" class="back-btn" @click="goBack">
-          <IconifyIcon icon="lucide:arrow-left" style="font-size: 12px;" />
+          <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-body-small);" />
           返回
         </Button>
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:database" style="font-size: 20px; color: var(--ict-primary);" />
+          <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">{{ poolDetail.name }}</h1>
@@ -66,7 +66,7 @@ function goBack() {
             <Tag :color="poolDetail.status === 'normal' ? 'success' : 'warning'" size="small">
               <span
                 class="status-dot"
-                :style="{ background: poolDetail.status === 'normal' ? '#52c41a' : '#faad14' }"
+                :style="{ background: poolDetail.status === 'normal' ? 'var(--ict-success)' : 'var(--ict-warning)' }"
               />
               {{ poolDetail.status === 'normal' ? '正常' : poolDetail.status }}
             </Tag>
@@ -75,21 +75,21 @@ function goBack() {
       </div>
       <div class="page-header-right">
         <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
           <div class="overview-info">
             <span class="overview-label">总容量</span>
             <span class="overview-value">{{ poolDetail.totalCapacity }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #52c41a;" />
+          <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
           <div class="overview-info">
             <span class="overview-label">已用</span>
             <span class="overview-value">{{ poolDetail.usedCapacity }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #faad14;" />
+          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
           <div class="overview-info">
             <span class="overview-label">可用</span>
             <span class="overview-value">{{ poolDetail.availableCapacity }}</span>
@@ -137,16 +137,16 @@ function goBack() {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #fff;
+  background: var(--ict-bg-card);
   gap: 16px;
   flex-shrink: 0;
 }
 
 .page-header-left { display: flex; align-items: center; gap: 12px; }
-.back-btn { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; }
-.page-icon-box { width: 44px; height: 44px; border-radius: 10px; background: #e6f4ff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.page-title { font-size: 16px; font-weight: 600; color: #262626; margin: 0; line-height: 1.4; }
-.page-desc { font-size: 12px; color: #8c8c8c; margin: 2px 0 0; }
+.back-btn { font-size: var(--ict-body-small); display: inline-flex; align-items: center; gap: 4px; border-radius: 6px; }
+.page-icon-box { width: 44px; height: 44px; border-radius: 10px; background: var(--ict-primary-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.page-title { font-size: var(--ict-title-medium); font-weight: 600; color: var(--ict-text-emphasis); margin: 0; line-height: 1.4; }
+.page-desc { font-size: var(--ict-body-small); color: var(--ict-text-secondary); margin: 2px 0 0; }
 
 .page-header-right { display: flex; align-items: center; gap: 12px; }
 
@@ -155,20 +155,20 @@ function goBack() {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
 
 .overview-info { display: flex; flex-direction: column; gap: 1px; }
-.overview-label { font-size: 11px; color: #8c8c8c; }
-.overview-value { font-size: 16px; font-weight: 600; color: #262626; font-family: 'SF Mono', 'Fira Code', monospace; }
+.overview-label { font-size: var(--ict-mark-small); color: var(--ict-text-secondary); }
+.overview-value { font-size: var(--ict-title-medium); font-weight: 600; color: var(--ict-text-emphasis); font-family: var(--ict-font-family); }
 
 .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
 
 /* Tab 卡片 */
 .pool-tabs-card { border-radius: 10px; overflow: hidden; }
-.pool-tabs :deep(.ant-tabs-nav) { padding: 0 16px; margin-bottom: 0; border-bottom: 1px solid #f0f0f0; }
+.pool-tabs :deep(.ant-tabs-nav) { padding: 0 16px; margin-bottom: 0; border-bottom: 1px solid var(--ict-border-light); }
 .tab-content { padding: 16px; }
 
 /* 响应式 */

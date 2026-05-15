@@ -27,8 +27,8 @@ const DEVICE = {
   width: 260,
   height: 480,
   cornerRadius: 16,
-  bodyColor: '#f5f5f5',
-  borderColor: '#d9d9d9',
+  bodyColor: 'var(--ict-bg-page)',
+  borderColor: 'var(--ict-text-disabled)',
   shadowColor: 'rgba(0,0,0,0.08)',
 };
 
@@ -39,7 +39,7 @@ const PANEL = {
   width: 48,
   height: 340,
   cornerRadius: 8,
-  color: '#262626',
+  color: 'var(--ict-text-emphasis)',
 };
 
 // 6个磁盘槽位参数（竖直排列）
@@ -50,11 +50,11 @@ const BAY = {
   height: 52,
   gap: 8,
   cornerRadius: 8,
-  borderColor: '#bfbfbf',
-  filledColor: '#1677ff',
-  filledBgColor: '#e6f4ff',
-  emptyBgColor: '#fafafa',
-  highlightColor: '#faad14',
+  borderColor: 'var(--ict-text-disabled)',
+  filledColor: 'var(--ict-primary)',
+  filledBgColor: 'var(--ict-primary-light)',
+  emptyBgColor: 'var(--ict-bg-section)',
+  highlightColor: 'var(--ict-warning)',
 };
 
 // 底部接口区域
@@ -64,7 +64,7 @@ const BOTTOM = {
   width: 236,
   height: 54,
   cornerRadius: 8,
-  bgColor: '#f0f0f0',
+  bgColor: 'var(--ict-border-light)',
 };
 
 // 槽位信息（6个槽位）
@@ -145,7 +145,7 @@ function draw() {
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 8;
   drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.fill();
   ctx.restore();
 
@@ -170,7 +170,7 @@ function draw() {
   ctx.translate(PANEL.x + PANEL.width / 2, PANEL.y + PANEL.height / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.font = 'bold 16px sans-serif';
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = 'var(--ict-bg-card)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('VIVIBIT', 0, 0);
@@ -187,10 +187,10 @@ function draw() {
   // 显示屏上的小指示灯
   ctx.beginPath();
   ctx.arc(PANEL.x + 16, screenY + 14, 3, 0, Math.PI * 2);
-  ctx.fillStyle = '#52c41a';
+  ctx.fillStyle = 'var(--ict-success)';
   ctx.fill();
   ctx.font = '9px monospace';
-  ctx.fillStyle = '#52c41a';
+  ctx.fillStyle = 'var(--ict-success)';
   ctx.textAlign = 'left';
   ctx.fillText('RUN', PANEL.x + 24, screenY + 17);
 
@@ -203,7 +203,7 @@ function draw() {
     drawRoundRect(ctx, bay.x, bay.y, bay.width, bay.height, BAY.cornerRadius);
     if (isSelected) {
       // 高亮选中状态
-      ctx.fillStyle = '#fff7e6';
+      ctx.fillStyle = 'var(--ict-warning-light)';
       ctx.fill();
       ctx.strokeStyle = BAY.highlightColor;
       ctx.lineWidth = 2.5;
@@ -238,36 +238,36 @@ function draw() {
       // 硬盘指示灯
       ctx.beginPath();
       ctx.arc(iconX + 5, iconY + 4, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = 'var(--ict-bg-card)';
       ctx.fill();
 
       // 磁盘名称
       ctx.font = 'bold 13px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : '#141414';
+      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-text-emphasis)';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(bay.disk.deviceName, bay.x + 32, bay.y + 18);
 
       // 磁盘容量
       ctx.font = '11px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : '#1677ff';
+      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-primary)';
       ctx.fillText(bay.disk.size || '', bay.x + 32, bay.y + 38);
 
       // 右侧状态点
-      const dotColor = bay.disk.status === '运行中' ? '#52c41a' : bay.disk.status === '休眠' ? '#faad14' : '#bfbfbf';
+      const dotColor = bay.disk.status === '运行中' ? 'var(--ict-success)' : bay.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)';
       ctx.beginPath();
       ctx.arc(bay.x + bay.width - 14, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
       ctx.fillStyle = dotColor;
       ctx.fill();
       ctx.beginPath();
       ctx.arc(bay.x + bay.width - 14, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = 'var(--ict-bg-card)';
       ctx.lineWidth = 2;
       ctx.stroke();
     } else {
       // 空槽位显示
       ctx.font = '12px sans-serif';
-      ctx.fillStyle = '#bfbfbf';
+      ctx.fillStyle = 'var(--ict-text-disabled)';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(`槽位 ${bay.index + 1}`, bay.x + bay.width / 2, bay.y + bay.height / 2);
@@ -278,26 +278,26 @@ function draw() {
   drawRoundRect(ctx, BOTTOM.x, BOTTOM.y, BOTTOM.width, BOTTOM.height, BOTTOM.cornerRadius);
   ctx.fillStyle = BOTTOM.bgColor;
   ctx.fill();
-  ctx.strokeStyle = '#d9d9d9';
+  ctx.strokeStyle = 'var(--ict-text-disabled)';
   ctx.lineWidth = 1;
   ctx.stroke();
 
   // 底部接口图标
   const portY = BOTTOM.y + BOTTOM.height / 2;
-  const portColors = ['#1677ff', '#1677ff', '#52c41a', '#faad14'];
+  const portColors = ['var(--ict-primary)', 'var(--ict-primary)', 'var(--ict-success)', 'var(--ict-warning)'];
   const portLabels = ['LAN', 'LAN', 'USB', 'PWR'];
   for (let i = 0; i < 4; i++) {
     const portX = BOTTOM.x + 24 + i * 58;
     // 接口小矩形
     drawRoundRect(ctx, portX - 18, portY - 10, 36, 20, 4);
-    ctx.fillStyle = '#e8e8e8';
+    ctx.fillStyle = 'var(--ict-border)';
     ctx.fill();
-    ctx.strokeStyle = '#bfbfbf';
+    ctx.strokeStyle = 'var(--ict-text-disabled)';
     ctx.lineWidth = 1;
     ctx.stroke();
     // 标签
     ctx.font = '9px sans-serif';
-    ctx.fillStyle = '#8c8c8c';
+    ctx.fillStyle = 'var(--ict-text-secondary)';
     ctx.textAlign = 'center';
     ctx.fillText(portLabels[i], portX, portY + 18);
     // 指示灯
@@ -453,7 +453,7 @@ defineExpose({ highlightBay });
           <span
             class="tooltip-status"
             :style="{
-              color: tooltip.disk.status === '运行中' ? '#52c41a' : tooltip.disk.status === '休眠' ? '#faad14' : '#bfbfbf',
+              color: tooltip.disk.status === '运行中' ? 'var(--ict-success)' : tooltip.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)',
             }"
           >
             {{ tooltip.disk.status || '--' }}
@@ -482,8 +482,8 @@ defineExpose({ highlightBay });
 
 .bay-tooltip {
   position: absolute;
-  background: #fff;
-  border: 1px solid #e8e8e8;
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-border);
   border-radius: 10px;
   padding: 12px 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -510,19 +510,19 @@ defineExpose({ highlightBay });
   gap: 8px;
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
 }
 
 .tooltip-icon {
-  font-size: 16px;
-  color: #1677ff;
+  font-size: var(--ict-title-medium);
+  color: var(--ict-primary);
 }
 
 .tooltip-title {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 700;
-  color: #141414;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 .tooltip-body {
@@ -539,14 +539,14 @@ defineExpose({ highlightBay });
 }
 
 .tooltip-label {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   flex-shrink: 0;
 }
 
 .tooltip-value {
-  font-size: 12px;
-  color: #262626;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-emphasis);
   font-weight: 500;
   text-align: right;
   overflow: hidden;
@@ -556,11 +556,11 @@ defineExpose({ highlightBay });
 }
 
 .tooltip-value.mono {
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 .tooltip-status {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   font-weight: 600;
 }
 </style>

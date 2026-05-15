@@ -16,9 +16,9 @@ const emit = defineEmits<{
 
 const statusColor = computed(() => {
   switch (props.network.connectionStatus) {
-    case '已连接': return '#52c41a';
-    case '断开': return '#ff4d4f';
-    default: return '#faad14';
+    case '已连接': return 'var(--ict-success)';
+    case '断开': return 'var(--ict-danger)';
+    default: return 'var(--ict-warning)';
   }
 });
 </script>
@@ -55,22 +55,22 @@ const statusColor = computed(() => {
               <IconifyIcon icon="lucide:settings" class="action-icon" />
             </Button>
             <Button size="small" type="primary" class="detail-btn" @click="emit('detail', network)">
-              <IconifyIcon icon="lucide:file-text" style="font-size: 11px;" />
+              <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-mark-small);" />
               详情
             </Button>
           </div>
         </div>
         <!-- 第二行：实时带宽 -->
         <div class="net-bandwidth-row compact">
-          <div class="bw-pill" style="background: #e6f4ff;">
-            <IconifyIcon icon="lucide:arrow-down" style="font-size: 11px; color: #1677ff;" />
+          <div class="bw-pill" style="background: var(--ict-primary-light);">
+            <IconifyIcon icon="lucide:arrow-down" style="font-size: var(--ict-mark-small); color: var(--ict-primary);" />
             <span class="bw-pill-label">下载</span>
-            <span class="bw-pill-value" style="color: #1677ff;">{{ formatSpeed(network.downloadSpeed) }}</span>
+            <span class="bw-pill-value" style="color: var(--ict-primary);">{{ formatSpeed(network.downloadSpeed) }}</span>
           </div>
-          <div class="bw-pill" style="background: #f6ffed;">
-            <IconifyIcon icon="lucide:arrow-up" style="font-size: 11px; color: #52c41a;" />
+          <div class="bw-pill" style="background: var(--ict-success-light);">
+            <IconifyIcon icon="lucide:arrow-up" style="font-size: var(--ict-mark-small); color: var(--ict-success);" />
             <span class="bw-pill-label">上传</span>
-            <span class="bw-pill-value" style="color: #52c41a;">{{ formatSpeed(network.uploadSpeed) }}</span>
+            <span class="bw-pill-value" style="color: var(--ict-success);">{{ formatSpeed(network.uploadSpeed) }}</span>
           </div>
         </div>
         <!-- 第三行：网络配置 + MAC -->
@@ -109,27 +109,27 @@ const statusColor = computed(() => {
 .disk-card { border-radius: 12px; overflow: hidden; transition: all 0.3s; }
 .disk-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .disk-card-inner { display: flex; }
-.disk-visual { width: 72px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 0; border-right: 1px solid #f0f0f0; flex-shrink: 0; }
+.disk-visual { width: 72px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 0; border-right: 1px solid var(--ict-border-light); flex-shrink: 0; }
 .disk-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid; }
-.disk-icon { font-size: 18px; }
-.health-badge { display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; line-height: 1.3; }
+.disk-icon { font-size: var(--ict-title-large); }
+.health-badge { display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: var(--ict-mark-small); font-weight: 500; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; line-height: 1.3; }
 .disk-info { flex: 1; min-width: 0; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
 .info-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .info-header-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.disk-device-name { font-size: 15px; font-weight: 600; color: #262626; }
-.disk-capacity { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 6px; }
+.disk-device-name { font-size: var(--ict-title-small); font-weight: 600; color: var(--ict-text-emphasis); }
+.disk-capacity { font-size: var(--ict-body-small); font-weight: 500; padding: 2px 8px; border-radius: 6px; }
 .health-dot-mini { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
 .header-actions { display: flex; gap: 5px; }
 .action-btn { width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-.action-icon { font-size: 12px; }
-.detail-btn { height: 26px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.action-icon { font-size: var(--ict-body-small); }
+.detail-btn { height: 26px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: var(--ict-mark-small); }
 .net-bandwidth-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.bw-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 6px; font-size: 11px; }
-.bw-pill-label { color: #595959; }
+.bw-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 6px; font-size: var(--ict-mark-small); }
+.bw-pill-label { color: var(--ict-text-secondary); }
 .bw-pill-value { font-weight: 600; font-family: 'SF Mono', monospace; }
-.net-config-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+.net-config-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: var(--ict-body-small); }
 .net-config-item { display: flex; align-items: center; gap: 4px; }
-.net-config-label { color: #8c8c8c; }
-.net-config-value { color: #262626; font-weight: 500; font-family: 'SF Mono', monospace; font-size: 11px; }
-.net-config-divider { width: 1px; height: 12px; background: #e8e8e8; }
+.net-config-label { color: var(--ict-text-secondary); }
+.net-config-value { color: var(--ict-text-emphasis); font-weight: 500; font-family: 'SF Mono', monospace; font-size: var(--ict-mark-small); }
+.net-config-divider { width: 1px; height: 12px; background: var(--ict-border); }
 </style>

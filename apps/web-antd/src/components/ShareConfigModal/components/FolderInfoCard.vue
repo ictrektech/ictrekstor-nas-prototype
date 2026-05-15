@@ -16,7 +16,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
   <div v-if="name" class="selected-folder-info">
     <div class="selected-folder-icon">
-      <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #faad14;" />
+      <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-large); color: var(--ict-warning);" />
     </div>
     <div class="selected-folder-detail">
       <div class="selected-folder-name">{{ name }}</div>
@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
   </div>
   <div v-else-if="showTree" class="selected-folder-empty">
-    <IconifyIcon icon="lucide:folder-open" style="font-size: 20px; color: #d9d9d9;" />
+    <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-large); color: var(--ict-text-disabled);" />
     <span>请从下方目录树中选择一个文件夹</span>
   </div>
 </template>
@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%);
+  background: linear-gradient(135deg, #fffbe6 0%, var(--ict-warning-light) 100%);
   border: 1px solid #ffd591;
   border-radius: 10px;
   margin-bottom: 12px;
@@ -45,7 +45,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--ict-bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,14 +61,14 @@ const props = withDefaults(defineProps<Props>(), {
 }
 
 .selected-folder-name {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .selected-folder-path {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -80,11 +80,11 @@ const props = withDefaults(defineProps<Props>(), {
   justify-content: center;
   gap: 8px;
   padding: 14px;
-  background: #fafafa;
-  border: 1px dashed #d9d9d9;
+  background: var(--ict-bg-section);
+  border: 1px dashed var(--ict-text-disabled);
   border-radius: 10px;
   margin-bottom: 12px;
-  color: #8c8c8c;
-  font-size: 13px;
+  color: var(--ict-text-secondary);
+  font-size: var(--ict-mark-medium);
 }
 </style>

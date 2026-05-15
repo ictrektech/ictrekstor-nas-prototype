@@ -56,27 +56,27 @@ function lineOption(title: string, yName: string, series: any[]) {
 
 const bandwidthOption = computed(() =>
   lineOption('读写带宽', 'MB/s', [
-    { name: '写入', type: 'line', data: writeBandwidthData, smooth: true, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#1677ff' } },
-    { name: '读取', type: 'line', data: readBandwidthData, smooth: true, areaStyle: { opacity: 0.15 }, itemStyle: { color: '#52c41a' } },
+    { name: '写入', type: 'line', data: writeBandwidthData, smooth: true, areaStyle: { opacity: 0.15 }, itemStyle: { color: 'var(--ict-primary)' } },
+    { name: '读取', type: 'line', data: readBandwidthData, smooth: true, areaStyle: { opacity: 0.15 }, itemStyle: { color: 'var(--ict-success)' } },
   ])
 );
 
 const utilizationOption = computed(() =>
   lineOption('磁盘占用率', '%', [
-    { name: '占用率', type: 'line', data: utilizationData, smooth: true, areaStyle: { opacity: 0.2 }, itemStyle: { color: '#faad14' }, markLine: { data: [{ yAxis: 70, label: { formatter: '70%' }, lineStyle: { color: '#ff4d4f', type: 'dashed' } }] } },
+    { name: '占用率', type: 'line', data: utilizationData, smooth: true, areaStyle: { opacity: 0.2 }, itemStyle: { color: 'var(--ict-warning)' }, markLine: { data: [{ yAxis: 70, label: { formatter: '70%' }, lineStyle: { color: 'var(--ict-danger)', type: 'dashed' } }] } },
   ])
 );
 
 const iopsOption = computed(() =>
   lineOption('IOPS', '次/秒', [
-    { name: '写入 IOPS', type: 'line', data: writeIopsData, smooth: true, itemStyle: { color: '#1677ff' } },
-    { name: '读取 IOPS', type: 'line', data: readIopsData, smooth: true, itemStyle: { color: '#52c41a' } },
+    { name: '写入 IOPS', type: 'line', data: writeIopsData, smooth: true, itemStyle: { color: 'var(--ict-primary)' } },
+    { name: '读取 IOPS', type: 'line', data: readIopsData, smooth: true, itemStyle: { color: 'var(--ict-success)' } },
   ])
 );
 
 const latencyOption = computed(() =>
   lineOption('时延', 'ms', [
-    { name: '平均时延', type: 'line', data: latencyData, smooth: true, areaStyle: { opacity: 0.2 }, itemStyle: { color: '#722ed1' }, markLine: { data: [{ yAxis: 10, label: { formatter: '10ms' }, lineStyle: { color: '#ff4d4f', type: 'dashed' } }] } },
+    { name: '平均时延', type: 'line', data: latencyData, smooth: true, areaStyle: { opacity: 0.2 }, itemStyle: { color: 'var(--ict-info)' }, markLine: { data: [{ yAxis: 10, label: { formatter: '10ms' }, lineStyle: { color: 'var(--ict-danger)', type: 'dashed' } }] } },
   ])
 );
 
@@ -88,7 +88,7 @@ const queueOption = computed(() =>
 
 const tempOption = computed(() =>
   lineOption('温度', '°C', [
-    { name: '温度', type: 'line', data: tempData, smooth: true, itemStyle: { color: '#faad14' }, markLine: { data: [{ yAxis: 45, label: { formatter: '45°C' }, lineStyle: { color: '#ff4d4f', type: 'dashed' } }] }, areaStyle: { opacity: 0.1 } },
+    { name: '温度', type: 'line', data: tempData, smooth: true, itemStyle: { color: 'var(--ict-warning)' }, markLine: { data: [{ yAxis: 45, label: { formatter: '45°C' }, lineStyle: { color: 'var(--ict-danger)', type: 'dashed' } }] }, areaStyle: { opacity: 0.1 } },
   ])
 );
 </script>

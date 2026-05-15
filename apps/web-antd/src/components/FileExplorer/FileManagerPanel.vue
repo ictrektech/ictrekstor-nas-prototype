@@ -48,6 +48,7 @@ const emit = defineEmits<{
   share: [file: FileItem];
   copy: [file: FileItem]; move: [file: FileItem];
   batchCopy: [files: FileItem[]]; batchMove: [files: FileItem[]];
+  batchDownload: [files: FileItem[]];
 }>();
 
 const filteredFiles = computed(() => {
@@ -96,7 +97,7 @@ function handleItemClick(file: FileItem, event: MouseEvent) {
 function selectAll() { internalSelectedIds.value = sortedFiles.value.map((f) => f.id); }
 function clearSelection() { internalSelectedIds.value = []; }
 
-function emitBatch(name: 'batchDelete' | 'batchRestore' | 'batchCopy' | 'batchMove') {
+function emitBatch(name: 'batchDelete' | 'batchRestore' | 'batchCopy' | 'batchMove' | 'batchDownload') {
   const files = getSelectedFiles();
   if (files.length) emit(name, files);
 }
@@ -166,11 +167,11 @@ function onDrop(event: DragEvent) {
       @refresh="$emit('refresh')" @new-folder="$emit('newFolder')" @upload="$emit('upload')"
       @select-all="selectAll" @clear-selection="clearSelection" @rename="$emit('rename', $event)"
       @share="$emit('share', $event)" @batch-delete="emitBatch('batchDelete')" @batch-restore="emitBatch('batchRestore')"
-      @batch-copy="emitBatch('batchCopy')" @batch-move="emitBatch('batchMove')" />
+      @batch-copy="emitBatch('batchCopy')" @batch-move="emitBatch('batchMove')" @batch-download="emitBatch('batchDownload')" />
 
     <!-- 拖拽遮罩 -->
     <div v-if="isDragOver && dropZone" class="fmp-drop-overlay">
-      <IconifyIcon icon="lucide:arrow-down-circle" style="font-size: 40px; color: #1677ff;" />
+      <IconifyIcon icon="lucide:arrow-down-circle" style="font-size: 40px; color: var(--ict-primary);" />
       <span>{{ dropHint }}</span>
     </div>
 
@@ -194,9 +195,9 @@ function onDrop(event: DragEvent) {
 </template>
 
 <style scoped>
-.fmp { display: flex; flex-direction: column; flex: 1; height: 100%; overflow: hidden; background: #fff; position: relative; }
-.fmp--drop-zone { border-style: dashed; border-color: #d9d9d9; }
-.fmp--drag-over { border-color: #1677ff; background: #e6f7ff; }
-.fmp-drop-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(22,119,255,0.06); z-index: 10; pointer-events: none; font-size: 16px; color: #1677ff; font-weight: 500; }
+.fmp { display: flex; flex-direction: column; flex: 1; height: 100%; overflow: hidden; background: var(--ict-bg-card); position: relative; }
+.fmp--drop-zone { border-style: dashed; border-color: var(--ict-text-disabled); }
+.fmp--drag-over { border-color: var(--ict-primary); background: var(--ict-primary-light); }
+.fmp-drop-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(22,119,255,0.06); z-index: 10; pointer-events: none; font-size: var(--ict-title-medium); color: var(--ict-primary); font-weight: 500; }
 .fmp-body { flex: 1; overflow: auto; padding: 20px; }
 </style>

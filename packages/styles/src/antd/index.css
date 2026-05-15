@@ -73,3 +73,50 @@
 .ant-app .form-valid-error .ant-picker-focused {
   box-shadow: 0 0 0 2px rgb(255 38 5 / 6%);
 }
+
+/* ═══════════════════════════════════════
+   Checkbox 多选框全局覆盖
+   ═══════════════════════════════════════ */
+
+.ant-checkbox .ant-checkbox-inner {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border-width: 1.5px;
+  border-color: var(--ict-border, #E9ECEF);
+  background: var(--ict-bg-card, #FFFFFF);
+}
+
+.ant-checkbox:hover .ant-checkbox-inner {
+  border-color: var(--ict-primary, #006BE6);
+}
+
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-checkbox-indeterminate .ant-checkbox-inner {
+  background: var(--ict-primary, #006BE6);
+  border-color: var(--ict-primary, #006BE6);
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: var(--ict-bg-card, #FFFFFF);
+}
+
+.ant-checkbox-disabled .ant-checkbox-inner {
+  background: var(--ict-bg-page, #F5F5F5);
+  border-color: var(--ict-border, #E9ECEF);
+}
+
+.ant-checkbox-disabled.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: var(--ict-text-tertiary, #8C8C8C);
+}
+
+.ant-checkbox + span {
+  font-size: 14px;
+  color: var(--ict-text-primary, #1e293b);
+  padding-left: 8px;
+  padding-right: 0;
+}
+
+.ant-checkbox-disabled + span {
+  color: var(--ict-text-disabled, #45484B);
+}

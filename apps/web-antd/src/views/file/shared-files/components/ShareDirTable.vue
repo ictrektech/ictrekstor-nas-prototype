@@ -49,7 +49,7 @@ function formatFriendlyTime(timeStr: string): string {
 
 function formatExpireTime(expireTime: string): { text: string; color: string } {
   if (expireTime === '永久') {
-    return { text: '永久', color: '#8c8c8c' };
+    return { text: '永久', color: 'var(--ict-text-secondary)' };
   }
   const now = new Date();
   const time = new Date(expireTime);
@@ -58,25 +58,25 @@ function formatExpireTime(expireTime: string): { text: string; color: string } {
   const isExpired = diffMs < 0;
 
   if (isExpired) {
-    return { text: `已过期${diffDay}天`, color: '#ff4d4f' };
+    return { text: `已过期${diffDay}天`, color: 'var(--ict-danger)' };
   }
   if (diffDay === 0) {
-    return { text: '今天过期', color: '#faad14' };
+    return { text: '今天过期', color: 'var(--ict-warning)' };
   }
   if (diffDay <= 3) {
-    return { text: `还剩${diffDay}天`, color: '#faad14' };
+    return { text: `还剩${diffDay}天`, color: 'var(--ict-warning)' };
   }
-  return { text: `还剩${diffDay}天`, color: '#8c8c8c' };
+  return { text: `还剩${diffDay}天`, color: 'var(--ict-text-secondary)' };
 }
 
 function getUserColor(user: string) {
   const colors: Record<string, string> = {
-    zhangsan: '#1677ff',
-    lisi: '#52c41a',
-    wangwu: '#fa8c16',
-    admin: '#722ed1',
+    zhangsan: 'var(--ict-primary)',
+    lisi: 'var(--ict-success)',
+    wangwu: 'var(--ict-warning)',
+    admin: 'var(--ict-info)',
   };
-  return colors[user] || '#595959';
+  return colors[user] || 'var(--ict-text-secondary)';
 }
 
 function getUserInitial(user: string) {
@@ -102,7 +102,7 @@ function getUserInitial(user: string) {
               class="name-icon-box"
               :class="{ 'name-icon-box--expired': record.status === 'expired' }"
             >
-              <IconifyIcon icon="lucide:folder-open" style="font-size: 16px;" />
+              <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium);" />
             </div>
             <div class="name-text-area">
               <div class="name-title">{{ record.name }}</div>
@@ -120,7 +120,7 @@ function getUserInitial(user: string) {
         <!-- 原文件夹 -->
         <template v-if="column.key === 'sourcePath'">
           <div class="path-cell">
-            <IconifyIcon icon="lucide:folder" style="font-size: 12px; color: #bfbfbf; flex-shrink: 0;" />
+            <IconifyIcon icon="lucide:folder" style="font-size: var(--ict-body-small); color: var(--ict-text-disabled); flex-shrink: 0;" />
             <span class="path-text" :title="record.sourcePath">{{ record.sourcePath }}</span>
           </div>
         </template>
@@ -164,7 +164,7 @@ function getUserInitial(user: string) {
           <div class="status-cell">
             <span
               class="status-dot"
-              :style="{ background: record.status === 'active' ? '#52c41a' : '#8c8c8c' }"
+              :style="{ background: record.status === 'active' ? 'var(--ict-success)' : 'var(--ict-text-secondary)' }"
             />
             <span class="status-text" :class="{ 'status-text--expired': record.status === 'expired' }">
               {{ record.status === 'active' ? '有效' : '已过期' }}
@@ -183,19 +183,19 @@ function getUserInitial(user: string) {
                   class="link-tag link-tag--clickable"
                   @click="emit('copy-link', record.linkUrl)"
                 >
-                  <IconifyIcon icon="lucide:link" style="font-size: 11px; margin-right: 2px;" />
+                  <IconifyIcon icon="lucide:link" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
                   已开启
                 </Tag>
               </Tooltip>
             </template>
             <template v-else-if="record.linkEnabled && record.linkStatus === 'expired'">
               <Tag color="default" size="small" class="link-tag">
-                <IconifyIcon icon="lucide:link-break" style="font-size: 11px; margin-right: 2px;" />
+                <IconifyIcon icon="lucide:link-break" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
                 已过期
               </Tag>
             </template>
             <span v-else class="link-none">
-              <IconifyIcon icon="lucide:link-off" style="font-size: 11px; margin-right: 2px;" />
+              <IconifyIcon icon="lucide:link-off" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
               未开启
             </span>
           </div>
@@ -211,7 +211,7 @@ function getUserInitial(user: string) {
                 class="action-icon-btn"
                 @click="emit('edit-users', record)"
               >
-                <IconifyIcon icon="lucide:users" style="font-size: 14px; color: #595959;" />
+                <IconifyIcon icon="lucide:users" style="font-size: var(--ict-body-medium); color: var(--ict-text-secondary);" />
               </Button>
             </Tooltip>
             <Tooltip title="外链管理">
@@ -221,7 +221,7 @@ function getUserInitial(user: string) {
                 class="action-icon-btn"
                 @click="emit('link-manage', record)"
               >
-                <IconifyIcon icon="lucide:link" style="font-size: 14px; color: #595959;" />
+                <IconifyIcon icon="lucide:link" style="font-size: var(--ict-body-medium); color: var(--ict-text-secondary);" />
               </Button>
             </Tooltip>
             <Tooltip title="删除共享">
@@ -233,7 +233,7 @@ function getUserInitial(user: string) {
                 @confirm="emit('delete-dir', record)"
               >
                 <Button size="small" type="text" danger class="action-icon-btn">
-                  <IconifyIcon icon="lucide:trash-2" style="font-size: 14px; color: #ff4d4f;" />
+                  <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-body-medium); color: var(--ict-danger);" />
                 </Button>
               </Popconfirm>
             </Tooltip>
@@ -245,7 +245,7 @@ function getUserInitial(user: string) {
         <Empty description="暂无共享目录" class="table-empty">
           <template #image>
             <div class="empty-image">
-              <IconifyIcon icon="lucide:folder-symlink" style="font-size: 48px; color: #d9d9d9;" />
+              <IconifyIcon icon="lucide:folder-symlink" style="font-size: 48px; color: var(--ict-text-disabled);" />
             </div>
           </template>
         </Empty>
@@ -256,32 +256,32 @@ function getUserInitial(user: string) {
 
 <style scoped>
 .table-card {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .shared-table :deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
+  background: var(--ict-bg-section);
   font-weight: 600;
-  font-size: 12px;
-  color: #595959;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   padding: 10px 16px;
 }
 
 .shared-table :deep(.ant-table-tbody > tr > td) {
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 
 .shared-table :deep(.ant-table-tbody > tr:hover > td) {
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
 }
 
 /* ═══ 时间列 ═══ */
 .time-text {
-  color: #8c8c8c;
-  font-size: 12px;
+  color: var(--ict-text-secondary);
+  font-size: var(--ict-body-small);
 }
 
 /* ═══ 名称列 ═══ */
@@ -295,8 +295,8 @@ function getUserInitial(user: string) {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #e6f4ff 0%, #f0f5ff 100%);
-  color: #1677ff;
+  background: linear-gradient(135deg, var(--ict-primary-light) 0%, #f0f5ff 100%);
+  color: var(--ict-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,8 +304,8 @@ function getUserInitial(user: string) {
 }
 
 .name-icon-box--expired {
-  background: linear-gradient(135deg, #f5f5f5 0%, #f0f0f0 100%);
-  color: #8c8c8c;
+  background: linear-gradient(135deg, var(--ict-bg-page) 0%, var(--ict-border-light) 100%);
+  color: var(--ict-text-secondary);
 }
 
 .name-text-area {
@@ -316,9 +316,9 @@ function getUserInitial(user: string) {
 }
 
 .name-title {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 500;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 /* ═══ 路径列 ═══ */
@@ -326,8 +326,8 @@ function getUserInitial(user: string) {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #8c8c8c;
-  font-size: 13px;
+  color: var(--ict-text-secondary);
+  font-size: var(--ict-mark-medium);
 }
 
 .path-text {
@@ -357,7 +357,7 @@ function getUserInitial(user: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   font-weight: 600;
   border: 1.5px solid;
   cursor: default;
@@ -370,20 +370,20 @@ function getUserInitial(user: string) {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  border: 1.5px solid #fff;
+  border: 1.5px solid var(--ict-bg-card);
 }
 
 .perm-dot--ro {
-  background: #8c8c8c;
+  background: var(--ict-text-secondary);
 }
 
 .perm-dot--rw {
-  background: #52c41a;
+  background: var(--ict-success);
 }
 
 .no-users {
-  color: #bfbfbf;
-  font-size: 13px;
+  color: var(--ict-text-disabled);
+  font-size: var(--ict-mark-medium);
 }
 
 /* ═══ 状态列 ═══ */
@@ -402,13 +402,13 @@ function getUserInitial(user: string) {
 }
 
 .status-text {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   font-weight: 500;
-  color: #52c41a;
+  color: var(--ict-success);
 }
 
 .status-text--expired {
-  color: #8c8c8c;
+  color: var(--ict-text-secondary);
 }
 
 /* ═══ 外链列 ═══ */
@@ -436,8 +436,8 @@ function getUserInitial(user: string) {
 .link-none {
   display: inline-flex;
   align-items: center;
-  color: #bfbfbf;
-  font-size: 12px;
+  color: var(--ict-text-disabled);
+  font-size: var(--ict-body-small);
 }
 
 /* ═══ 操作列 ═══ */
@@ -460,7 +460,7 @@ function getUserInitial(user: string) {
 }
 
 .action-icon-btn:hover {
-  background: #f0f0f0 !important;
+  background: var(--ict-border-light) !important;
 }
 
 /* ═══ 空状态 ═══ */

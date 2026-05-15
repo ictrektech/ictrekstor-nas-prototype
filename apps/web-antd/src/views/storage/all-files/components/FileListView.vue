@@ -77,7 +77,7 @@ function getFileIcon(file: StorageSpaceFile): string {
 
 <style scoped>
 .file-name-cell { display: flex; align-items: center; gap: 8px; }
-.file-icon { font-size: 18px; flex-shrink: 0; }
+.file-icon { font-size: var(--ict-title-large); flex-shrink: 0; }
 .file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .file-actions { display: flex; gap: 4px; }
 </style>

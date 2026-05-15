@@ -78,7 +78,7 @@ function ejectDevice(device: ExternalDevice) {
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:usb" style="font-size: 20px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:usb" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">外接设备</h1>
@@ -87,21 +87,21 @@ function ejectDevice(device: ExternalDevice) {
       </div>
       <div class="page-header-right">
         <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: 16px; color: #1677ff;" />
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
           <div class="overview-info">
             <span class="overview-label">设备总数</span>
             <span class="overview-value">{{ overviewStats.total }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:plug" style="font-size: 16px; color: #52c41a;" />
+          <IconifyIcon icon="lucide:plug" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
           <div class="overview-info">
             <span class="overview-label">已连接</span>
             <span class="overview-value">{{ overviewStats.connected }}</span>
           </div>
         </div>
         <div class="overview-card">
-          <IconifyIcon icon="lucide:unplug" style="font-size: 16px; color: #bfbfbf;" />
+          <IconifyIcon icon="lucide:unplug" style="font-size: var(--ict-title-medium); color: var(--ict-text-disabled);" />
           <div class="overview-info">
             <span class="overview-label">未连接</span>
             <span class="overview-value">{{ overviewStats.disconnected }}</span>
@@ -135,7 +135,7 @@ function ejectDevice(device: ExternalDevice) {
     >
       <template #image>
         <div class="empty-image">
-          <IconifyIcon icon="lucide:usb" style="font-size: 56px; color: #d9d9d9;" />
+          <IconifyIcon icon="lucide:usb" style="font-size: 56px; color: var(--ict-text-disabled);" />
         </div>
       </template>
     </Empty>
@@ -147,7 +147,7 @@ function ejectDevice(device: ExternalDevice) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 /* 页面顶部概览 */
@@ -156,8 +156,8 @@ function ejectDevice(device: ExternalDevice) {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -172,7 +172,7 @@ function ejectDevice(device: ExternalDevice) {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #e6f4ff;
+  background: var(--ict-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,16 +180,16 @@ function ejectDevice(device: ExternalDevice) {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -204,7 +204,7 @@ function ejectDevice(device: ExternalDevice) {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -216,15 +216,15 @@ function ejectDevice(device: ExternalDevice) {
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 
 /* 设备卡片网格 */
@@ -244,7 +244,7 @@ function ejectDevice(device: ExternalDevice) {
 .device-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: #1677ff;
+  border-color: var(--ict-primary);
 }
 
 /* 空状态 */
@@ -265,7 +265,7 @@ function ejectDevice(device: ExternalDevice) {
 
   .stat-item {
     border-right: none;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--ict-border-light);
     padding: 0 0 12px 0;
   }
 

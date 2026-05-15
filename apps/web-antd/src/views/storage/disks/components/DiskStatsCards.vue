@@ -41,7 +41,7 @@ const healthyCount = computed(
     <div class="overview-card">
       <IconifyIcon
         icon="lucide:hard-drive"
-        style="font-size: 16px; color: #1677ff;"
+        style="font-size: var(--ict-title-medium); color: var(--ict-primary);"
       />
       <div class="overview-info">
         <span class="overview-label">硬盘数</span>
@@ -51,7 +51,7 @@ const healthyCount = computed(
     <div class="overview-card">
       <IconifyIcon
         icon="lucide:database"
-        style="font-size: 16px; color: #52c41a;"
+        style="font-size: var(--ict-title-medium); color: var(--ict-success);"
       />
       <div class="overview-info">
         <span class="overview-label">总容量(TB)</span>
@@ -61,7 +61,7 @@ const healthyCount = computed(
     <div class="overview-card">
       <IconifyIcon
         icon="lucide:heart-pulse"
-        style="font-size: 16px; color: #52c41a;"
+        style="font-size: var(--ict-title-medium); color: var(--ict-success);"
       />
       <div class="overview-info">
         <span class="overview-label">健康</span>
@@ -83,7 +83,7 @@ const healthyCount = computed(
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -95,14 +95,14 @@ const healthyCount = computed(
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 </style>

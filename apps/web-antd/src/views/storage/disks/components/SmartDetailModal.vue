@@ -112,7 +112,7 @@ function onClose() {
     <div v-if="!rawView" class="smart-structured">
       <div v-if="smartInfoSection.length > 0" class="smart-section">
         <div class="smart-section-title">
-          <IconifyIcon icon="lucide:info" style="font-size: 13px;" />
+          <IconifyIcon icon="lucide:info" style="font-size: var(--ict-mark-medium);" />
           设备信息 (INFORMATION SECTION)
         </div>
         <Descriptions :column="2" size="small" bordered>
@@ -124,7 +124,7 @@ function onClose() {
 
       <div v-if="smartAttributes.length > 0" class="smart-section">
         <div class="smart-section-title">
-          <IconifyIcon icon="lucide:table" style="font-size: 13px;" />
+          <IconifyIcon icon="lucide:table" style="font-size: var(--ict-mark-medium);" />
           SMART 属性 (Vendor Specific SMART Attributes with Thresholds)
         </div>
         <Table
@@ -139,7 +139,7 @@ function onClose() {
 
       <div v-for="section in smartTextSections" :key="section.title" class="smart-section">
         <div class="smart-section-title">
-          <IconifyIcon icon="lucide:file-text" style="font-size: 13px;" />
+          <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-mark-medium);" />
           {{ section.title.replace('START OF ', '') }}
         </div>
         <pre class="smart-section-pre">{{ section.content }}</pre>
@@ -150,7 +150,7 @@ function onClose() {
 
     <div class="smart-modal-footer">
       <Button size="small" @click="toggleView">
-        <IconifyIcon :icon="rawView ? 'lucide:table' : 'lucide:terminal'" style="font-size: 12px;" />
+        <IconifyIcon :icon="rawView ? 'lucide:table' : 'lucide:terminal'" style="font-size: var(--ict-body-small);" />
         {{ rawView ? '查看结构化信息' : '查看原始信息' }}
       </Button>
     </div>
@@ -174,33 +174,33 @@ function onClose() {
 }
 
 .smart-section-title {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   display: flex;
   align-items: center;
   gap: 5px;
 }
 
 .smart-section-pre {
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
+  background: var(--ict-bg-section);
+  border: 1px solid var(--ict-border-light);
   border-radius: 6px;
   padding: 10px 12px;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 11px;
+  font-size: var(--ict-mark-small);
   line-height: 1.6;
   overflow-x: auto;
   white-space: pre-wrap;
   word-break: break-word;
-  color: #595959;
+  color: var(--ict-text-secondary);
 }
 
 .smart-modal-footer {
   display: flex;
   justify-content: center;
   padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--ict-border-light);
   margin-top: 12px;
 }
 
@@ -210,7 +210,7 @@ function onClose() {
   padding: 16px;
   border-radius: 6px;
   font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   line-height: 1.6;
   overflow-x: auto;
   max-height: 600px;

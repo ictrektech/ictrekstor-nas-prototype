@@ -183,15 +183,15 @@ function onExpand(keys: string[]) {
 
   function defaultIconResolver(node: FileTreeNode): { icon: string; color: string } {
   if (node.type === 'space') {
-    return { icon: 'lucide:hard-drive', color: '#1677ff' };
+    return { icon: 'lucide:hard-drive', color: 'var(--ict-primary)' };
   }
   if (node.type === 'team-folder') {
-    return { icon: 'lucide:folder-heart', color: '#1677ff' };
+    return { icon: 'lucide:folder-heart', color: 'var(--ict-primary)' };
   }
   if (node.isLeaf) {
-    return { icon: 'lucide:folder-open', color: '#faad14' };
+    return { icon: 'lucide:folder-open', color: 'var(--ict-warning)' };
   }
-  return { icon: 'lucide:folder', color: '#faad14' };
+  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
 }
 
 function resolveIcon(node: FileTreeNode) {
@@ -218,7 +218,7 @@ watch(
     >
       <IconifyIcon
         icon="lucide:panel-left-open"
-        style="font-size: 16px; color: #8c8c8c;"
+        style="font-size: var(--ict-title-medium); color: var(--ict-text-secondary);"
       />
       <span class="trigger-label">目录</span>
     </div>
@@ -247,7 +247,7 @@ watch(
         <span class="panel-title">
           <IconifyIcon
             icon="lucide:folder-tree"
-            style="font-size: 14px; color: #1677ff;"
+            style="font-size: var(--ict-body-medium); color: var(--ict-primary);"
           />
           文件目录
         </span>
@@ -258,12 +258,12 @@ watch(
               :class="{ active: isPinned }"
               @click="togglePin"
             >
-              <IconifyIcon icon="lucide:pin" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:pin" style="font-size: var(--ict-mark-medium);" />
             </button>
           </Tooltip>
           <Tooltip title="收起侧边栏">
             <button class="action-btn" @click="collapse">
-              <IconifyIcon icon="lucide:panel-left-close" style="font-size: 13px;" />
+              <IconifyIcon icon="lucide:panel-left-close" style="font-size: var(--ict-mark-medium);" />
             </button>
           </Tooltip>
         </div>
@@ -314,9 +314,9 @@ watch(
   flex-direction: column;
   align-items: center;
   padding: 14px 0;
-  background: #fff;
+  background: var(--ict-bg-card);
   border: none;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid var(--ict-border-light);
   cursor: pointer;
   gap: 10px;
   transition: all 0.2s ease;
@@ -330,8 +330,8 @@ watch(
 .trigger-label {
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
   letter-spacing: 3px;
   font-weight: 500;
 }
@@ -339,9 +339,9 @@ watch(
 /* ═══ 展开面板 ═══ */
 .drawer-panel {
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
   border: none;
-  border-right: 1px solid #f0f0f0;
+  border-right: 1px solid var(--ict-border-light);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -388,7 +388,7 @@ watch(
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px 10px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
   flex-shrink: 0;
   user-select: none;
 }
@@ -397,9 +397,9 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .panel-actions {
@@ -418,18 +418,18 @@ watch(
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #8c8c8c;
+  color: var(--ict-text-secondary);
   transition: all 0.2s ease;
 }
 
 .action-btn:hover {
   background: #f0f5ff;
-  color: #1677ff;
+  color: var(--ict-primary);
 }
 
 .action-btn.active {
-  background: #e6f4ff;
-  color: #1677ff;
+  background: var(--ict-primary-light);
+  color: var(--ict-primary);
 }
 
 /* ═══ 树状内容区：支持横向+纵向滚动 ═══ */
@@ -439,7 +439,7 @@ watch(
   padding: 20px;
   /* 隐藏滚动条但保留滚动能力 */
   scrollbar-width: thin;
-  scrollbar-color: #d9d9d9 transparent;
+  scrollbar-color: var(--ict-text-disabled) transparent;
 }
 
 .panel-content::-webkit-scrollbar {
@@ -452,12 +452,12 @@ watch(
 }
 
 .panel-content::-webkit-scrollbar-thumb {
-  background: #d9d9d9;
+  background: var(--ict-text-disabled);
   border-radius: 3px;
 }
 
 .panel-content::-webkit-scrollbar-thumb:hover {
-  background: #bfbfbf;
+  background: var(--ict-text-disabled);
 }
 
 /* ═══ 树组件样式 ═══ */
@@ -483,8 +483,8 @@ watch(
 }
 
 .file-tree :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
-  background: #e6f4ff !important;
-  color: #1677ff;
+  background: var(--ict-primary-light) !important;
+  color: var(--ict-primary);
   font-weight: 500;
 }
 
@@ -499,7 +499,8 @@ watch(
 .tree-node-title {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  font-size: var(--ict-body-medium);
+  color: var(--ict-text-primary);
   min-width: max-content;
 }
 

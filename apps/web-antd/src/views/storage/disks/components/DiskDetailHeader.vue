@@ -18,9 +18,9 @@ function getDeviceIcon(deviceType?: string): string {
 }
 
 function getDeviceIconColor(deviceType?: string): string {
-  if (deviceType?.includes('SSD')) return '#722ed1';
+  if (deviceType?.includes('SSD')) return 'var(--ict-info)';
   if (deviceType?.includes('NVMe')) return '#eb2f96';
-  return '#1677ff';
+  return 'var(--ict-primary)';
 }
 
 function formatHours(hours?: number): string {
@@ -31,10 +31,10 @@ function formatHours(hours?: number): string {
 }
 
 function getTempColor(temp?: number): string {
-  if (!temp) return '#8c8c8c';
-  if (temp < 40) return '#52c41a';
-  if (temp < 50) return '#faad14';
-  return '#ff4d4f';
+  if (!temp) return 'var(--ict-text-secondary)';
+  if (temp < 40) return 'var(--ict-success)';
+  if (temp < 50) return 'var(--ict-warning)';
+  return 'var(--ict-danger)';
 }
 </script>
 
@@ -42,7 +42,7 @@ function getTempColor(temp?: number): string {
   <div class="page-header">
     <div class="page-header-left">
       <Button size="small" class="back-btn" @click="emit('back')">
-        <IconifyIcon icon="lucide:arrow-left" style="font-size: 13px;" />
+        <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-mark-medium);" />
       </Button>
       <div
         class="page-icon-box"
@@ -53,7 +53,7 @@ function getTempColor(temp?: number): string {
       >
         <IconifyIcon
           :icon="getDeviceIcon(disk.deviceType)"
-          style="font-size: 20px;"
+          style="font-size: var(--ict-title-large);"
           :style="{ color: getDeviceIconColor(disk.deviceType) }"
         />
       </div>
@@ -64,28 +64,28 @@ function getTempColor(temp?: number): string {
     </div>
     <div class="page-header-right">
       <div class="overview-card">
-        <IconifyIcon icon="lucide:database" style="font-size: 16px; color: #1677ff;" />
+        <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
         <div class="overview-info">
           <span class="overview-label">容量</span>
           <span class="overview-value">{{ disk.size }}</span>
         </div>
       </div>
       <div v-if="disk.temperature !== undefined" class="overview-card">
-        <IconifyIcon icon="lucide:thermometer" style="font-size: 16px; color: #faad14;" />
+        <IconifyIcon icon="lucide:thermometer" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
         <div class="overview-info">
           <span class="overview-label">温度</span>
           <span class="overview-value" :style="{ color: getTempColor(disk.temperature) }">{{ disk.temperature }}°C</span>
         </div>
       </div>
       <div v-if="disk.usedHours" class="overview-card">
-        <IconifyIcon icon="lucide:clock" style="font-size: 16px; color: #52c41a;" />
+        <IconifyIcon icon="lucide:clock" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
         <div class="overview-info">
           <span class="overview-label">使用时长</span>
           <span class="overview-value">{{ formatHours(disk.usedHours) }}</span>
         </div>
       </div>
       <div v-if="disk.partitions" class="overview-card">
-        <IconifyIcon icon="lucide:folder-open" style="font-size: 16px; color: #722ed1;" />
+        <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
         <div class="overview-info">
           <span class="overview-label">分区数</span>
           <span class="overview-value">{{ disk.partitions.length }}</span>
@@ -101,7 +101,7 @@ function getTempColor(temp?: number): string {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #fff;
+  background: var(--ict-bg-card);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -113,7 +113,7 @@ function getTempColor(temp?: number): string {
 }
 
 .back-btn {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -131,16 +131,16 @@ function getTempColor(temp?: number): string {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -155,7 +155,7 @@ function getTempColor(temp?: number): string {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 8px;
   min-width: 90px;
 }
@@ -167,14 +167,14 @@ function getTempColor(temp?: number): string {
 }
 
 .overview-label {
-  font-size: 11px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
 }
 
 .overview-value {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
 }
 </style>

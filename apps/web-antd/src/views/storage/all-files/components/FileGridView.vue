@@ -77,13 +77,13 @@ function getFileIcon(file: StorageSpaceFile): string {
 }
 
 .file-grid-item:hover {
-  background: #f5f5f5;
-  border-color: #d9d9d9;
+  background: var(--ict-bg-page);
+  border-color: var(--ict-text-disabled);
 }
 
 .file-grid-icon { font-size: 40px; margin-bottom: 8px; }
-.file-grid-name { font-size: 13px; color: #262626; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; margin-bottom: 4px; }
-.file-grid-meta { font-size: 11px; color: #8c8c8c; margin-bottom: 8px; }
+.file-grid-name { font-size: var(--ict-body-medium); color: var(--ict-text-primary); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; margin-bottom: 4px; }
+.file-grid-meta { font-size: var(--ict-body-medium); color: var(--ict-text-primary); margin-bottom: 8px; }
 .file-grid-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
 .file-grid-item:hover .file-grid-actions { opacity: 1; }
 .file-grid-empty { grid-column: 1 / -1; padding: 48px 0; }

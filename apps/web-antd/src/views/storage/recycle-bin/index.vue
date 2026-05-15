@@ -77,12 +77,12 @@ function refresh() {
 }
 
 function nodeIconResolver(node: FileTreeNode) {
-  if (node.type === 'root-space') return { icon: 'lucide:hard-drive', color: '#1677ff' };
-  if (node.type === 'root-team') return { icon: 'lucide:users', color: '#1677ff' };
-  if (node.type === 'space') return { icon: 'lucide:server', color: '#1677ff' };
-  if (node.type === 'team-folder') return { icon: 'lucide:folder-heart', color: '#1677ff' };
-  if (node.isLeaf) return { icon: 'lucide:folder-open', color: '#faad14' };
-  return { icon: 'lucide:folder', color: '#faad14' };
+  if (node.type === 'root-space') return { icon: 'lucide:hard-drive', color: 'var(--ict-primary)' };
+  if (node.type === 'root-team') return { icon: 'lucide:users', color: 'var(--ict-primary)' };
+  if (node.type === 'space') return { icon: 'lucide:server', color: 'var(--ict-primary)' };
+  if (node.type === 'team-folder') return { icon: 'lucide:folder-heart', color: 'var(--ict-primary)' };
+  if (node.isLeaf) return { icon: 'lucide:folder-open', color: 'var(--ict-warning)' };
+  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
 }
 
 onMounted(() => {
@@ -128,9 +128,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.file-manager-page { display: flex; flex-direction: column; height: 100%; background: #fff; }
+.file-manager-page { display: flex; flex-direction: column; height: 100%; background: var(--ict-bg-card); }
 .fm-body { display: flex; flex: 1; overflow: hidden; }
-.file-manager-panel__path { color: #8c8c8c; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-manager-panel__path { color: var(--ict-text-secondary); font-size: var(--ict-body-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (max-width: 768px) {
   .page-header { flex-direction: column; align-items: flex-start; }

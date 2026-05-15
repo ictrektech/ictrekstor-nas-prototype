@@ -79,7 +79,7 @@ export default { name: 'SectionCard' };
 }
 
 .section-icon {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
 }
 
 .section-title-text {

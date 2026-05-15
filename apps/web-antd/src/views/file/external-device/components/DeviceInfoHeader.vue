@@ -29,7 +29,7 @@ function getDeviceIcon(_type: string): string {
 }
 
 function getDeviceIconColor(_type: string): string {
-  return '#1677ff';
+  return 'var(--ict-primary)';
 }
 
 function getDeviceTypeLabel(type: string): string {
@@ -57,7 +57,7 @@ function getDeviceTypeLabel(type: string): string {
           <div class="device-info__icon">
             <IconifyIcon
               :icon="getDeviceIcon(device?.type || 'usb')"
-              style="font-size: 18px;"
+              style="font-size: var(--ict-title-large);"
               :style="{ color: getDeviceIconColor(device?.type || 'usb') }"
             />
           </div>
@@ -97,7 +97,7 @@ function getDeviceTypeLabel(type: string): string {
         <div class="stat-chip">
           <IconifyIcon
             icon="lucide:hard-drive"
-            style="font-size: 14px; color: #1677ff;"
+            style="font-size: var(--ict-body-medium); color: var(--ict-primary);"
           />
           <div class="stat-chip__content">
             <span class="stat-chip__label">总容量</span>
@@ -109,7 +109,7 @@ function getDeviceTypeLabel(type: string): string {
         <div class="stat-chip">
           <IconifyIcon
             icon="lucide:database"
-            style="font-size: 14px; color: #52c41a;"
+            style="font-size: var(--ict-body-medium); color: var(--ict-success);"
           />
           <div class="stat-chip__content">
             <span class="stat-chip__label">已用</span>
@@ -121,7 +121,7 @@ function getDeviceTypeLabel(type: string): string {
         <div class="stat-chip">
           <IconifyIcon
             icon="lucide:percent"
-            style="font-size: 14px; color: #faad14;"
+            style="font-size: var(--ict-body-medium); color: var(--ict-warning);"
           />
           <div class="stat-chip__content">
             <span class="stat-chip__label">使用率</span>
@@ -138,7 +138,7 @@ function getDeviceTypeLabel(type: string): string {
       <Button size="small" class="back-btn" @click="emit('back')">
         <IconifyIcon
           icon="lucide:arrow-left"
-          style="font-size: 14px;"
+          style="font-size: var(--ict-body-medium);"
         />
         返回外接设备列表
       </Button>
@@ -152,7 +152,7 @@ function getDeviceTypeLabel(type: string): string {
           :icon="
             showCopyMode ? 'lucide:folder-x' : 'lucide:folder-sync'
           "
-          style="font-size: 14px;"
+          style="font-size: var(--ict-body-medium);"
         />
         <span>{{ showCopyMode ? '退出拷贝' : '文件拷贝' }}</span>
       </button>
@@ -165,8 +165,8 @@ function getDeviceTypeLabel(type: string): string {
   display: flex;
   flex-direction: column;
   padding: 12px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 10px;
   flex-shrink: 0;
 }
@@ -196,7 +196,7 @@ function getDeviceTypeLabel(type: string): string {
 .header-divider {
   width: 1px;
   height: 24px;
-  background: #e8e8e8;
+  background: var(--ict-border);
   flex-shrink: 0;
 }
 
@@ -210,7 +210,7 @@ function getDeviceTypeLabel(type: string): string {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #e6f4ff 0%, #d6e8ff 100%);
+  background: linear-gradient(135deg, var(--ict-primary-light) 0%, #d6e8ff 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,9 +224,9 @@ function getDeviceTypeLabel(type: string): string {
 }
 
 .device-info__name {
-  font-size: 15px;
+  font-size: var(--ict-title-small);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   line-height: 1.3;
 }
 
@@ -234,8 +234,8 @@ function getDeviceTypeLabel(type: string): string {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
 .meta-tag {
@@ -244,13 +244,13 @@ function getDeviceTypeLabel(type: string): string {
   padding: 1px 8px;
   background: #f0f5ff;
   border-radius: 10px;
-  font-size: 11px;
-  color: #1677ff;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-primary);
   font-weight: 500;
 }
 
 .meta-sep {
-  color: #d9d9d9;
+  color: var(--ict-text-disabled);
 }
 
 .unified-header__right-stats {
@@ -265,8 +265,8 @@ function getDeviceTypeLabel(type: string): string {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
-  border: 1px solid #f0f0f0;
+  background: linear-gradient(135deg, var(--ict-bg-section) 0%, var(--ict-bg-page) 100%);
+  border: 1px solid var(--ict-border-light);
   border-radius: 10px;
   flex-shrink: 0;
   transition: all 0.2s ease;
@@ -284,16 +284,16 @@ function getDeviceTypeLabel(type: string): string {
 }
 
 .stat-chip__label {
-  font-size: 10px;
-  color: #8c8c8c;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
   line-height: 1.3;
 }
 
 .stat-chip__value {
-  font-size: 14px;
+  font-size: var(--ict-body-medium);
   font-weight: 600;
-  color: #262626;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-emphasis);
+  font-family: var(--ict-font-family);
   line-height: 1.3;
 }
 
@@ -302,28 +302,28 @@ function getDeviceTypeLabel(type: string): string {
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
   border-radius: 20px;
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   transition: all 0.2s ease;
 }
 
 .connection-badge--connected {
-  background: #f6ffed;
-  color: #52c41a;
+  background: var(--ict-success-light);
+  color: var(--ict-success);
 }
 
 .connection-badge__dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #bfbfbf;
+  background: var(--ict-text-disabled);
   flex-shrink: 0;
 }
 
 .connection-badge--connected .connection-badge__dot {
-  background: #52c41a;
+  background: var(--ict-success);
   box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2);
 }
 
@@ -332,11 +332,11 @@ function getDeviceTypeLabel(type: string): string {
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
+  background: var(--ict-bg-page);
+  border: 1px solid var(--ict-border);
   border-radius: 8px;
-  font-size: 13px;
-  color: #595959;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-secondary);
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
@@ -346,20 +346,20 @@ function getDeviceTypeLabel(type: string): string {
 .copy-mode-toggle:hover {
   background: #f0f5ff;
   border-color: #bae0ff;
-  color: #1677ff;
+  color: var(--ict-primary);
 }
 
 .copy-mode-toggle--active {
-  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
-  border-color: #1677ff;
-  color: #fff;
+  background: linear-gradient(135deg, var(--ict-primary) 0%, #4096ff 100%);
+  border-color: var(--ict-primary);
+  color: var(--ict-bg-card);
   box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
 }
 
 .copy-mode-toggle--active:hover {
-  background: linear-gradient(135deg, #0958d9 0%, #1677ff 100%);
+  background: linear-gradient(135deg, #0958d9 0%, var(--ict-primary) 100%);
   border-color: #0958d9;
-  color: #fff;
+  color: var(--ict-bg-card);
 }
 
 @media (max-width: 768px) {

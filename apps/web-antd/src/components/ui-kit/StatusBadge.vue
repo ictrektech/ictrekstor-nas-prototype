@@ -19,11 +19,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const colorMap: Record<string, string> = {
-  success: '#52C41A',
-  warning: '#FAAD14',
-  danger: '#FF4D4F',
-  info: '#722ED1',
-  default: '#BFBFBF',
+  success: 'var(--ict-success)',
+  warning: 'var(--ict-warning)',
+  danger: 'var(--ict-danger)',
+  info: 'var(--ict-info)',
+  default: 'var(--ict-text-disabled)',
 };
 
 const color = computed(() => colorMap[props.type] || colorMap.default);
@@ -43,8 +43,8 @@ export default { name: 'StatusBadge' };
     class="status-badge"
     :style="{
       color: color,
-      borderColor: color + '50',
-      background: color + '10',
+      borderColor: color.startsWith('var(') ? 'currentColor' : color + '50',
+      background: color.startsWith('var(') ? 'transparent' : color + '10',
       padding: padding,
     }"
   >

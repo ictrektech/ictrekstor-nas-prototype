@@ -4,7 +4,7 @@ import PageIconBox from './PageIconBox.vue';
 interface Props {
   /** 页面图标（Iconify 图标名） */
   icon: string;
-  /** 图标颜色（默认主色 #006BE6） */
+  /** 图标颜色（默认主色 var(--ict-primary)） */
   iconColor?: string;
   /** 页面主标题 */
   title: string;

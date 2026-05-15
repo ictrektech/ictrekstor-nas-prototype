@@ -33,8 +33,8 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
       <div class="nest-icon-box">
         <IconifyIcon
           :icon="volume.sourceType === 'directory' ? 'lucide:folder' : 'lucide:box'"
-          style="font-size: 16px;"
-          :style="{ color: volume.sourceType === 'directory' ? '#52c41a' : '#1677ff' }"
+          style="font-size: var(--ict-title-medium);"
+          :style="{ color: volume.sourceType === 'directory' ? 'var(--ict-success)' : 'var(--ict-primary)' }"
         />
       </div>
       <div class="nest-title-info">
@@ -43,7 +43,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
           <Tag :color="statusColor" size="small">
             <span
               class="status-dot"
-              :style="{ background: volume.status === '正常' ? '#52c41a' : '#8c8c8c' }"
+              :style="{ background: volume.status === '正常' ? 'var(--ict-success)' : 'var(--ict-text-secondary)' }"
             />
             {{ volume.status }}
           </Tag>
@@ -75,7 +75,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
       </div>
       <div class="nest-card-footer">
         <span class="fs-tag">
-          <IconifyIcon :icon="fsIcon" style="font-size: 10px; color: #8c8c8c;" />
+          <IconifyIcon :icon="fsIcon" style="font-size: var(--ict-mark-small); color: var(--ict-text-secondary);" />
           {{ volume.filesystem }}
         </span>
         <div class="nest-actions">
@@ -84,24 +84,24 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
             class="user-btn"
             @click="emit('configUser', volume.id)"
           >
-            <IconifyIcon icon="lucide:users" style="font-size: 11px;" />
+            <IconifyIcon icon="lucide:users" style="font-size: var(--ict-mark-small);" />
             用户管理
           </Button>
           <Dropdown>
             <Button size="small" class="vol-action-btn">
-              <IconifyIcon icon="lucide:settings" style="font-size: 11px;" />
+              <IconifyIcon icon="lucide:settings" style="font-size: var(--ict-mark-small);" />
               高级动作
-              <IconifyIcon icon="lucide:chevron-down" style="font-size: 10px;" />
+              <IconifyIcon icon="lucide:chevron-down" style="font-size: var(--ict-mark-small);" />
             </Button>
             <template #overlay>
               <div class="vol-action-menu">
                 <div class="menu-item" @click="emit('expand', volume)">
-                  <IconifyIcon icon="lucide:maximize" style="font-size: 13px; color: #1677ff;" />
+                  <IconifyIcon icon="lucide:maximize" style="font-size: var(--ict-mark-medium); color: var(--ict-primary);" />
                   <span>扩容</span>
                 </div>
                 <div class="menu-divider" />
                 <div class="menu-item danger" @click="emit('deleteVolume', volume)">
-                  <IconifyIcon icon="lucide:trash-2" style="font-size: 13px; color: #ff4d4f;" />
+                  <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium); color: var(--ict-danger);" />
                   <span>删除</span>
                 </div>
               </div>
@@ -115,9 +115,9 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 
 <style scoped>
 .volume-nest-card {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 10px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid var(--ict-border);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -125,12 +125,12 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 .volume-nest-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  border-color: #1677ff;
+  border-color: var(--ict-primary);
 }
 
 .nest-card-header {
   padding: 10px 14px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ict-border-light);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -140,7 +140,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #e6f7ff;
+  background: var(--ict-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,9 +160,9 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 }
 
 .nest-name {
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   font-weight: 700;
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 
 .status-dot {
@@ -194,29 +194,29 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 }
 
 .nest-capacity-text {
-  font-size: 12px;
-  color: #262626;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-emphasis);
 }
 
 .nest-used {
   font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 .nest-divider {
-  color: #bfbfbf;
+  color: var(--ict-text-disabled);
   margin: 0 2px;
 }
 
 .nest-total {
-  color: #8c8c8c;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--ict-text-secondary);
+  font-family: var(--ict-font-family);
 }
 
 .nest-percent {
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 /* 卡片底部操作区 */
@@ -225,16 +225,16 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   align-items: center;
   justify-content: space-between;
   padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--ict-border-light);
 }
 
 .fs-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
-  color: #595959;
-  background: #f5f5f5;
+  font-size: var(--ict-mark-small);
+  color: var(--ict-text-secondary);
+  background: var(--ict-bg-page);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -249,7 +249,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   border-radius: 6px;
 }
 
@@ -257,15 +257,15 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--ict-body-small);
   border-radius: 6px;
 }
 
 .vol-action-menu {
-  background: #fff;
+  background: var(--ict-bg-card);
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--ict-border-light);
   padding: 4px;
   min-width: 120px;
 }
@@ -277,22 +277,22 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  color: #262626;
+  font-size: var(--ict-mark-medium);
+  color: var(--ict-text-emphasis);
   transition: all 0.2s ease;
 }
 
 .menu-item:hover {
-  background: #f5f5f5;
+  background: var(--ict-bg-page);
 }
 
 .menu-item.danger:hover {
-  background: #fff1f0;
+  background: var(--ict-danger-light);
 }
 
 .menu-divider {
   height: 1px;
-  background: #f0f0f0;
+  background: var(--ict-border-light);
   margin: 4px 0;
 }
 </style>

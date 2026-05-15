@@ -182,7 +182,7 @@ function handleDeleteDir(dir: SharedDir) {
     <div class="page-header">
       <div class="page-header-left">
         <div class="page-icon-box">
-          <IconifyIcon icon="lucide:link" style="font-size: 20px; color: #722ed1;" />
+          <IconifyIcon icon="lucide:link" style="font-size: var(--ict-title-large); color: var(--ict-info);" />
         </div>
         <div class="page-title-area">
           <h1 class="page-title">我的分享</h1>
@@ -201,7 +201,7 @@ function handleDeleteDir(dir: SharedDir) {
     <div class="action-bar">
       <div class="action-bar-left">
         <Button type="primary" class="create-btn" @click="openCreateModal">
-          <IconifyIcon icon="lucide:folder-plus" style="font-size: 13px;" />
+          <IconifyIcon icon="lucide:folder-plus" style="font-size: var(--ict-mark-medium);" />
           创建分享
         </Button>
       </div>
@@ -213,7 +213,7 @@ function handleDeleteDir(dir: SharedDir) {
           allow-clear
         >
           <template #prefix>
-            <IconifyIcon icon="lucide:search" style="font-size: 14px; color: #bfbfbf;" />
+            <IconifyIcon icon="lucide:search" style="font-size: var(--ict-body-medium); color: var(--ict-text-disabled);" />
           </template>
         </Input>
       </div>
@@ -272,7 +272,7 @@ function handleDeleteDir(dir: SharedDir) {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: var(--ict-bg-card);
 }
 
 .page-header {
@@ -280,8 +280,8 @@ function handleDeleteDir(dir: SharedDir) {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
 }
@@ -296,7 +296,7 @@ function handleDeleteDir(dir: SharedDir) {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  background: #f9f0ff;
+  background: var(--ict-info-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -304,16 +304,16 @@ function handleDeleteDir(dir: SharedDir) {
 }
 
 .page-title {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
-  color: #262626;
+  color: var(--ict-text-emphasis);
   margin: 0;
   line-height: 1.4;
 }
 
 .page-desc {
-  font-size: 12px;
-  color: #8c8c8c;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
   margin: 2px 0 0;
 }
 
@@ -322,8 +322,8 @@ function handleDeleteDir(dir: SharedDir) {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 12px;
   flex-shrink: 0;
 }
@@ -355,7 +355,7 @@ function handleDeleteDir(dir: SharedDir) {
 }
 
 .shared-card {
-  background: #fff;
+  background: var(--ict-bg-card);
   border: none;
   box-shadow: none;
 }

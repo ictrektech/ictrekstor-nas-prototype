@@ -23,17 +23,17 @@ const diskIcon = computed(() => {
 });
 
 const diskIconColor = computed(() => {
-  if (props.disk.deviceType?.includes('SSD')) return '#722ed1';
+  if (props.disk.deviceType?.includes('SSD')) return 'var(--ict-info)';
   if (props.disk.deviceType?.includes('NVMe')) return '#eb2f96';
-  return '#1677ff';
+  return 'var(--ict-primary)';
 });
 
 const healthColor = computed(() => {
   switch (props.disk.healthStatus) {
-    case '正常': return '#52c41a';
-    case '警告': return '#faad14';
-    case '异常': return '#ff4d4f';
-    default: return '#8c8c8c';
+    case '正常': return 'var(--ict-success)';
+    case '警告': return 'var(--ict-warning)';
+    case '异常': return 'var(--ict-danger)';
+    default: return 'var(--ict-text-secondary)';
   }
 });
 
@@ -74,7 +74,7 @@ const diskPools = computed(() => {
             </span>
             <span v-if="diskPools.length > 0" class="disk-pools-inline">
               <span v-for="pname in diskPools" :key="pname" class="disk-pool-tag">
-                <IconifyIcon icon="lucide:database" style="font-size: 10px; margin-right: 2px;" />
+                <IconifyIcon icon="lucide:database" style="font-size: var(--ict-mark-small); margin-right: 2px;" />
                 {{ pname }}
               </span>
             </span>
@@ -92,7 +92,7 @@ const diskPools = computed(() => {
               </Button>
             </Tooltip>
             <Button size="small" type="primary" class="detail-btn" @click="emit('detail', disk)">
-              <IconifyIcon icon="lucide:file-text" style="font-size: 11px;" />
+              <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-mark-small);" />
               详情
             </Button>
           </div>
@@ -122,28 +122,28 @@ const diskPools = computed(() => {
 .disk-card { border-radius: 12px; overflow: hidden; transition: all 0.3s; }
 .disk-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
 .disk-card-inner { display: flex; }
-.disk-visual { width: 72px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 0; border-right: 1px solid #f0f0f0; flex-shrink: 0; }
+.disk-visual { width: 72px; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 0; border-right: 1px solid var(--ict-border-light); flex-shrink: 0; }
 .disk-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid; cursor: pointer; transition: transform 0.2s, filter 0.2s; }
 .disk-icon-box:hover { transform: scale(1.08); filter: brightness(1.1); }
-.disk-icon { font-size: 18px; }
-.health-badge { display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; line-height: 1.3; }
+.disk-icon { font-size: var(--ict-title-large); }
+.health-badge { display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: var(--ict-mark-small); font-weight: 500; padding: 2px 7px; border-radius: 10px; border: 1px solid; white-space: nowrap; line-height: 1.3; }
 .disk-info { flex: 1; min-width: 0; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
 .info-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .info-header-left { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.disk-device-name { font-size: 15px; font-weight: 600; color: #262626; }
-.disk-capacity { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 6px; }
+.disk-device-name { font-size: var(--ict-title-small); font-weight: 600; color: var(--ict-text-emphasis); }
+.disk-capacity { font-size: var(--ict-body-small); font-weight: 500; padding: 2px 8px; border-radius: 6px; }
 .health-dot-mini { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
 .header-actions { display: flex; gap: 5px; }
 .action-btn { width: 26px; height: 26px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-.action-icon { font-size: 12px; }
-.detail-btn { height: 26px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.action-icon { font-size: var(--ict-body-small); }
+.detail-btn { height: 26px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-size: var(--ict-mark-small); }
 .disk-attrs-row { display: flex; gap: 14px; flex-wrap: wrap; }
-.disk-attr { display: flex; align-items: center; gap: 4px; font-size: 12px; }
-.attr-icon { font-size: 11px; color: #bfbfbf; }
-.attr-label { color: #8c8c8c; }
-.attr-value { color: #434343; font-weight: 500; }
-.attr-value.serial { font-family: 'SF Mono', monospace; font-size: 11px; }
+.disk-attr { display: flex; align-items: center; gap: 4px; font-size: var(--ict-body-small); }
+.attr-icon { font-size: var(--ict-mark-small); color: var(--ict-text-disabled); }
+.attr-label { color: var(--ict-text-secondary); }
+.attr-value { color: var(--ict-text-primary); font-weight: 500; }
+.attr-value.serial { font-family: 'SF Mono', monospace; font-size: var(--ict-mark-small); }
 .disk-pools-inline { display: inline-flex; gap: 5px; flex-wrap: wrap; align-items: center; }
-.disk-pool-tag { display: inline-flex; align-items: center; padding: 1px 6px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 5px; font-size: 10px; color: #389e0d; }
-.pool-empty-inline { font-size: 10px; color: #bfbfbf; font-style: italic; }
+.disk-pool-tag { display: inline-flex; align-items: center; padding: 1px 6px; background: var(--ict-success-light); border: 1px solid var(--ict-success-disabled); border-radius: 5px; font-size: var(--ict-mark-small); color: var(--ict-success-active); }
+.pool-empty-inline { font-size: var(--ict-mark-small); color: var(--ict-text-disabled); font-style: italic; }
 </style>

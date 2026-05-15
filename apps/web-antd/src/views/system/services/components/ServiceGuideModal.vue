@@ -43,18 +43,18 @@ const emit = defineEmits<{
 
 .guide-card {
   margin-top: 8px;
-  background: #f6ffed;
+  background: var(--ict-success-light);
 }
 
 .guide-code {
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: var(--ict-success-light);
+  border: 1px solid var(--ict-success-disabled);
   border-radius: 6px;
   padding: 16px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 13px;
+  font-family: var(--ict-font-family);
+  font-size: var(--ict-mark-medium);
   line-height: 1.8;
-  color: #135200;
+  color: var(--ict-success-active);
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-x: auto;

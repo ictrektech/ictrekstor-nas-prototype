@@ -69,7 +69,7 @@ export default { name: 'InfoChip' };
 }
 
 .chip-icon {
-  font-size: 16px;
+  font-size: var(--ict-title-medium);
 }
 
 .chip-text {
@@ -82,7 +82,7 @@ export default { name: 'InfoChip' };
   font-size: var(--ict-text-base);
   font-weight: 600;
   color: var(--ict-text-emphasis);
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--ict-font-family);
 }
 
 .chip-label {

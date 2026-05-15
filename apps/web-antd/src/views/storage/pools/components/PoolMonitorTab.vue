@@ -46,7 +46,7 @@ const capacityChartOption = computed(() => {
         data: props.poolDetail.capacityHistory.map((h) => h.used),
         smooth: true,
         areaStyle: { opacity: 0.3 },
-        itemStyle: { color: '#1677ff' },
+        itemStyle: { color: 'var(--ict-primary)' },
       },
       {
         name: '可用容量',
@@ -54,7 +54,7 @@ const capacityChartOption = computed(() => {
         data: props.poolDetail.capacityHistory.map((h) => h.available),
         smooth: true,
         areaStyle: { opacity: 0.3 },
-        itemStyle: { color: '#52c41a' },
+        itemStyle: { color: 'var(--ict-success)' },
       },
     ],
   };
@@ -69,8 +69,8 @@ const iopsChartOption = computed(() => {
     xAxis: { type: 'category', data: times },
     yAxis: { type: 'value', name: 'IOPS' },
     series: [
-      { name: '读 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readIops), smooth: true, itemStyle: { color: '#1677ff' } },
-      { name: '写 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeIops), smooth: true, itemStyle: { color: '#52c41a' } },
+      { name: '读 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readIops), smooth: true, itemStyle: { color: 'var(--ict-primary)' } },
+      { name: '写 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeIops), smooth: true, itemStyle: { color: 'var(--ict-success)' } },
     ],
   };
 });
@@ -84,8 +84,8 @@ const bandwidthChartOption = computed(() => {
     xAxis: { type: 'category', data: times },
     yAxis: { type: 'value', name: 'MB/s' },
     series: [
-      { name: '读带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readBandwidth), smooth: true, itemStyle: { color: '#1677ff' } },
-      { name: '写带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeBandwidth), smooth: true, itemStyle: { color: '#faad14' } },
+      { name: '读带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readBandwidth), smooth: true, itemStyle: { color: 'var(--ict-primary)' } },
+      { name: '写带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeBandwidth), smooth: true, itemStyle: { color: 'var(--ict-warning)' } },
     ],
   };
 });
@@ -128,6 +128,6 @@ const bandwidthChartOption = computed(() => {
 <style scoped>
 .monitor-section { margin-bottom: 20px; }
 .section-header { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-.section-title { font-size: 14px; font-weight: 600; color: #262626; margin: 0; }
-.chart-wrapper { background: #fafafa; border-radius: 8px; padding: 12px 12px 32px; border: 1px solid #f0f0f0; }
+.section-title { font-size: var(--ict-body-medium); font-weight: 600; color: var(--ict-text-emphasis); margin: 0; }
+.chart-wrapper { background: var(--ict-bg-section); border-radius: 8px; padding: 12px 12px 32px; border: 1px solid var(--ict-border-light); }
 </style>

@@ -30,13 +30,13 @@ const chartOption = computed(() => ({
     data: xLabels,
     axisLine: { show: false },
     axisTick: { show: false },
-    axisLabel: { fontSize: 10, color: '#bfbfbf' },
+    axisLabel: { fontSize: 10, color: 'var(--ict-text-disabled)' },
   },
   yAxis: {
     type: 'value',
     max: 100,
-    splitLine: { lineStyle: { color: '#f0f0f0' } },
-    axisLabel: { fontSize: 10, color: '#bfbfbf', formatter: '{value}%' },
+    splitLine: { lineStyle: { color: 'var(--ict-border-light)' } },
+    axisLabel: { fontSize: 10, color: 'var(--ict-text-disabled)', formatter: '{value}%' },
   },
   tooltip: { trigger: 'axis', formatter: (params: any) => `${params[0].name}: ${params[0].value}%` },
   series: [{
@@ -85,18 +85,18 @@ const chartOption = computed(() => ({
 .resource-card { border-radius: 14px; }
 .resource-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .resource-icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.resource-icon { font-size: 20px; color: #fff; }
+.resource-icon { font-size: var(--ict-title-large); color: var(--ict-bg-card); }
 .resource-title-wrap { flex: 1; min-width: 0; }
-.resource-title { font-size: 14px; font-weight: 600; color: #262626; }
+.resource-title { font-size: var(--ict-body-medium); font-weight: 600; color: var(--ict-text-emphasis); }
 .resource-specs { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-.spec-tag { display: flex; align-items: center; gap: 4px; font-size: 11px; }
-.spec-label { color: #8c8c8c; }
-.spec-value { color: #434343; font-weight: 500; }
+.spec-tag { display: flex; align-items: center; gap: 4px; font-size: var(--ict-mark-small); }
+.spec-label { color: var(--ict-text-secondary); }
+.spec-value { color: var(--ict-text-primary); font-weight: 500; }
 .resource-percent { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-.percent-value { font-size: 24px; font-weight: 700; font-family: 'SF Mono', monospace; }
-.percent-label { font-size: 11px; color: #8c8c8c; }
+.percent-value { font-size: var(--ict-headline-small); font-weight: 700; font-family: 'SF Mono', monospace; }
+.percent-label { font-size: var(--ict-mark-small); color: var(--ict-text-secondary); }
 .chart-container { position: relative; }
 .chart-avg { display: flex; align-items: center; gap: 6px; margin-top: 2px; padding-left: 28px; }
 .avg-dot { width: 6px; height: 6px; border-radius: 50%; }
-.avg-text { font-size: 11px; color: #8c8c8c; }
+.avg-text { font-size: var(--ict-mark-small); color: var(--ict-text-secondary); }
 </style>

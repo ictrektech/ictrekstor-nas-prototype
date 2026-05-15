@@ -77,19 +77,19 @@ function onOk() {
                 color:
                   node.type === 'category'
                     ? node.key === 'root-my-files'
-                      ? '#1677ff'
+                      ? 'var(--ict-primary)'
                       : node.key === 'root-public'
-                        ? '#fa8c16'
-                        : '#722ed1'
+                        ? 'var(--ict-warning)'
+                        : 'var(--ict-info)'
                     : node.type === 'space'
-                      ? '#1677ff'
+                      ? 'var(--ict-primary)'
                       : node.type === 'public-folder'
-                        ? '#fa8c16'
+                        ? 'var(--ict-warning)'
                         : node.type === 'shared-user'
-                          ? '#722ed1'
+                          ? 'var(--ict-info)'
                           : node.type === 'shared-folder'
                             ? '#a855f7'
-                            : '#faad14',
+                            : 'var(--ict-warning)',
                 marginRight: '6px',
                 flexShrink: 0,
               }"
@@ -116,7 +116,7 @@ function onOk() {
 .target-dir-tree-wrap {
   max-height: 320px;
   overflow: auto;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--ict-border-light);
   border-radius: 6px;
   padding: 8px;
 }
@@ -139,8 +139,8 @@ function onOk() {
 
 .target-dir-tree
   :deep(.ant-tree-node-selected .ant-tree-node-content-wrapper) {
-  background: #e6f4ff !important;
-  color: #1677ff;
+  background: var(--ict-primary-light) !important;
+  color: var(--ict-primary);
   font-weight: 500;
 }
 
@@ -148,7 +148,7 @@ function onOk() {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
   white-space: nowrap;
 }
 
@@ -159,18 +159,18 @@ function onOk() {
 .target-dir-pending {
   margin-top: 12px;
   padding: 8px 12px;
-  background: #f6ffed;
-  border: 1px solid #b7eb8f;
+  background: var(--ict-success-light);
+  border: 1px solid var(--ict-success-disabled);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--ict-mark-medium);
 }
 
 .target-dir-pending-label {
-  color: #52c41a;
+  color: var(--ict-success);
   font-weight: 500;
 }
 
 .target-dir-pending-names {
-  color: #262626;
+  color: var(--ict-text-emphasis);
 }
 </style>
