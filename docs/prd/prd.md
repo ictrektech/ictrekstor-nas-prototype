@@ -168,4 +168,5 @@ ICTrekStor NAS 前端原型项目是基于 [Vben Admin](https://github.com/vbenj
 - 当页面功能发生变更时，需同步更新对应的 PRD 文件，确保 PRD 描述与实际功能保持一致。
 - 当页面路由发生变更（新增、重命名、移动、删除、合并）时，需同步调整 PRD 文件及本索引的导航表格。
 - PRD 仅关注页面功能行为，视觉样式变更无需更新 PRD（视觉规范独立维护于 `docs/visual-design/`）。
+- 各页面涉及的接口统一在 [interface.md](interface.md) 中定义，PRD 中的接口名称已添加指向该文档的链接。
 - PRD 格式规范与维护规则参见 `.clinerules/prd.md`。
