@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OutlinedButton } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import { Button, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
 import { computed, ref } from 'vue';
@@ -149,14 +150,14 @@ const handleGoForward = () => {
       <!-- 左侧：新建 + 上传 -->
       <div class="toolbar-left-actions" @click.stop>
         <template v-if="mode !== 'recycle'">
-          <Button type="primary" size="small" class="action-btn-primary" @click="emit('newFolder')">
+          <Button type="primary" class="action-btn-primary" @click="emit('newFolder')">
             <IconifyIcon icon="lucide:folder-plus" style="font-size: var(--ict-body-medium);" />
             <span>新建</span>
           </Button>
-          <Button size="small" class="action-btn-outline" @click="emit('upload')">
+          <OutlinedButton @click="emit('upload')">
             <IconifyIcon icon="lucide:upload" style="font-size: var(--ict-body-medium);" />
-            <span>上传</span>
-          </Button>
+            上传
+          </OutlinedButton>
         </template>
       </div>
 
@@ -338,15 +339,44 @@ const handleGoForward = () => {
 
 /* 左侧操作：新建 + 上传 */
 .toolbar-left-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.toolbar-left-actions .action-btn-primary,
-.toolbar-left-actions .action-btn-outline {
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  width: auto;
   height: 32px;
-  padding: 0 12px;
-  font-size: var(--ict-mark-medium);
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: var(--ict-body-medium);
+  font-weight: 400;
+  background: var(--ict-primary);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:hover) {
+  background: var(--ict-primary-hover);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:active) {
+  background: var(--ict-primary-active);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:disabled) {
+  background: var(--ict-primary-disabled);
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary .ant-btn-icon) {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary > .ant-btn-icon + span) {
+  margin-left: 0;
 }
 
 /* 右侧组：批量操作 + 视图切换 */

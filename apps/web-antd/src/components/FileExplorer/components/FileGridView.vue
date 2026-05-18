@@ -65,8 +65,10 @@ function onHeaderCheck() {
         <IconifyIcon v-if="isSelected(file)" icon="lucide:check" style="font-size: var(--ict-mark-small); color: var(--ict-bg-card);" />
       </div>
       <div class="grid-icon-wrap">
-        <div class="grid-icon-box" :style="{ background: getFileIconClass(file).bg }">
-          <IconifyIcon :icon="getFileIconClass(file).icon" :style="{ fontSize: '32px', color: getFileIconClass(file).color }" />
+        <div class="grid-icon-box">
+          <img v-if="file.thumbnail" :src="file.thumbnail" class="grid-thumbnail" />
+          <img v-else-if="getFileIconClass(file).img" :src="getFileIconClass(file).img" :style="{ width: getFileIconClass(file).imgSize || '40px', height: getFileIconClass(file).imgSize || '40px' }" />
+          <IconifyIcon v-else :icon="getFileIconClass(file).icon" :style="{ fontSize: '32px', color: getFileIconClass(file).color }" />
         </div>
         <div v-if="file.isShared" class="grid-shared-badge" title="已分享">
           <IconifyIcon icon="lucide:link" style="font-size: var(--ict-mark-small); color: var(--ict-bg-card);" />
@@ -94,6 +96,7 @@ function onHeaderCheck() {
 .grid-checkbox--indeterminate { background: var(--ict-primary); border-color: var(--ict-primary); }
 .grid-icon-wrap { position: relative; }
 .grid-icon-box { width: 56px; height: 56px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.grid-thumbnail { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 .grid-shared-badge { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: var(--ict-success); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ict-bg-card); }
 .grid-name { font-size: var(--ict-body-medium); color: var(--ict-text-primary); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .grid-meta { font-size: var(--ict-body-medium); color: var(--ict-text-primary); }

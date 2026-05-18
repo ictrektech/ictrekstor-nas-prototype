@@ -182,7 +182,79 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ## 3. 组件规范
 
-### 3.1 Checkbox 多选框
+### 3.1 主按钮（Primary Button）
+
+全局主按钮用于页面核心操作，使用品牌主色填充。
+
+#### 尺寸规格
+
+| 尺寸 | 高度 | gap | padding | icon | 文本 | border-radius |
+|------|------|-----|---------|------|------|---------------|
+| **大（Large）** | 32px | 8px (`--ict-space-2`) | 8px 16px | 16px | 14px / 400 (`--ict-body-medium`) | 8px (`--ict-radius-md`) |
+| **小（Small）** | 24px | 4px (`--ict-space-1`) | 2px 8px | 14px | 12px / 400 (`--ict-body-small`) | 4px (`--ict-radius-sm`) |
+
+#### 状态定义（大 / 小共用）
+
+| 状态 | 背景色 | 文字色 | 边框 | 说明 |
+|------|--------|--------|------|------|
+| 默认 | `--ict-primary` | `#FFFFFF` | 无 | 常规展示态 |
+| 悬浮（Hover） | `--ict-primary-hover` | `#FFFFFF` | 无 | 鼠标移入 |
+| 点击（Active / Press） | `--ict-primary-active` | `#FFFFFF` | 无 | 鼠标按下 |
+| 禁用（Disabled） | `--ict-primary-disabled` | `#FFFFFF` (50% 不透明度) | 无 | 不可操作 |
+
+#### 版本定义
+
+| 版本 | 结构 | 适用场景 |
+|------|------|----------|
+| **纯文本** | 仅文字 | 按钮文字已足够表达含义 |
+| **图文** | icon + 文字，水平排列 | 需要图标增强识别度 |
+
+#### 使用规范
+
+1. 同一页面内主按钮数量不宜超过 2 个，避免视觉重心分散。
+2. 禁用态主按钮不响应点击，光标为 `not-allowed`。
+3. 图文版按钮 icon 与文本必须垂直居中对齐。
+4. 按钮宽度由内容撑开（`width: auto`），禁止固定宽度导致文字截断。
+
+---
+
+### 3.2 线框按钮（Secondary Button / Outlined Button）
+
+线框按钮作为次要操作按钮，与主按钮配合使用，视觉上弱于主按钮。
+
+#### 尺寸规格
+
+| 尺寸 | 高度 | gap | padding | icon | 文本 | border-radius |
+|------|------|-----|---------|------|------|---------------|
+| **大（Large）** | 32px | 8px (`--ict-space-2`) | 8px 16px | 16px | 14px / 400 (`--ict-body-medium`) | 8px (`--ict-radius-md`) |
+| **小（Small）** | 24px | 4px (`--ict-space-1`) | 2px 8px | 14px | 12px / 400 (`--ict-body-small`) | 4px (`--ict-radius-sm`) |
+
+#### 状态定义（大 / 小共用）
+
+| 状态 | 背景色 | 文字色 | 边框 | 说明 |
+|------|--------|--------|------|------|
+| 默认 | `--ict-bg-card` | `--ict-text-primary` | 1px solid `--ict-border` | 常规展示态 |
+| 悬浮（Hover） | `--ict-bg-card` | `--ict-primary-hover` | 1px solid `--ict-primary-hover` | 鼠标移入 |
+| 点击（Active / Press） | `--ict-bg-card` | `--ict-primary-active` | 1px solid `--ict-primary-active` | 鼠标按下 |
+| 禁用（Disabled） | `--ict-bg-page` | `--ict-text-disabled` | 1px solid `--ict-border` | 不可操作 |
+
+#### 版本定义
+
+| 版本 | 结构 | 适用场景 |
+|------|------|----------|
+| **纯文本** | 仅文字 | 按钮文字已足够表达含义 |
+| **图文** | icon + 文字，水平排列 | 需要图标增强识别度 |
+
+#### 使用规范
+
+1. 线框按钮作为次要按钮，与主按钮配合使用时数量不宜超过 3 个。
+2. 禁用态线框按钮不响应点击，光标为 `not-allowed`。
+3. 图文版按钮 icon 与文本必须垂直居中对齐。
+4. 按钮宽度由内容撑开（`width: auto`），禁止固定宽度导致文字截断。
+
+---
+
+### 3.3 Checkbox 多选框
 
 #### 基础尺寸
 

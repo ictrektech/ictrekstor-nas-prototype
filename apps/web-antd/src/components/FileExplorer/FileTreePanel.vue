@@ -181,7 +181,7 @@ function onExpand(keys: string[]) {
     setPin,
   });
 
-  function defaultIconResolver(node: FileTreeNode): { icon: string; color: string } {
+  function defaultIconResolver(node: FileTreeNode): { icon?: string; color?: string; img?: string; imgSize?: string } {
   if (node.type === 'space') {
     return { icon: 'lucide:hard-drive', color: 'var(--ict-primary)' };
   }
@@ -191,7 +191,7 @@ function onExpand(keys: string[]) {
   if (node.isLeaf) {
     return { icon: 'lucide:folder-open', color: 'var(--ict-warning)' };
   }
-  return { icon: 'lucide:folder', color: 'var(--ict-warning)' };
+  return { img: '/icons/folder.png', imgSize: '16px' };
 }
 
 function resolveIcon(node: FileTreeNode) {
@@ -283,9 +283,15 @@ watch(
         >
           <template #title="node">
             <span class="tree-node-title">
+              <img
+                v-if="resolveIcon(node).img"
+                :src="resolveIcon(node).img"
+                :style="{ width: resolveIcon(node).imgSize || '14px', height: resolveIcon(node).imgSize || '14px', marginRight: '6px', flexShrink: 0 }"
+              />
               <IconifyIcon
+                v-else
                 :icon="resolveIcon(node).icon"
-                :style="{ fontSize: '14px', color: resolveIcon(node).color, marginRight: '6px', flexShrink: 0 }"
+                :style="{ fontSize: '14px', marginRight: '6px', flexShrink: 0 }"
               />
               <span class="tree-node-text" :title="node.title">{{ node.title }}</span>
             </span>
