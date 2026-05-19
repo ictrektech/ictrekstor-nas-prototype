@@ -5,6 +5,8 @@
 > PRD 主要关注**页面功能与行为**，不关注页面视觉表现。视觉规范参见 `docs/visual-design/`。
 >
 > PRD 格式规范与维护规则参见 `.clinerules/prd.md`。
+>
+> **功能实现约束**：当前迭代的功能实现边界参见 [`constraints.md`](./constraints.md)，按开发阶段记录各 PRD 功能的实现状态。
 
 ---
 
