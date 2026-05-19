@@ -323,9 +323,6 @@ onMounted(() => {
     <!-- ═══════ 页面顶部概览 ═══════ -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-heart" style="font-size: var(--ict-title-large); color: var(--ict-warning);" />
-        </div>
         <div class="page-title-area">
           <h1 class="page-title">公共文件</h1>
           <div class="page-title-actions">

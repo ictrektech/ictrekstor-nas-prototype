@@ -103,3 +103,163 @@
   --ict-link-medium: 14px;
   --ict-link-small: 12px;
 }
+
+/* ═══════════════════════════════════════
+   3. 全局组件覆盖 — 主按钮
+   ═══════════════════════════════════════ */
+
+/* 大主按钮（32px） */
+.ant-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 32px;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: var(--ict-body-medium);
+  font-weight: 400;
+  background: var(--ict-primary);
+  border: none;
+  color: #FFFFFF;
+}
+
+.ant-btn-primary:hover {
+  background: var(--ict-primary-hover);
+  border: none;
+  color: #FFFFFF;
+}
+
+.ant-btn-primary:active,
+.ant-btn-primary.ant-btn-active {
+  background: var(--ict-primary-active);
+  border: none;
+  color: #FFFFFF;
+}
+
+.ant-btn-primary:disabled,
+.ant-btn-primary.ant-btn-disabled {
+  background: var(--ict-primary-disabled);
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+/* 图文版 icon 尺寸 */
+.ant-btn-primary .ant-btn-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* 取消 Ant Design Vue 默认 icon + text 的 margin-left */
+.ant-btn-primary > .ant-btn-icon + span {
+  margin-left: 0;
+}
+
+.ant-btn > svg + span{
+  margin: 0 !important
+}
+
+/* 小主按钮（24px） */
+.ant-btn-primary.ant-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 24px;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: var(--ict-body-small);
+  font-weight: 400;
+}
+
+.ant-btn-primary.ant-btn-sm .ant-btn-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* ═══════════════════════════════════════
+   4. 全局组件覆盖 — 线框按钮（次要按钮）
+   ═══════════════════════════════════════ */
+
+/* 大线框按钮（32px） */
+.ant-btn-default {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 32px;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: var(--ict-body-medium);
+  font-weight: 400;
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-border);
+  color: var(--ict-text-primary);
+}
+
+.ant-btn-default:hover {
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-primary-hover);
+  color: var(--ict-primary-hover);
+}
+
+.ant-btn-default:active,
+.ant-btn-default.ant-btn-active {
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-primary-active);
+  color: var(--ict-primary-active);
+}
+
+.ant-btn-default:disabled,
+.ant-btn-default.ant-btn-disabled {
+  background: var(--ict-bg-page);
+  border: 1px solid var(--ict-border);
+  color: var(--ict-text-disabled);
+  cursor: not-allowed;
+}
+
+/* 线框按钮图文版 icon 尺寸 */
+.ant-btn-default .ant-btn-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* 取消线框按钮 icon + text 的 margin-left */
+.ant-btn-default > .ant-btn-icon + span {
+  margin-left: 0;
+}
+
+/* ═══════════════════════════════════════
+   5. 全局组件覆盖 — Dropdown Menu 危险项悬浮
+   ═══════════════════════════════════════ */
+.ant-dropdown-menu-item-danger:hover,
+.ant-dropdown-menu-item-danger.ant-dropdown-menu-item-active {
+  background-color: #F3F3F3 !important;
+}
+
+/* 小线框按钮（24px） */
+.ant-btn-default.ant-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: 24px;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: var(--ict-body-small);
+  font-weight: 400;
+}
+
+.ant-btn-default.ant-btn-sm .ant-btn-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}

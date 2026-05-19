@@ -114,7 +114,10 @@ function onContextMenu(file: FileItem, event: MouseEvent) {
 
 function onCtxAction(action: string, file: FileItem) {
   switch (action) {
+    case 'open': emit('openFolder', file); break;
     case 'rename': emit('rename', file); break;
+    case 'download': emit('batchDownload', [file]); break;
+    case 'share': emit('share', file); break;
     case 'copy': emit('copy', file); break;
     case 'move': emit('move', file); break;
     case 'delete': emit('deleteFile', file); break;

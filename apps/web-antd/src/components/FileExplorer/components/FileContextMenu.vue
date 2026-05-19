@@ -16,14 +16,19 @@ function handle(action: string) { if (!props.file) return; emit('action', action
       <div class="ctx-menu" :style="{ left: `${x}px`, top: `${y}px` }" @click.stop>
         <Menu>
           <template v-if="mode === 'recycle' && file">
-            <Menu.Item key="restore" @click="handle('restore')"><span class="ctx-item"><IconifyIcon icon="lucide:rotate-ccw" style="font-size:13px;color:var(--ict-primary);" />还原</span></Menu.Item>
+            <Menu.Item key="restore" @click="handle('restore')"><span class="ctx-item"><IconifyIcon icon="lucide:rotate-ccw" style="font-size:13px;" />还原</span></Menu.Item>
             <Menu.Divider />
             <Menu.Item key="delete" danger @click="handle('delete')"><span class="ctx-item ctx-item--danger"><IconifyIcon icon="lucide:trash-2" style="font-size:13px;" />彻底删除</span></Menu.Item>
           </template>
           <template v-else-if="file">
+            <Menu.Item key="open" @click="handle('open')"><span class="ctx-item"><IconifyIcon icon="lucide:folder-open" style="font-size:13px;" />打开</span></Menu.Item>
             <Menu.Item key="rename" @click="handle('rename')"><span class="ctx-item"><IconifyIcon icon="lucide:pencil" style="font-size:13px;" />重命名</span></Menu.Item>
-            <Menu.Item key="copy" @click="handle('copy')"><span class="ctx-item"><IconifyIcon icon="lucide:copy" style="font-size:13px;color:var(--ict-primary);" />复制</span></Menu.Item>
-            <Menu.Item key="move" @click="handle('move')"><span class="ctx-item"><IconifyIcon icon="lucide:move" style="font-size:13px;color:var(--ict-success);" />移动</span></Menu.Item>
+            <Menu.Item key="download" @click="handle('download')"><span class="ctx-item"><IconifyIcon icon="lucide:download" style="font-size:13px;" />下载</span></Menu.Item>
+            <Menu.Item v-if="file.type === 'folder'" key="share" @click="handle('share')"><span class="ctx-item"><IconifyIcon icon="lucide:share-2" style="font-size:13px;" />分享</span></Menu.Item>
+            <Menu.Item key="copy" @click="handle('copy')"><span class="ctx-item"><IconifyIcon icon="lucide:copy" style="font-size:13px;" />复制</span></Menu.Item>
+            <Menu.Item key="move" @click="handle('move')"><span class="ctx-item"><IconifyIcon icon="lucide:move" style="font-size:13px;" />移动</span></Menu.Item>
+            <Menu.Divider />
+            <Menu.Item key="delete" danger @click="handle('delete')"><span class="ctx-item ctx-item--danger"><IconifyIcon icon="lucide:trash-2" style="font-size:13px;" />删除</span></Menu.Item>
           </template>
         </Menu>
       </div>

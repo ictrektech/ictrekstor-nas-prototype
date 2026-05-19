@@ -8,24 +8,29 @@ import type { FileIconConfig, FileItem } from './types';
  */
 export function getFileIconClass(file: FileItem): FileIconConfig {
   if (file.type === 'folder') {
-    return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6' };
+    if (file.isSharedFolder) {
+      return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6', img: '/icons/Shared with me.png', imgSize: '100%' };
+    }
+    return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6', img: '/icons/folder.png', imgSize: '100%' };
   }
   const ext = (file.extension || '').toLowerCase();
   const iconMap: Record<string, FileIconConfig> = {
-    md: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
+    md: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff', img: '/icons/markdown.png', imgSize: '100%' },
     txt: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    json: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb' },
+    json: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb', img: '/icons/json.png', imgSize: '100%' },
     xml: { icon: 'lucide:file-code', color: '#13c2c2', bg: '#e6fffb' },
     zip: { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
     rar: { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
     '7z': { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
     'tar.gz': { icon: 'lucide:package', color: '#722ed1', bg: '#f9f0ff' },
-    pdf: { icon: 'lucide:file-type', color: '#f5222d', bg: '#fff1f0' },
-    xlsx: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    xls: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    csv: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed' },
-    doc: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
-    docx: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff' },
+    pdf: { icon: 'lucide:file-type', color: '#f5222d', bg: '#fff1f0', img: '/icons/PDF.png', imgSize: '100%' },
+    xlsx: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed', img: '/icons/excel.png', imgSize: '100%' },
+    xls: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed', img: '/icons/excel.png', imgSize: '100%' },
+    csv: { icon: 'lucide:file-spreadsheet', color: '#52c41a', bg: '#f6ffed', img: '/icons/excel.png', imgSize: '100%' },
+    doc: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff', img: '/icons/word.png', imgSize: '100%' },
+    docx: { icon: 'lucide:file-text', color: '#1677ff', bg: '#e6f4ff', img: '/icons/word.png', imgSize: '100%' },
+    ppt: { icon: 'lucide:presentation', color: '#fa8c16', bg: '#fff7e6', img: '/icons/ppt.png', imgSize: '100%' },
+    pptx: { icon: 'lucide:presentation', color: '#fa8c16', bg: '#fff7e6', img: '/icons/ppt.png', imgSize: '100%' },
     jpg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
     jpeg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
     png: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
@@ -33,12 +38,12 @@ export function getFileIconClass(file: FileItem): FileIconConfig {
     svg: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
     psd: { icon: 'lucide:image', color: '#eb2f96', bg: '#fff0f6' },
     fig: { icon: 'lucide:figma', color: '#eb2f96', bg: '#fff0f6' },
-    mp4: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    avi: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    mkv: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6' },
-    mp3: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
-    wav: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
-    flac: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6' },
+    mp4: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6', img: '/icons/视频.png', imgSize: '100%' },
+    avi: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6', img: '/icons/视频.png', imgSize: '100%' },
+    mkv: { icon: 'lucide:video', color: '#fa8c16', bg: '#fff7e6', img: '/icons/视频.png', imgSize: '100%' },
+    mp3: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6', img: '/icons/音频.png', imgSize: '100%' },
+    wav: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6', img: '/icons/音频.png', imgSize: '100%' },
+    flac: { icon: 'lucide:music', color: '#fa8c16', bg: '#fff7e6', img: '/icons/音频.png', imgSize: '100%' },
     exe: { icon: 'lucide:terminal', color: '#595959', bg: '#f5f5f5' },
     log: { icon: 'lucide:scroll-text', color: '#8c8c8c', bg: '#fafafa' },
     conf: { icon: 'lucide:settings', color: '#8c8c8c', bg: '#fafafa' },
@@ -46,6 +51,15 @@ export function getFileIconClass(file: FileItem): FileIconConfig {
     sql: { icon: 'lucide:database', color: '#1677ff', bg: '#e6f4ff' },
   };
   return iconMap[ext] || { icon: 'lucide:file', color: '#8c8c8c', bg: '#f5f5f5' };
+}
+
+/**
+ * 判断是否为图片文件（展示缩略图）
+ */
+export function isImageFile(file: FileItem): boolean {
+  if (file.type !== 'file') return false;
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'bmp', 'webp'];
+  return imageExts.includes((file.extension || '').toLowerCase());
 }
 
 /**

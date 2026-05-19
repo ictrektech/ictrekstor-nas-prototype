@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 
 defineProps<{
@@ -9,28 +10,13 @@ defineProps<{
 <template>
   <div class="page-header">
     <div class="page-header-left">
-      <div class="page-icon-box">
-        <IconifyIcon
-          icon="lucide:folder-open"
-          style="font-size: var(--ict-title-large); color: var(--ict-primary);"
-        />
-      </div>
       <div class="page-title-area">
         <h1 class="page-title">我的文件</h1>
         <p class="page-desc">普通用户所能访问到的所有文件资源</p>
       </div>
     </div>
     <div class="page-header-right">
-      <div class="overview-card">
-        <IconifyIcon
-          icon="lucide:hard-drive"
-          style="font-size: var(--ict-title-medium); color: var(--ict-primary);"
-        />
-        <div class="overview-info">
-          <span class="overview-label">存储空间</span>
-          <span class="overview-value">{{ spaces }}</span>
-        </div>
-      </div>
+      <OverviewCard icon="lucide:hard-drive" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="存储空间" :value="spaces" />
     </div>
   </div>
 </template>
@@ -82,34 +68,6 @@ defineProps<{
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
 }
 
 @media (max-width: 768px) {

@@ -4,7 +4,7 @@ import { Empty, Table, Tag } from 'ant-design-vue';
 import { computed } from 'vue';
 
 import type { FileItem } from '../types';
-import { getFileIconClass } from '../utils';
+import { getFileIconClass, isImageFile } from '../utils';
 
 interface Props {
   files: FileItem[];
@@ -128,8 +128,10 @@ function customRow(record: any) {
             <IconifyIcon v-if="isSelected(record)" icon="lucide:check" style="font-size: var(--ict-mark-small); color: var(--ict-bg-card);" />
           </div>
           <div class="icon-wrap">
-            <div class="icon-box" :style="{ background: getFileIconClass(record).bg }">
-              <IconifyIcon :icon="getFileIconClass(record).icon" :style="{ fontSize: '16px', color: getFileIconClass(record).color }" />
+            <div class="icon-box">
+              <img v-if="record.thumbnail" :src="record.thumbnail" class="list-thumbnail" />
+              <img v-else-if="getFileIconClass(record).img" :src="getFileIconClass(record).img" :style="{ width: getFileIconClass(record).imgSize, height: getFileIconClass(record).imgSize }" />
+              <IconifyIcon v-else :icon="getFileIconClass(record).icon" :style="{ fontSize: '16px', color: getFileIconClass(record).color }" />
             </div>
             <div v-if="record.isShared" class="shared-badge" title="已分享">
               <IconifyIcon icon="lucide:link" style="font-size: 9px; color: var(--ict-bg-card);" />
@@ -139,9 +141,7 @@ function customRow(record: any) {
         </div>
       </template>
       <template v-if="column.key === 'type'">
-        <Tag :color="record.type === 'folder' ? 'blue' : 'default'" size="small">
-          {{ record.type === 'folder' ? '文件夹' : '文件' }}
-        </Tag>
+        <span class="type-text">{{ record.type === 'folder' ? '文件夹' : '文件' }}</span>
       </template>
       <template v-if="column.key === 'size'">
         <span class="size-text">{{ record.size }}</span>
@@ -224,11 +224,12 @@ function customRow(record: any) {
 /* 图标 */
 .icon-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
 .icon-box { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.list-thumbnail { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
 .shared-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ict-primary); display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ict-bg-card); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
 
 /* 文字 */
 .name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ict-text-primary); transition: color 0.2s; }
-.size-text, .time-text, .path-text { font-family: var(--ict-font-family); color: var(--ict-text-primary); font-size: var(--ict-body-medium); }
+.type-text, .size-text, .time-text, .path-text { font-family: var(--ict-font-family); color: var(--ict-text-primary); font-size: var(--ict-body-medium); }
 
 /* 表头 checkbox */
 .header-check-wrap { display: inline-flex; align-items: center; gap: 8px; cursor: default; user-select: none; }

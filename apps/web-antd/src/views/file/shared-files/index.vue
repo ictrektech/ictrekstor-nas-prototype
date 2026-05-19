@@ -181,9 +181,6 @@ function handleDeleteDir(dir: SharedDir) {
     <!-- 页面顶部概览 -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:link" style="font-size: var(--ict-title-large); color: var(--ict-info);" />
-        </div>
         <div class="page-title-area">
           <h1 class="page-title">我的分享</h1>
           <p class="page-desc">管理当前用户对外分享的文件夹，可配置是否开启外链</p>

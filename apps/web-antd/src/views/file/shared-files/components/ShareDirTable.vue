@@ -102,7 +102,7 @@ function getUserInitial(user: string) {
               class="name-icon-box"
               :class="{ 'name-icon-box--expired': record.status === 'expired' }"
             >
-              <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium);" />
+              <img src="/icons/Shared by me.png" />
             </div>
             <div class="name-text-area">
               <div class="name-title">{{ record.name }}</div>
@@ -295,17 +295,17 @@ function getUserInitial(user: string) {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--ict-primary-light) 0%, #f0f5ff 100%);
-  color: var(--ict-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.name-icon-box--expired {
-  background: linear-gradient(135deg, var(--ict-bg-page) 0%, var(--ict-border-light) 100%);
-  color: var(--ict-text-secondary);
+.name-icon-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .name-text-area {

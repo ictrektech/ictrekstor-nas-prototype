@@ -29,6 +29,10 @@ export interface FileItem {
   originalPath?: string;
   /** 是否已共享 */
   isShared?: boolean;
+  /** 图片缩略图路径 */
+  thumbnail?: string;
+  /** 是否为他人分享的文件夹 */
+  isSharedFolder?: boolean;
 }
 
 /** 文件图标配置 */
@@ -36,6 +40,9 @@ export interface FileIconConfig {
   icon: string;
   color: string;
   bg: string;
+  /** 自定义图片路径，优先于 icon */
+  img?: string;
+  imgSize?: string;
 }
 
 /** 面包屑路径项 */
@@ -54,4 +61,4 @@ export interface OverviewStatConfig {
 }
 
 /** 树节点图标配置回调 */
-export type TreeNodeIconResolver = (node: FileTreeNode) => { icon: string; color: string };
+export type TreeNodeIconResolver = (node: FileTreeNode) => { icon?: string; color?: string; img?: string; imgSize?: string };

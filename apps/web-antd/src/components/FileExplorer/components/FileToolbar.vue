@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OutlinedButton } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import { Button, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
 import { computed, ref } from 'vue';
@@ -34,6 +35,7 @@ const emit = defineEmits<{
   upload: [];
   selectAll: [];
   clearSelection: [];
+  open: [file: FileItem];
   rename: [file: FileItem];
   share: [file: FileItem];
   batchDelete: [];
@@ -149,14 +151,14 @@ const handleGoForward = () => {
       <!-- 左侧：新建 + 上传 -->
       <div class="toolbar-left-actions" @click.stop>
         <template v-if="mode !== 'recycle'">
-          <Button type="primary" size="small" class="action-btn-primary" @click="emit('newFolder')">
+          <Button type="primary" class="action-btn-primary" @click="emit('newFolder')">
             <IconifyIcon icon="lucide:folder-plus" style="font-size: var(--ict-body-medium);" />
             <span>新建</span>
           </Button>
-          <Button size="small" class="action-btn-outline" @click="emit('upload')">
+          <OutlinedButton @click="emit('upload')">
             <IconifyIcon icon="lucide:upload" style="font-size: var(--ict-body-medium);" />
-            <span>上传</span>
-          </Button>
+            上传
+          </OutlinedButton>
         </template>
       </div>
 
@@ -170,19 +172,10 @@ const handleGoForward = () => {
                 <IconifyIcon icon="lucide:rotate-ccw" style="font-size: var(--ict-body-small);" />
                 批量还原
               </Button>
-              <Dropdown placement="bottomRight">
-                <Button><IconifyIcon icon="lucide:more-horizontal" style="font-size: var(--ict-body-small);" /> 更多</Button>
-                <template #overlay>
-                  <Menu>
-                    <Menu.Item key="batch-delete" danger @click="emit('batchDelete')">
-                      <span class="batch-menu-item batch-menu-item--danger">
-                        <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium);" />
-                        彻底删除
-                      </span>
-                    </Menu.Item>
-                  </Menu>
-                </template>
-              </Dropdown>
+              <Button danger @click="emit('batchDelete')">
+                <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-body-small);" />
+                彻底删除
+              </Button>
             </template>
             <template v-else>
               <Button v-if="isSingleSelection" @click="singleSelectedFile && emit('rename', singleSelectedFile)">
@@ -338,15 +331,44 @@ const handleGoForward = () => {
 
 /* 左侧操作：新建 + 上传 */
 .toolbar-left-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.toolbar-left-actions .action-btn-primary,
-.toolbar-left-actions .action-btn-outline {
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  width: auto;
   height: 32px;
-  padding: 0 12px;
-  font-size: var(--ict-mark-medium);
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: var(--ict-body-medium);
+  font-weight: 400;
+  background: var(--ict-primary);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:hover) {
+  background: var(--ict-primary-hover);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:active) {
+  background: var(--ict-primary-active);
+  border: none;
+  color: #FFFFFF;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary:disabled) {
+  background: var(--ict-primary-disabled);
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary .ant-btn-icon) {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+.toolbar-left-actions :deep(.action-btn-primary.ant-btn-primary > .ant-btn-icon + span) {
+  margin-left: 0;
 }
 
 /* 右侧组：批量操作 + 视图切换 */
@@ -372,10 +394,20 @@ const handleGoForward = () => {
   align-items: center;
   justify-content: center;
   height: 32px;
-  padding: 0 10px;
-  font-size: var(--ict-mark-medium);
+  padding: 8px 16px;
+  font-size: var(--ict-body-medium);
+  font-weight: 400;
+  gap: 8px;
 }
 .batch-btn-text { margin-left: 4px; }
 .batch-menu-item { display: flex; align-items: center; gap: 6px; }
-.batch-menu-item--danger { color: var(--ict-danger); }
+.batch-menu-item--danger {
+  color: var(--ict-danger);
+}
+:deep(.ant-dropdown-menu-item-danger:hover) {
+  background-color: var(--ict-danger-light) !important;
+}
+:deep(.ant-dropdown-menu-item-danger:hover .batch-menu-item--danger) {
+  color: var(--ict-danger);
+}
 </style>

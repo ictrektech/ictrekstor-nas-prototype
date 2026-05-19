@@ -360,12 +360,6 @@ function syncQuickInfo(s: ServiceData) {
     <!-- 页面头部 -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon
-            icon="lucide:server-cog"
-            style="font-size: var(--ict-headline-small); color: var(--ict-primary);"
-          />
-        </div>
         <div>
           <h1 class="page-title">服务设置</h1>
           <p class="page-desc">管理系统各项服务的启用状态和配置参数</p>
