@@ -343,3 +343,51 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 2. **DOM 顺序**：数值在上，标签在下，确保视觉重心在数据本身。
 3. **语义配色**：根据指标语义选择对应的状态色，如"有效"用 `success`，"外链"用 `primary`，"用户"用 `info`，"总数"用 `warning`。
 4. **容器样式**：卡片带 `1px solid var(--ict-border-light)` 边框和极浅阴影。
+
+---
+
+### 3.5 开关切换（SwitchToggle）
+
+全局统一的 Switch 开关组件，统一尺寸、配色与交互行为。
+
+#### 尺寸规格
+
+| 尺寸 | 轨道宽 | 轨道高 | 滑块直径 | 滑块阴影 |
+|------|--------|--------|----------|----------|
+| **默认（default）** | 36px | 20px | 16px | `0 2px 4px rgba(0,0,0,0.15)` |
+| **小（small）** | 26px | 16px | 12px | `0 2px 4px rgba(0,0,0,0.15)` |
+
+#### 状态定义
+
+| 状态 | 轨道背景色 | 滑块颜色 | 说明 |
+|------|-----------|---------|------|
+| 开启（checked） | `checkedColor`（默认 `--ict-primary`） | `#FFFFFF` | 带滑块阴影 |
+| 关闭（unchecked） | `uncheckedColor`（默认 `--ict-border`） | `#FFFFFF` | 带滑块阴影 |
+| 悬浮（hover） | 同当前状态，透明度 `0.85` | `#FFFFFF` | 轨道变暗 |
+| 禁用（disabled） | 同当前状态，透明度 `0.4` | `#FFFFFF` | 光标 `not-allowed` |
+
+#### 结构定义
+
+```vue
+<SwitchToggle
+  :checked="service.enabled"
+  checked-color="var(--ict-primary)"
+  unchecked-color="var(--ict-border)"
+  @update:checked="onToggle"
+/>
+```
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `checked` | `boolean` | — | 是否开启（v-model） |
+| `checkedColor` | `string` | `var(--ict-primary)` | 开启态轨道背景色 |
+| `uncheckedColor` | `string` | `var(--ict-border)` | 关闭态轨道背景色 |
+| `disabled` | `boolean` | `false` | 是否禁用 |
+| `size` | `'default' \| 'small'` | `'default'` | 开关尺寸 |
+
+#### 使用规范
+
+1. **语义配色**：服务启用场景使用 `primary`（`--ict-primary`），系统健康状态使用 `success`（`--ict-success`），警告类开关使用 `warning`（`--ict-warning`）。
+2. **尺寸选择**：卡片头部操作区使用默认尺寸（20px 高），表格行内紧凑场景使用 `small`（16px 高）。
+3. **禁用态**：禁用态开关不响应点击，且透明度降至 `0.4`。
+4. **禁止直接使用原生 Switch**：项目内所有 Switch 必须使用 `SwitchToggle` 组件，确保全局视觉一致。

@@ -62,7 +62,7 @@ function getUserInitial(user: string): string {
     />
     <div v-if="modelValue.length > 0" class="user-perm-list">
       <div v-for="su in modelValue" :key="su.user" class="user-perm-row">
-        <div class="user-perm-info">
+        <div class="user-perm-info" style="display: flex;gap: 8px;align-items: center;">
           <div
             class="user-avatar-small"
             :style="{
@@ -75,6 +75,7 @@ function getUserInitial(user: string): string {
           </div>
           <span class="user-perm-name">{{ su.user }}</span>
         </div>
+        <div>
         <Radio.Group :value="su.permission" size="small" @change="updatePermission(su.user, $event.target.value)">
           <Radio.Button value="readonly">
             <span class="radio-with-icon">
@@ -89,9 +90,10 @@ function getUserInitial(user: string): string {
             </span>
           </Radio.Button>
         </Radio.Group>
-        <Button type="text" size="small" danger class="user-remove-btn" @click="removeUser(su.user)">
+        <Button style="margin-left:8px;" type="text" size="small" danger class="user-remove-btn" @click="removeUser(su.user)">
           <IconifyIcon icon="lucide:x" style="font-size: var(--ict-body-small);" />
         </Button>
+        </div>
       </div>
     </div>
   </div>
@@ -102,7 +104,9 @@ function getUserInitial(user: string): string {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  background: var(--ict-bg-section);
+  border-radius: 8px;
+  padding: 4px 0;
 }
 
 .user-perm-row {
@@ -111,10 +115,12 @@ function getUserInitial(user: string): string {
   justify-content: space-between;
   gap: 8px;
   padding: 6px 10px;
-  background: var(--ict-success-light);
-  border: 1px solid var(--ict-success-disabled);
-  border-radius: 8px;
 }
+
+.user-perm-row + .user-perm-row {
+  border-top: 1px solid var(--ict-border-light);
+}
+```
 
 .user-perm-info {
   display: flex;

@@ -15,9 +15,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <div v-if="name" class="selected-folder-info">
-    <div class="selected-folder-icon">
-      <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-large); color: var(--ict-warning);" />
-    </div>
+    <img class="selected-folder-icon" src="/icons/folder.png" alt="folder" />
     <div class="selected-folder-detail">
       <div class="selected-folder-name">{{ name }}</div>
       <div v-if="path" class="selected-folder-path">{{ path }}</div>
@@ -34,23 +32,16 @@ const props = withDefaults(defineProps<Props>(), {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
-  background: linear-gradient(135deg, #fffbe6 0%, var(--ict-warning-light) 100%);
-  border: 1px solid #ffd591;
+  padding: 20px 0;
   border-radius: 10px;
-  margin-bottom: 12px;
 }
 
 .selected-folder-icon {
-  width: 36px;
-  height: 36px;
+  width: 56px;
+  height: 56px;
   border-radius: 8px;
-  background: var(--ict-bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  object-fit: contain;
 }
 
 .selected-folder-detail {
