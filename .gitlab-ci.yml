@@ -27,6 +27,8 @@ build:
     - corepack prepare pnpm@10.28.2 --activate
     # 配置 pnpm 缓存
     - pnpm config set store-dir .pnpm-store
+    # 替换软件源为中科大镜像
+    - sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
     # 安装 sshpass（用于非交互式密码传递）
     - apt-get update && apt-get install -y sshpass
   script:
