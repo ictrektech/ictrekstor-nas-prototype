@@ -53,8 +53,8 @@ const mockTree: FileTreeNode[] = [
 // ─── Mock 文件数据 ───
 const mockFiles: Record<string, FileItem[]> = {
   'sfo-zhangsan': [
-    { id: 'zs-d', name: '共享文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00' },
-    { id: 'zs-de', name: '共享设计', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00' },
+    { id: 'zs-d', name: '共享文档', type: 'folder', size: '--', modifyTime: '2024-05-06 10:30:00', isSharedFolder: true },
+    { id: 'zs-de', name: '共享设计', type: 'folder', size: '--', modifyTime: '2024-05-05 14:20:00', isSharedFolder: true },
   ],
   'sfo-zhangsan/docs': [
     { id: 'zs-d1', name: '项目计划书.pdf', type: 'file', size: '2.5 MB', modifyTime: '2024-05-06 10:30:00', extension: 'pdf' },
@@ -66,8 +66,8 @@ const mockFiles: Record<string, FileItem[]> = {
     { id: 'zs-de2', name: '架构图.png', type: 'file', size: '3.2 MB', modifyTime: '2024-04-20 09:00:00', extension: 'png' },
   ],
   'sfo-lisi': [
-    { id: 'ls-p', name: '项目资料', type: 'folder', size: '--', modifyTime: '2024-04-20 09:15:00' },
-    { id: 'ls-v', name: '培训视频', type: 'folder', size: '--', modifyTime: '2024-03-20 10:00:00' },
+    { id: 'ls-p', name: '项目资料', type: 'folder', size: '--', modifyTime: '2024-04-20 09:15:00', isSharedFolder: true },
+    { id: 'ls-v', name: '培训视频', type: 'folder', size: '--', modifyTime: '2024-03-20 10:00:00', isSharedFolder: true },
   ],
   'sfo-lisi/projects': [
     { id: 'ls-p1', name: '技术方案.md', type: 'file', size: '28 KB', modifyTime: '2024-04-15 14:00:00', extension: 'md' },
@@ -78,7 +78,7 @@ const mockFiles: Record<string, FileItem[]> = {
     { id: 'ls-v2', name: '安全规范.pdf', type: 'file', size: '8 MB', modifyTime: '2024-03-15 09:00:00', extension: 'pdf' },
   ],
   'sfo-wangwu': [
-    { id: 'ww-a', name: '会议录音', type: 'folder', size: '--', modifyTime: '2024-05-01 12:00:00' },
+    { id: 'ww-a', name: '会议录音', type: 'folder', size: '--', modifyTime: '2024-05-01 12:00:00', isSharedFolder: true },
   ],
   'sfo-wangwu/audio': [
     { id: 'ww-a1', name: '周会-20240501.mp3', type: 'file', size: '45 MB', modifyTime: '2024-05-01 12:00:00', extension: 'mp3' },
@@ -143,6 +143,7 @@ function loadFiles(key: string) {
           type: 'folder' as const,
           size: '--',
           modifyTime: '--',
+          isSharedFolder: true,
         }));
       } else {
         currentFiles.value = [];
@@ -213,9 +214,6 @@ onMounted(() => {
     <!-- ═══════ 页面顶部概览 ═══════ -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:share-2" style="font-size: var(--ict-title-large); color: var(--ict-info);" />
-        </div>
         <div class="page-title-area">
           <h1 class="page-title">他人分享</h1>
           <p class="page-desc">其他用户分享给你的文件和文件夹</p>

@@ -141,9 +141,7 @@ function customRow(record: any) {
         </div>
       </template>
       <template v-if="column.key === 'type'">
-        <Tag :color="record.type === 'folder' ? 'blue' : 'default'" size="small">
-          {{ record.type === 'folder' ? '文件夹' : '文件' }}
-        </Tag>
+        <span class="type-text">{{ record.type === 'folder' ? '文件夹' : '文件' }}</span>
       </template>
       <template v-if="column.key === 'size'">
         <span class="size-text">{{ record.size }}</span>
@@ -231,7 +229,7 @@ function customRow(record: any) {
 
 /* 文字 */
 .name-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ict-text-primary); transition: color 0.2s; }
-.size-text, .time-text, .path-text { font-family: var(--ict-font-family); color: var(--ict-text-primary); font-size: var(--ict-body-medium); }
+.type-text, .size-text, .time-text, .path-text { font-family: var(--ict-font-family); color: var(--ict-text-primary); font-size: var(--ict-body-medium); }
 
 /* 表头 checkbox */
 .header-check-wrap { display: inline-flex; align-items: center; gap: 8px; cursor: default; user-select: none; }

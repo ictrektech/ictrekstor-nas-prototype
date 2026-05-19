@@ -40,24 +40,11 @@ function getTempColor(temp?: number): string {
 
 <template>
   <div class="page-header">
-    <div class="page-header-left">
-      <Button size="small" class="back-btn" @click="emit('back')">
-        <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-mark-medium);" />
-      </Button>
-      <div
-        class="page-icon-box"
-        :style="{
-          background: `${getDeviceIconColor(disk.deviceType)}15`,
-          border: `1px solid ${getDeviceIconColor(disk.deviceType)}30`,
-        }"
-      >
-        <IconifyIcon
-          :icon="getDeviceIcon(disk.deviceType)"
-          style="font-size: var(--ict-title-large);"
-          :style="{ color: getDeviceIconColor(disk.deviceType) }"
-        />
-      </div>
-      <div class="page-title-area">
+      <div class="page-header-left">
+        <Button size="small" class="back-btn" @click="emit('back')">
+          <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-mark-medium);" />
+        </Button>
+        <div class="page-title-area">
         <h1 class="page-title">{{ disk.deviceName }}</h1>
         <p class="page-desc">{{ disk.model }} · {{ disk.usageStatus || disk.status }}</p>
       </div>

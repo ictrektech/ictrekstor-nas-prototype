@@ -8,6 +8,9 @@ import type { FileIconConfig, FileItem } from './types';
  */
 export function getFileIconClass(file: FileItem): FileIconConfig {
   if (file.type === 'folder') {
+    if (file.isSharedFolder) {
+      return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6', img: '/icons/Shared with me.png', imgSize: '100%' };
+    }
     return { icon: 'lucide:folder', color: '#faad14', bg: '#fffbe6', img: '/icons/folder.png', imgSize: '100%' };
   }
   const ext = (file.extension || '').toLowerCase();

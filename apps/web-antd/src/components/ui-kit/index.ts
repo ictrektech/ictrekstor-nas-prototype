@@ -9,3 +9,4 @@ export { default as SectionCard } from './SectionCard.vue';
 export { default as StatusBadge } from './StatusBadge.vue';
 export { default as InfoChip } from './InfoChip.vue';
 export { default as OutlinedButton } from './OutlinedButton.vue';
+export { default as OverviewCard } from './OverviewCard.vue';

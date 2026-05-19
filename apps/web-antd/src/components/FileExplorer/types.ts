@@ -31,6 +31,8 @@ export interface FileItem {
   isShared?: boolean;
   /** 图片缩略图路径 */
   thumbnail?: string;
+  /** 是否为他人分享的文件夹 */
+  isSharedFolder?: boolean;
 }
 
 /** 文件图标配置 */

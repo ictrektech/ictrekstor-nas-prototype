@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { Button, Tag, Progress, Tooltip } from 'ant-design-vue';
-import { IconifyIcon } from '@vben/icons';
+import { computed } from 'vue';
+import { Button, Tag, Progress } from 'ant-design-vue';
 
 export interface ExternalDevice {
   id: string;
@@ -22,14 +22,6 @@ const emit = defineEmits<{
   (e: 'manage', device: ExternalDevice): void;
   (e: 'eject', device: ExternalDevice): void;
 }>();
-
-function getDeviceIcon(type: string): string {
-  return 'lucide:usb';
-}
-
-function getDeviceIconColor(type: string): string {
-  return 'var(--ict-primary)';
-}
 
 function getDeviceTypeLabel(type: string): string {
   switch (type) {
@@ -60,11 +52,11 @@ function getCapacityColor(percent: number): string {
   return 'var(--ict-primary)';
 }
 
-function getCapacityBg(percent: number): string {
-  if (percent >= 90) return 'var(--ict-danger-light)';
-  if (percent >= 70) return '#fffbe6';
-  return 'var(--ict-primary-light)';
-}
+const availableSpace = computed(() => {
+  if (props.device.status !== 'connected') return '--';
+  // mock 数据简化处理：从 used 和 capacity 推算可用
+  return `${props.device.used} / ${props.device.capacity}`;
+});
 
 function onManage() {
   emit('manage', props.device);
@@ -77,35 +69,13 @@ function onEject() {
 
 <template>
   <div class="device-card-inner">
-    <!-- 左侧：设备图标区域 -->
-    <div
-      class="device-visual"
-      :style="{ background: getDeviceIconColor(device.type) + '12' }"
-    >
-      <div
-        class="device-icon-box"
-        :style="{
-          background: getDeviceIconColor(device.type) + '18',
-          borderColor: getDeviceIconColor(device.type) + '35',
-        }"
-      >
-        <IconifyIcon
-          :icon="getDeviceIcon(device.type)"
-          class="device-icon"
-          :style="{ color: getDeviceIconColor(device.type) }"
-        />
+    <!-- 头部：图标 + 名称 + 状态 -->
+    <div class="device-header">
+      <div class="device-icon-wrapper">
+        <img src="/icons/USB.png" class="device-icon-img" alt="USB" />
       </div>
-      <div
-        class="device-status-dot"
-        :style="{ background: device.status === 'connected' ? 'var(--ict-success)' : 'var(--ict-text-disabled)' }"
-      />
-    </div>
-
-    <!-- 右侧：信息区域 -->
-    <div class="device-info">
-      <!-- 第一行：名称 + 状态 -->
-      <div class="info-header">
-        <div class="info-header-left">
+      <div class="device-header-info">
+        <div class="device-name-row">
           <span class="device-name">{{ device.name }}</span>
           <Tag :color="getStatusColor(device.status)" size="small">
             <span
@@ -115,73 +85,53 @@ function onEject() {
             {{ getStatusLabel(device.status) }}
           </Tag>
         </div>
-      </div>
-
-      <!-- 第二行：类型 / 文件系统 -->
-      <div class="info-meta">
-        <span class="meta-chip">
-          <IconifyIcon :icon="getDeviceIcon(device.type)" style="font-size: var(--ict-mark-small);" />
-          {{ getDeviceTypeLabel(device.type) }}
-        </span>
-        <span v-if="device.status === 'connected'" class="meta-chip">
-          <IconifyIcon icon="lucide:folder-tree" style="font-size: var(--ict-mark-small);" />
-          {{ device.fileSystem }}
-        </span>
-      </div>
-
-      <!-- 第三行：容量信息 -->
-      <div v-if="device.status === 'connected'" class="info-capacity">
-        <div class="capacity-row">
-          <span class="capacity-text">
-            <span class="cap-used">{{ device.used }}</span>
-            <span class="cap-div">/</span>
-            <span class="cap-total">{{ device.capacity }}</span>
-          </span>
-          <span
-            class="cap-percent"
-            :style="{ color: getCapacityColor(device.usedPercent) }"
-          >
-            {{ device.usedPercent }}%
-          </span>
+        <div class="device-subtitle">
+          {{ getDeviceTypeLabel(device.type) }} · {{ device.fileSystem }}
         </div>
-        <Progress
-          :percent="device.usedPercent"
-          :stroke-color="getCapacityColor(device.usedPercent)"
-          :show-info="false"
-          :stroke-width="5"
-          size="small"
-        />
       </div>
-      <div v-else class="info-capacity-disconnected">
-        <span class="disconnected-hint">
-          <IconifyIcon icon="lucide:unplug" style="font-size: var(--ict-body-small); color: var(--ict-text-disabled);" />
-          设备未连接
+    </div>
+
+    <!-- 容量进度 -->
+    <div v-if="device.status === 'connected'" class="info-capacity">
+      <Progress
+        :percent="device.usedPercent"
+        :stroke-color="getCapacityColor(device.usedPercent)"
+        :show-info="false"
+        :stroke-width="6"
+        size="small"
+      />
+      <div class="capacity-summary">
+        <span class="cap-used">{{ device.used }}</span>
+        <span class="cap-div">/</span>
+        <span class="cap-total">{{ device.capacity }}</span>
+        <span class="cap-percent" :style="{ color: getCapacityColor(device.usedPercent) }">
+          {{ device.usedPercent }}%
         </span>
       </div>
+    </div>
+    <div v-else class="info-capacity-disconnected">
+      <span class="disconnected-hint">设备未连接</span>
+    </div>
 
-      <!-- 第四行：操作按钮 -->
-      <div class="info-actions">
-        <Button
-          type="primary"
-          size="small"
-          class="file-manage-btn"
-          :disabled="device.status !== 'connected'"
-          @click="onManage"
-        >
-          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-body-small);" />
-          文件管理
-        </Button>
-        <Tooltip title="安全弹出">
-          <Button
-            size="small"
-            class="action-btn"
-            :disabled="device.status !== 'connected'"
-            @click="onEject"
-          >
-            <IconifyIcon icon="lucide:log-out" style="font-size: var(--ict-body-small);" />
-          </Button>
-        </Tooltip>
-      </div>
+    <!-- 操作按钮 -->
+    <div class="device-actions">
+      <Button
+        type="primary"
+        size="small"
+        class="action-btn-primary"
+        :disabled="device.status !== 'connected'"
+        @click="onManage"
+      >
+        浏览文件
+      </Button>
+      <Button
+        size="small"
+        class="action-btn-secondary"
+        :disabled="device.status !== 'connected'"
+        @click="onEject"
+      >
+        安全弹出
+      </Button>
     </div>
   </div>
 </template>
@@ -189,69 +139,47 @@ function onEject() {
 <style scoped>
 .device-card-inner {
   display: flex;
-  align-items: stretch;
-  height: 100%;
-}
-
-/* 左侧图标区 */
-.device-visual {
-  width: 72px;
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 10px;
-  gap: 8px;
-  flex-shrink: 0;
-  position: relative;
-  margin-right: 12px;
+  gap: 12px;
+  padding: 16px;
 }
 
-.device-icon-box {
-  width: 48px;
-  height: 48px;
+/* 头部 */
+.device-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.device-icon-wrapper {
+  width: 52px;
+  height: 52px;
   border-radius: 12px;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid;
+  flex-shrink: 0;
 }
 
-.device-icon {
-  font-size: var(--ict-headline-small);
+.device-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
-.device-status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid var(--ict-bg-card);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
-}
-
-/* 右侧信息区 */
-.device-info {
+.device-header-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 16px 14px 0;
-  min-width: 0;
+  gap: 4px;
 }
 
-/* 名称行 */
-.info-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.info-header-left {
+.device-name-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
 }
 
 .device-name {
@@ -271,39 +199,22 @@ function onEject() {
   margin-right: 4px;
 }
 
-/* 元信息行 */
-.info-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.meta-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  background: var(--ict-bg-page);
-  border-radius: 4px;
+.device-subtitle {
   font-size: var(--ict-body-small);
   color: var(--ict-text-secondary);
 }
 
-/* 容量行 */
+/* 容量 */
 .info-capacity {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
-.capacity-row {
+.capacity-summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.capacity-text {
+  gap: 4px;
   font-size: var(--ict-body-small);
   color: var(--ict-text-secondary);
 }
@@ -314,7 +225,6 @@ function onEject() {
 }
 
 .cap-div {
-  margin: 0 3px;
   color: var(--ict-text-disabled);
 }
 
@@ -323,45 +233,35 @@ function onEject() {
 }
 
 .cap-percent {
+  margin-left: auto;
   font-size: var(--ict-mark-medium);
   font-weight: 700;
   font-family: var(--ict-font-family);
 }
 
 .info-capacity-disconnected {
-  padding: 4px 0;
+  padding: 8px 0;
 }
 
 .disconnected-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   font-size: var(--ict-body-small);
   color: var(--ict-text-disabled);
 }
 
-/* 操作按钮行 */
-.info-actions {
+/* 操作按钮 */
+.device-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
 }
 
-.file-manage-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.action-btn-primary {
+  flex: 1;
   border-radius: 6px;
 }
 
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
+.action-btn-secondary {
+  flex: 1;
   border-radius: 6px;
 }
 </style>

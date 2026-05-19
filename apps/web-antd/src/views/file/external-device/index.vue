@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { Card, Empty } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import ExternalDeviceCard, { type ExternalDevice } from './components/ExternalDeviceCard.vue';
 
@@ -77,36 +78,15 @@ function ejectDevice(device: ExternalDevice) {
     <!-- 页面顶部概览 -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:usb" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
-        </div>
         <div class="page-title-area">
           <h1 class="page-title">外接设备</h1>
           <p class="page-desc">查看和管理所有通过 USB 或 SD 卡槽连接到 NAS 的外部存储设备</p>
         </div>
       </div>
       <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-          <div class="overview-info">
-            <span class="overview-label">设备总数</span>
-            <span class="overview-value">{{ overviewStats.total }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:plug" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
-          <div class="overview-info">
-            <span class="overview-label">已连接</span>
-            <span class="overview-value">{{ overviewStats.connected }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:unplug" style="font-size: var(--ict-title-medium); color: var(--ict-text-disabled);" />
-          <div class="overview-info">
-            <span class="overview-label">未连接</span>
-            <span class="overview-value">{{ overviewStats.disconnected }}</span>
-          </div>
-        </div>
+        <OverviewCard icon="lucide:hard-drive" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="设备总数" :value="overviewStats.total" />
+        <OverviewCard icon="lucide:plug" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="已连接" :value="overviewStats.connected" />
+        <OverviewCard icon="lucide:unplug" icon-color="var(--ict-text-disabled)" icon-bg="var(--ict-bg-page)" label="未连接" :value="overviewStats.disconnected" />
       </div>
     </div>
 
@@ -199,40 +179,13 @@ function ejectDevice(device: ExternalDevice) {
   gap: 12px;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 
 /* 设备卡片网格 */
 .device-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 12px;
-  padding: 16px 0;
+  gap: 16px;
+  padding: 20px;
 }
 
 .device-card {

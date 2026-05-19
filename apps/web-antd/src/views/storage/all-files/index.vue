@@ -314,9 +314,6 @@ onMounted(() => {
     <!-- ═══════ 页面顶部概览 ═══════ -->
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
-        </div>
         <div class="page-title-area">
           <h1 class="page-title">设备全部文件</h1>
           <p class="page-desc">管理存储空间中挂载目录下的所有文件</p>

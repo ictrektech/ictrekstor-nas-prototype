@@ -51,15 +51,12 @@ function goBack() {
   <div class="pool-detail">
     <!-- 页面顶部概览 -->
     <div v-if="poolDetail" class="page-header">
-      <div class="page-header-left">
-        <Button size="small" class="back-btn" @click="goBack">
-          <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-body-small);" />
-          返回
-        </Button>
-        <div class="page-icon-box">
-          <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />
-        </div>
-        <div class="page-title-area">
+        <div class="page-header-left">
+          <Button size="small" class="back-btn" @click="goBack">
+            <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-body-small);" />
+            返回
+          </Button>
+          <div class="page-title-area">
           <h1 class="page-title">{{ poolDetail.name }}</h1>
           <p class="page-desc">
             {{ poolDetail.raidType }} · {{ poolDetail.diskCount }} 块硬盘 ·
