@@ -22,20 +22,20 @@ function updateType(v: 'preset' | 'custom' | 'forever') {
 
 <template>
   <div class="expire-selector">
-    <Radio.Group :value="type" size="small" @change="updateType($event.target.value)">
+    <Radio.Group :value="type" @change="updateType($event.target.value)">
       <Radio.Button value="preset">预设</Radio.Button>
       <Radio.Button value="custom">自定义</Radio.Button>
       <Radio.Button value="forever">永久</Radio.Button>
     </Radio.Group>
     <div v-if="type === 'preset'" class="expire-preset">
-      <Radio.Group :value="preset" size="small" @change="emit('update:preset', $event.target.value)">
+      <Radio.Group :value="preset" @change="emit('update:preset', $event.target.value)">
         <Radio.Button value="1">1天</Radio.Button>
         <Radio.Button value="7">7天</Radio.Button>
         <Radio.Button value="30">30天</Radio.Button>
       </Radio.Group>
     </div>
     <div v-else-if="type === 'custom'" class="expire-custom">
-      <DatePicker :value="customDate" placeholder="选择到期日期" size="small" style="width: 100%;" @change="emit('update:customDate', $event)" />
+      <DatePicker :value="customDate" placeholder="选择到期日期" style="width: 100%;" @change="emit('update:customDate', $event)" />
     </div>
   </div>
 </template>

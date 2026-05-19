@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import { message, Tabs, Tag } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import type { ServiceData, ServiceCategory } from './types';
 import ServiceCard from './components/ServiceCard.vue';
@@ -367,36 +368,9 @@ function syncQuickInfo(s: ServiceData) {
       </div>
       <!-- 概览统计 -->
       <div class="page-header-stats">
-        <div class="stat-card">
-          <IconifyIcon
-            icon="lucide:activity"
-            style="font-size: var(--ict-title-medium); color: var(--ict-success);"
-          />
-          <div class="stat-info">
-            <span class="stat-label">运行中</span>
-            <span class="stat-value">{{ runningCount }}</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <IconifyIcon
-            icon="lucide:toggle-right"
-            style="font-size: var(--ict-title-medium); color: var(--ict-primary);"
-          />
-          <div class="stat-info">
-            <span class="stat-label">已启用</span>
-            <span class="stat-value">{{ enabledCount }}</span>
-          </div>
-        </div>
-        <div class="stat-card">
-          <IconifyIcon
-            icon="lucide:layers"
-            style="font-size: var(--ict-title-medium); color: var(--ict-text-secondary);"
-          />
-          <div class="stat-info">
-            <span class="stat-label">总服务</span>
-            <span class="stat-value">{{ totalCount }}</span>
-          </div>
-        </div>
+      <OverviewCard icon="lucide:activity" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="运行中" :value="runningCount" />
+      <OverviewCard icon="lucide:toggle-right" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="已启用" :value="enabledCount" />
+      <OverviewCard icon="lucide:layers" icon-color="var(--ict-text-secondary)" icon-bg="var(--ict-bg-page)" label="总服务" :value="totalCount" />
       </div>
     </div>
 
@@ -523,33 +497,6 @@ function syncQuickInfo(s: ServiceData) {
   flex-shrink: 0;
 }
 
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.stat-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.stat-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 
 /* 分类 Tabs */
 .category-tabs-wrapper {

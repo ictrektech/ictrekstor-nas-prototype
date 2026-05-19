@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import { computed } from 'vue';
 import { getCapacityColor } from '../types';
@@ -23,34 +24,10 @@ const usageColor = computed(() => getCapacityColor(usagePercent.value));
 
 <template>
   <div class="vol-overview">
-    <div class="overview-card">
-      <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-      <div class="overview-info">
-        <span class="overview-label">存储池</span>
-        <span class="overview-value">{{ poolCount }}</span>
-      </div>
-    </div>
-    <div class="overview-card">
-      <IconifyIcon icon="lucide:box" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-      <div class="overview-info">
-        <span class="overview-label">存储空间</span>
-        <span class="overview-value">{{ volumeCount }}</span>
-      </div>
-    </div>
-    <div class="overview-card">
-      <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
-      <div class="overview-info">
-        <span class="overview-label">总容量</span>
-        <span class="overview-value">{{ totalCap }}</span>
-      </div>
-    </div>
-    <div class="overview-card">
-      <IconifyIcon icon="lucide:pie-chart" style="font-size: var(--ict-title-medium);" :style="{ color: usageColor }" />
-      <div class="overview-info">
-        <span class="overview-label">使用率</span>
-        <span class="overview-value" :style="{ color: usageColor }">{{ usagePercent }}%</span>
-      </div>
-    </div>
+    <OverviewCard icon="lucide:database" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="存储池" :value="poolCount" />
+    <OverviewCard icon="lucide:box" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="存储空间" :value="volumeCount" />
+    <OverviewCard icon="lucide:hard-drive" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="总容量" :value="totalCap" />
+    <OverviewCard icon="lucide:pie-chart" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="使用率" :value="usagePercent + '%'" :value-color="usageColor" />
   </div>
 </template>
 
@@ -61,31 +38,4 @@ const usageColor = computed(() => getCapacityColor(usagePercent.value));
   gap: 12px;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 </style>

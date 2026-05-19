@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Button } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import type { DiskInfo } from '#/api/storage';
 
@@ -50,34 +51,10 @@ function getTempColor(temp?: number): string {
       </div>
     </div>
     <div class="page-header-right">
-      <div class="overview-card">
-        <IconifyIcon icon="lucide:database" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-        <div class="overview-info">
-          <span class="overview-label">容量</span>
-          <span class="overview-value">{{ disk.size }}</span>
-        </div>
-      </div>
-      <div v-if="disk.temperature !== undefined" class="overview-card">
-        <IconifyIcon icon="lucide:thermometer" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
-        <div class="overview-info">
-          <span class="overview-label">温度</span>
-          <span class="overview-value" :style="{ color: getTempColor(disk.temperature) }">{{ disk.temperature }}°C</span>
-        </div>
-      </div>
-      <div v-if="disk.usedHours" class="overview-card">
-        <IconifyIcon icon="lucide:clock" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
-        <div class="overview-info">
-          <span class="overview-label">使用时长</span>
-          <span class="overview-value">{{ formatHours(disk.usedHours) }}</span>
-        </div>
-      </div>
-      <div v-if="disk.partitions" class="overview-card">
-        <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
-        <div class="overview-info">
-          <span class="overview-label">分区数</span>
-          <span class="overview-value">{{ disk.partitions.length }}</span>
-        </div>
-      </div>
+      <OverviewCard icon="lucide:database" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="容量" :value="disk.size" />
+      <OverviewCard v-if="disk.temperature !== undefined" icon="lucide:thermometer" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="温度" :value="disk.temperature + '°C'" :value-color="getTempColor(disk.temperature)" />
+      <OverviewCard v-if="disk.usedHours" icon="lucide:clock" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="使用时长" :value="formatHours(disk.usedHours)" />
+      <OverviewCard v-if="disk.partitions" icon="lucide:folder-open" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="分区数" :value="disk.partitions.length" />
     </div>
   </div>
 </template>
@@ -137,31 +114,4 @@ function getTempColor(temp?: number): string {
   gap: 12px;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 </style>

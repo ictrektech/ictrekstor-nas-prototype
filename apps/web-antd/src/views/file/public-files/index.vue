@@ -8,6 +8,7 @@ import {
   Select,
   message,
 } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import {
   FileTreePanel,
@@ -341,13 +342,7 @@ onMounted(() => {
           <span class="pool-badge-label">所属存储池</span>
           <span class="pool-badge-value">{{ currentStoragePool }}</span>
         </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
-          <div class="overview-info">
-            <span class="overview-label">公共文件夹</span>
-            <span class="overview-value">{{ overviewStats.folders }}</span>
-          </div>
-        </div>
+        <OverviewCard icon="lucide:folder-open" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="公共文件夹" :value="overviewStats.folders" />
       </div>
     </div>
 
@@ -482,33 +477,6 @@ onMounted(() => {
   gap: 12px;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 
 /* 存储池徽章 */
 .pool-badge {

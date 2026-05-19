@@ -9,6 +9,7 @@ import {
   Dropdown,
   Menu,
 } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import {
   FileTreePanel,
@@ -220,20 +221,8 @@ onMounted(() => {
         </div>
       </div>
       <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:users" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
-          <div class="overview-info">
-            <span class="overview-label">分享者</span>
-            <span class="overview-value">{{ overviewStats.users }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
-          <div class="overview-info">
-            <span class="overview-label">分享文件夹</span>
-            <span class="overview-value">{{ treeData.reduce((sum, s) => sum + (s.children?.length || 0), 0) }}</span>
-          </div>
-        </div>
+        <OverviewCard icon="lucide:users" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="分享者" :value="overviewStats.users" />
+        <OverviewCard icon="lucide:folder-open" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="分享文件夹" :value="treeData.reduce((sum, s) => sum + (s.children?.length || 0), 0)" />
       </div>
     </div>
 
@@ -335,33 +324,6 @@ onMounted(() => {
   gap: 12px;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 
 .fm-body {
   display: flex;
