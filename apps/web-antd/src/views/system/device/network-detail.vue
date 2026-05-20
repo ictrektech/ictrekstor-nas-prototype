@@ -7,6 +7,7 @@ import {
   Button,
   Descriptions,
 } from 'ant-design-vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
@@ -172,34 +173,10 @@ onMounted(loadNetwork);
         </div>
       </div>
       <div class="page-header-right">
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:arrow-down" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-          <div class="overview-info">
-            <span class="overview-label">下载速度</span>
-            <span class="overview-value" style="color: var(--ict-primary);">{{ formatSpeed(net.downloadSpeed) }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:arrow-up" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
-          <div class="overview-info">
-            <span class="overview-label">上传速度</span>
-            <span class="overview-value" style="color: var(--ict-success);">{{ formatSpeed(net.uploadSpeed) }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:zap" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
-          <div class="overview-info">
-            <span class="overview-label">协商速率</span>
-            <span class="overview-value">{{ net.linkSpeed }}</span>
-          </div>
-        </div>
-        <div class="overview-card">
-          <IconifyIcon icon="lucide:git-compare" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
-          <div class="overview-info">
-            <span class="overview-label">双工模式</span>
-            <span class="overview-value">{{ net.duplex }}</span>
-          </div>
-        </div>
+        <OverviewCard icon="lucide:arrow-down" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="下载速度" :value="formatSpeed(net.downloadSpeed)" value-color="var(--ict-primary)" />
+        <OverviewCard icon="lucide:arrow-up" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="上传速度" :value="formatSpeed(net.uploadSpeed)" value-color="var(--ict-success)" />
+        <OverviewCard icon="lucide:zap" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="协商速率" :value="net.linkSpeed" />
+        <OverviewCard icon="lucide:git-compare" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="双工模式" :value="net.duplex" />
       </div>
     </div>
 
@@ -356,33 +333,6 @@ onMounted(loadNetwork);
   flex-wrap: wrap;
 }
 
-.overview-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--ict-bg-page);
-  border-radius: 8px;
-  min-width: 90px;
-}
-
-.overview-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.overview-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-}
-
-.overview-value {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
-}
 
 /* ===== 主体 ===== */
 .detail-body {

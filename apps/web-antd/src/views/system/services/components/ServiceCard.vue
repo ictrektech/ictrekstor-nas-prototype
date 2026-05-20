@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { Switch, Button, Tag } from 'ant-design-vue';
+import { SwitchToggle } from '#/components/ui-kit';
+import { Button, Tag } from 'ant-design-vue';
 import type { ServiceData } from '../types';
 
 const props = defineProps<{
@@ -81,7 +82,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
           <IconifyIcon icon="lucide:settings-2" :style="{ fontSize: '14px' }" />
           配置
         </Button>
-        <Switch :checked="service.enabled" @update:checked="onToggle" />
+        <SwitchToggle :checked="service.enabled" checked-color="var(--ict-primary)" unchecked-color="var(--ict-border)" @update:checked="onToggle" />
       </div>
     </div>
 

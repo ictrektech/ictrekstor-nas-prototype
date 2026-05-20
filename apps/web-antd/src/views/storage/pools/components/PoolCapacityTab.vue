@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { Progress, Statistic, Card } from 'ant-design-vue';
-import { IconifyIcon } from '@vben/icons';
+import { OverviewCard } from '#/components/ui-kit';
 import type { StoragePoolDetail } from '#/api/storage';
 
 const props = defineProps<{
@@ -56,31 +56,16 @@ const capacityStats = computed(() => [
   <div class="capacity-tab-content">
     <!-- 容量概览 -->
     <div class="capacity-overview">
-      <div
+      <OverviewCard
         v-for="stat in capacityStats"
         :key="stat.title"
-        class="capacity-stat-card"
-      >
-        <div
-          class="capacity-stat-icon"
-          :style="{ background: stat.bgColor }"
-        >
-          <IconifyIcon
-            :icon="stat.icon"
-            style="font-size: var(--ict-title-large);"
-            :style="{ color: stat.iconColor }"
-          />
-        </div>
-        <div class="capacity-stat-info">
-          <div class="capacity-stat-title">{{ stat.title }}</div>
-          <div
-            class="capacity-stat-value"
-            :style="{ color: stat.iconColor }"
-          >
-            {{ stat.value }}
-          </div>
-        </div>
-      </div>
+        :icon="stat.icon"
+        :icon-color="stat.iconColor"
+        :icon-bg="stat.bgColor"
+        :label="stat.title"
+        :value="stat.value"
+        :value-color="stat.iconColor"
+      />
     </div>
 
     <!-- 容量进度条 -->
@@ -153,28 +138,6 @@ const capacityStats = computed(() => [
   margin-bottom: 20px;
 }
 
-.capacity-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: var(--ict-bg-section);
-  border-radius: 8px;
-}
-
-.capacity-stat-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.capacity-stat-info { flex: 1; }
-.capacity-stat-title { font-size: var(--ict-body-small); color: var(--ict-text-secondary); margin-bottom: 2px; }
-.capacity-stat-value { font-size: var(--ict-title-large); font-weight: 700; font-family: var(--ict-font-family); }
 
 .capacity-progress-section { margin-bottom: 20px; }
 .section-title { font-size: var(--ict-body-medium); font-weight: 600; color: var(--ict-text-emphasis); margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px; }

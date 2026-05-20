@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import { Checkbox, Tooltip, Input, Form } from 'ant-design-vue';
+import { Tooltip, Input, Form } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
+import { SwitchToggle } from '#/components/ui-kit';
 import ExpireSelector from './ExpireSelector.vue';
 
 interface Props {
@@ -24,12 +25,11 @@ const emit = defineEmits<{
 <template>
   <div class="link-section">
     <div class="link-section-header">
-      <Checkbox :checked="enabled" @update:checked="emit('update:enabled', $event)">
-        <span style="font-weight: 500; font-size: var(--ict-mark-medium);">启用外链分享</span>
-      </Checkbox>
+      <span style="font-weight: 500; font-size: var(--ict-mark-medium);">启用外链分享</span>
       <Tooltip title="开启后，未登录用户也可通过链接访问">
         <IconifyIcon icon="lucide:circle-help" style="font-size: var(--ict-mark-medium); color: var(--ict-text-disabled); cursor: help;" />
       </Tooltip>
+      <SwitchToggle class="link-switch" :checked="enabled" checked-color="var(--ict-primary)" unchecked-color="var(--ict-border)" @update:checked="emit('update:enabled', $event)" />
     </div>
 
     <div v-if="enabled" class="link-config">
@@ -46,7 +46,7 @@ const emit = defineEmits<{
         </Form.Item>
 
         <Form.Item label="访问密码" class="config-item">
-          <Input :value="password" placeholder="公开访问" size="small" type="password" @update:value="emit('update:password', $event)">
+          <Input :value="password" placeholder="公开访问" type="password" @update:value="emit('update:password', $event)">
             <template #prefix>
               <IconifyIcon icon="lucide:lock" style="font-size: var(--ict-body-small); color: var(--ict-text-disabled);" />
             </template>
@@ -68,6 +68,10 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.link-switch {
+  margin-left: auto;
 }
 
 .link-config {

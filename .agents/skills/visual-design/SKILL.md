@@ -254,7 +254,44 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ---
 
-### 3.3 Checkbox 多选框
+### 3.3 危险按钮（Danger Button）
+
+危险按钮用于执行不可逆的危险操作（如彻底删除、清空回收站等），采用线框风格，使用语义危险色作为边框和文字色。
+
+#### 尺寸规格（与线框按钮完全一致）
+
+| 尺寸 | 高度 | gap | padding | icon | 文本 | border-radius |
+|------|------|-----|---------|------|------|---------------|
+| **大（Large）** | 32px | 8px (`--ict-space-2`) | 8px 16px | 16px | 14px / 400 (`--ict-body-medium`) | 8px (`--ict-radius-md`) |
+| **小（Small）** | 24px | 4px (`--ict-space-1`) | 2px 8px | 14px | 12px / 400 (`--ict-body-small`) | 4px (`--ict-radius-sm`) |
+
+#### 状态定义（大 / 小共用）
+
+| 状态 | 背景色 | 文字色 | 边框 | 说明 |
+|------|--------|--------|------|------|
+| 默认 | `--ict-bg-card` | `--ict-danger` | 1px solid `--ict-danger` | 常规展示态 |
+| 悬浮（Hover） | `--ict-bg-card` | `--ict-danger-hover` | 1px solid `--ict-danger-hover` | 鼠标移入 |
+| 点击（Active / Press） | `--ict-bg-card` | `--ict-danger-active` | 1px solid `--ict-danger-active` | 鼠标按下 |
+| 禁用（Disabled） | `--ict-bg-page` | `--ict-danger-disabled` | 1px solid `--ict-danger-disabled` | 不可操作 |
+
+#### 版本定义
+
+| 版本 | 结构 | 适用场景 |
+|------|------|----------|
+| **纯文本** | 仅文字 | 按钮文字已足够表达含义 |
+| **图文** | icon + 文字，水平排列 | 需要图标增强识别度 |
+
+#### 使用规范
+
+1. 危险按钮应仅在需要强调操作风险时使用，同一页面内不宜超过 1 个。
+2. 危险按钮可与主按钮或线框按钮配合使用，但不可与另一个危险按钮并列出现。
+3. 禁用态危险按钮不响应点击，光标为 `not-allowed`。
+4. 图文版按钮 icon 与文本必须垂直居中对齐。
+5. 按钮宽度由内容撑开（`width: auto`），禁止固定宽度导致文字截断。
+
+---
+
+### 3.4 Checkbox 多选框
 
 #### 基础尺寸
 
@@ -295,7 +332,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ---
 
-### 3.4 概览卡片（OverviewCard）
+### 3.5 概览卡片（OverviewCard）
 
 用于页面顶部统计概览，展示关键指标数据。
 
@@ -343,3 +380,96 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 2. **DOM 顺序**：数值在上，标签在下，确保视觉重心在数据本身。
 3. **语义配色**：根据指标语义选择对应的状态色，如"有效"用 `success`，"外链"用 `primary`，"用户"用 `info`，"总数"用 `warning`。
 4. **容器样式**：卡片带 `1px solid var(--ict-border-light)` 边框和极浅阴影。
+
+---
+
+### 3.6 开关切换（SwitchToggle）
+
+全局统一的 Switch 开关组件，统一尺寸、配色与交互行为。
+
+#### 尺寸规格
+
+| 尺寸 | 轨道宽 | 轨道高 | 滑块直径 | 滑块阴影 |
+|------|--------|--------|----------|----------|
+| **默认（default）** | 36px | 20px | 16px | `0 2px 4px rgba(0,0,0,0.15)` |
+| **小（small）** | 26px | 16px | 12px | `0 2px 4px rgba(0,0,0,0.15)` |
+
+#### 状态定义
+
+| 状态 | 轨道背景色 | 滑块颜色 | 说明 |
+|------|-----------|---------|------|
+| 开启（checked） | `checkedColor`（默认 `--ict-primary`） | `#FFFFFF` | 带滑块阴影 |
+| 关闭（unchecked） | `uncheckedColor`（默认 `--ict-border`） | `#FFFFFF` | 带滑块阴影 |
+| 悬浮（hover） | 同当前状态，透明度 `0.85` | `#FFFFFF` | 轨道变暗 |
+| 禁用（disabled） | 同当前状态，透明度 `0.4` | `#FFFFFF` | 光标 `not-allowed` |
+
+#### 结构定义
+
+```vue
+<SwitchToggle
+  :checked="service.enabled"
+  checked-color="var(--ict-primary)"
+  unchecked-color="var(--ict-border)"
+  @update:checked="onToggle"
+/>
+```
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `checked` | `boolean` | — | 是否开启（v-model） |
+| `checkedColor` | `string` | `var(--ict-primary)` | 开启态轨道背景色 |
+| `uncheckedColor` | `string` | `var(--ict-border)` | 关闭态轨道背景色 |
+| `disabled` | `boolean` | `false` | 是否禁用 |
+| `size` | `'default' \| 'small'` | `'default'` | 开关尺寸 |
+
+#### 使用规范
+
+1. **语义配色**：服务启用场景使用 `primary`（`--ict-primary`），系统健康状态使用 `success`（`--ict-success`），警告类开关使用 `warning`（`--ict-warning`）。
+2. **尺寸选择**：卡片头部操作区使用默认尺寸（20px 高），表格行内紧凑场景使用 `small`（16px 高）。
+3. **禁用态**：禁用态开关不响应点击，且透明度降至 `0.4`。
+4. **禁止直接使用原生 Switch**：项目内所有 Switch 必须使用 `SwitchToggle` 组件，确保全局视觉一致。
+
+---
+
+### 3.7 全局标签（Tag）
+
+全局统一的 Tag 标签组件，用于展示状态、分类、标识等信息。
+
+#### 尺寸规格
+
+| 属性 | 值 | Token |
+|------|-----|-------|
+| 高度 | 20px | — |
+| 水平内边距 | 6px | — |
+| 圆角 | 4px | `--ict-radius-sm` |
+| 字号 | 12px / 400 | `--ict-body-small` |
+| line-height | 18px | — |
+
+#### 语义配色
+
+| 语义 | 文本色 | 背景色 |
+|------|--------|--------|
+| 默认（default） | `--ict-text-secondary` | `#F7F8FA` |
+| 危险（danger） | `--ict-danger` | `--ict-danger-light` |
+| 警告（warning） | `--ict-warning` | `--ict-warning-light` |
+| 成功（success） | `--ict-success` | `--ict-success-light` |
+| 主色（primary） | `--ict-primary` | `--ict-primary-light` |
+
+#### 结构定义
+
+```vue
+<Tag text="已启用" type="success" />
+<Tag text="删除中" type="danger" />
+```
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `text` | `string` | — | 标签文本 |
+| `type` | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger'` | `'default'` | 标签语义类型 |
+
+#### 使用规范
+
+1. **语义选择**：根据信息语义选择对应类型，禁止随意混用。
+2. **文本精简**：标签文本应尽量简短，不超过 4 个汉字。
+3. **禁止点击**：默认 Tag 为纯展示组件，不响应点击；如需可点击场景，应使用按钮组件替代。
+4. **组合使用**：多个 Tag 横向排列时，项与项之间间距为 `4px`。

@@ -174,7 +174,7 @@ watch(
     @mousedown="handleMouseDown"
     @click="handleAIFabClick"
   >
-    <div class="ai-fab-inner">🤖</div>
+    <img class="ai-fab-inner" src="/icons/AI%20assistant.gif" alt="AI助手" />
     <div class="ai-fab-pulse" />
   </div>
 </template>
@@ -208,7 +208,10 @@ watch(
 }
 
 .ai-fab-inner {
-  font-size: var(--ict-headline-medium);
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
   z-index: 2;
   pointer-events: none;
 }

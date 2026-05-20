@@ -101,7 +101,6 @@ function handleSave() {
           <div class="link-section-title">有效期</div>
           <Radio.Group
             v-model:value="form.expireType"
-            size="small"
             class="link-expire-radio"
           >
             <Radio.Button value="preset">预设</Radio.Button>
@@ -114,7 +113,6 @@ function handleSave() {
           >
             <Radio.Group
               v-model:value="form.expirePreset"
-              size="small"
             >
               <Radio.Button value="1">1天</Radio.Button>
               <Radio.Button value="7">7天</Radio.Button>

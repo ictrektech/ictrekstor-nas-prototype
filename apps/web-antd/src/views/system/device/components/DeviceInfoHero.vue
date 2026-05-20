@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { OverviewCard } from '#/components/ui-kit';
 import { Tag } from 'ant-design-vue';
-import { IconifyIcon } from '@vben/icons';
 
 const props = defineProps<{
   deviceName: string;
@@ -35,51 +35,11 @@ const copySerial = (serial: string) => {
     </div>
 
     <div class="device-info-chips">
-      <div class="info-chip">
-        <div class="chip-icon" style="background: var(--ict-primary-light);">
-          <IconifyIcon icon="lucide:cpu" style="font-size: var(--ict-title-medium); color: var(--ict-primary);" />
-        </div>
-        <div class="chip-text">
-          <span class="chip-value">{{ cpuCores }} 核</span>
-          <span class="chip-label">CPU</span>
-        </div>
-      </div>
-      <div class="info-chip">
-        <div class="chip-icon" style="background: var(--ict-success-light);">
-          <IconifyIcon icon="lucide:memory-stick" style="font-size: var(--ict-title-medium); color: var(--ict-success);" />
-        </div>
-        <div class="chip-text">
-          <span class="chip-value">{{ memorySize }}</span>
-          <span class="chip-label">内存</span>
-        </div>
-      </div>
-      <div class="info-chip">
-        <div class="chip-icon" style="background: var(--ict-warning-light);">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-title-medium); color: var(--ict-warning);" />
-        </div>
-        <div class="chip-text">
-          <span class="chip-value">{{ diskCount }} 块</span>
-          <span class="chip-label">硬盘</span>
-        </div>
-      </div>
-      <div class="info-chip">
-        <div class="chip-icon" style="background: var(--ict-info-light);">
-          <IconifyIcon icon="lucide:fingerprint" style="font-size: var(--ict-title-medium); color: var(--ict-info);" />
-        </div>
-        <div class="chip-text">
-          <span class="chip-value mono">{{ deviceId }}</span>
-          <span class="chip-label">设备ID</span>
-        </div>
-      </div>
-      <div class="info-chip">
-        <div class="chip-icon" style="background: var(--ict-danger-light);">
-          <IconifyIcon icon="lucide:globe" style="font-size: var(--ict-title-medium); color: #eb2f96;" />
-        </div>
-        <div class="chip-text">
-          <span class="chip-value chip-link">{{ remoteAccess }}</span>
-          <span class="chip-label">远程连接</span>
-        </div>
-      </div>
+      <OverviewCard icon="lucide:cpu" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="CPU" :value="cpuCores + ' 核'" />
+      <OverviewCard icon="lucide:memory-stick" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="内存" :value="memorySize" />
+      <OverviewCard icon="lucide:hard-drive" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="硬盘" :value="diskCount + ' 块'" />
+      <OverviewCard icon="lucide:fingerprint" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="设备ID" :value="deviceId" />
+      <OverviewCard icon="lucide:globe" icon-color="#eb2f96" icon-bg="var(--ict-danger-light)" label="远程连接" :value="remoteAccess" />
     </div>
   </div>
 </template>
@@ -106,16 +66,4 @@ const copySerial = (serial: string) => {
 .device-name { font-size: var(--ict-title-large); font-weight: 700; color: var(--ict-text-emphasis); margin: 0; }
 .device-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .device-info-chips { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.info-chip {
-  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-  background: var(--ict-bg-card); border-radius: 10px; border: 1px solid var(--ict-border-light);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: all 0.3s;
-}
-.info-chip:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
-.chip-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.chip-text { display: flex; flex-direction: column; gap: 0px; }
-.chip-value { font-size: var(--ict-mark-medium); font-weight: 600; color: var(--ict-text-emphasis); font-family: var(--ict-font-family); }
-.chip-value.mono { font-size: var(--ict-body-small); }
-.chip-label { font-size: var(--ict-mark-small); color: var(--ict-text-secondary); }
-.chip-link { font-size: var(--ict-body-small); color: var(--ict-primary); font-weight: 500; }
 </style>
