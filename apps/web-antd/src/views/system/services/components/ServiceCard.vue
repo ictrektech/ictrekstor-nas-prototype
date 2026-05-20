@@ -1,8 +1,12 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { SwitchToggle } from '#/components/ui-kit';
-import { Button, Tag } from 'ant-design-vue';
+import { useUserStore } from '@vben/stores';
+import { SwitchToggle, Tag } from '#/components/ui-kit';
+import { Button } from 'ant-design-vue';
+import { computed } from 'vue';
 import type { ServiceData } from '../types';
+
+const userStore = useUserStore();
 
 const props = defineProps<{
   service: ServiceData;
@@ -12,7 +16,7 @@ const emit = defineEmits<{
   (e: 'toggle', id: string, enabled: boolean): void;
   (e: 'guide', s: ServiceData): void;
   (e: 'configure', s: ServiceData): void;
-  (e: 'copy', url: string): void;
+  (e: 'copy', text: string): void;
 }>();
 
 function onToggle(checked: boolean) {
@@ -20,11 +24,36 @@ function onToggle(checked: boolean) {
 }
 
 /** 状态标签配置 */
-const statusConfig: Record<string, { color: string; text: string }> = {
-  running: { color: 'success', text: '运行中' },
-  stopped: { color: 'default', text: '已停止' },
-  error: { color: 'error', text: '异常' },
+const statusConfig: Record<string, { type: string; text: string }> = {
+  running: { type: 'success', text: '运行中' },
+  stopped: { type: 'default', text: '已停止' },
+  error: { type: 'danger', text: '异常' },
 };
+
+// ===== 连接方式数据 =====
+const ipAddress = computed(() => {
+  const url = props.service.url || '';
+  // 从 \\192.168.1.100\share 格式中提取 IP 地址
+  const match = url.match(/\\(.+?)(\\|$)/);
+  return match ? match[1] : '';
+});
+
+const macUrl = computed(() => `smb://${ipAddress.value}`);
+const windowsUrl = computed(() => `\\\\${ipAddress.value}`);
+
+const port = computed(() => {
+  const item = props.service.quickInfo?.find((q) => q.label === '端口');
+  return item?.value || '445';
+});
+
+const hostname = computed(() => {
+  return (props.service.config as any)?.serverName || 'NAS';
+});
+
+/** 当前登录用户名（用于 SMB 连接） */
+const username = computed(() => userStore.userInfo?.username || 'admin');
+/** 密码（MOCK：SMB 连接密码与系统密码一致） */
+const password = computed(() => 'admin123');
 </script>
 
 <template>
@@ -43,12 +72,10 @@ const statusConfig: Record<string, { color: string; text: string }> = {
               : 'var(--ict-border-light)',
           }"
         >
-          <IconifyIcon
-            :icon="service.icon"
-            class="service-icon"
-            :style="{
-              color: service.enabled ? service.iconColor : 'var(--ict-text-disabled)',
-            }"
+          <img
+            src="/icons/smb.png"
+            class="service-icon-img"
+            alt="SMB"
           />
         </div>
         <div class="service-meta">
@@ -56,76 +83,87 @@ const statusConfig: Record<string, { color: string; text: string }> = {
             {{ service.name }}
             <Tag
               class="status-tag"
-              :color="statusConfig[service.status]?.color"
-            >
-              {{ statusConfig[service.status]?.text }}
-            </Tag>
+              :type="statusConfig[service.status]?.type"
+              :text="statusConfig[service.status]?.text"
+            />
           </div>
           <div class="service-desc">{{ service.description }}</div>
         </div>
       </div>
       <div class="header-actions">
-        <Button
-          v-if="service.enabled"
-          size="small"
-          @click="emit('guide', service)"
-        >
-          <IconifyIcon icon="lucide:book-open" :style="{ fontSize: '14px' }" />
-          使用指南
-        </Button>
-        <Button
-          v-if="service.enabled"
-          size="small"
-          type="primary"
-          @click="emit('configure', service)"
-        >
-          <IconifyIcon icon="lucide:settings-2" :style="{ fontSize: '14px' }" />
-          配置
-        </Button>
         <SwitchToggle :checked="service.enabled" checked-color="var(--ict-primary)" unchecked-color="var(--ict-border)" @update:checked="onToggle" />
       </div>
     </div>
 
     <!-- 启用状态内容 -->
     <div v-if="service.enabled" class="card-body">
-      <!-- 访问地址 -->
-      <div v-if="service.url" class="info-section url-section">
-        <div class="section-label">
-          <IconifyIcon
-            icon="lucide:link"
-            :style="{ fontSize: '13px', color: 'var(--ict-success)' }"
-          />
-          访问地址
+      <!-- 连接方式 -->
+      <div class="connection-section">
+        <div class="connection-title">连接方式</div>
+        <div class="connection-cards">
+          <!-- Mac -->
+          <div class="connection-card">
+            <div class="connection-label">Mac</div>
+            <div class="connection-steps">
+              <span class="step">1. 访达</span>
+              <IconifyIcon icon="lucide:chevrons-right" class="step-arrow" />
+              <span class="step">2. 前往</span>
+              <IconifyIcon icon="lucide:chevrons-right" class="step-arrow" />
+              <span class="step">3. 连接服务器</span>
+            </div>
+            <div class="connection-url-bar">
+              <span class="connection-url">{{ macUrl }}</span>
+              <Button
+                size="small"
+                class="copy-btn"
+                type="link"
+                @click="emit('copy', macUrl)"
+              >
+                <IconifyIcon icon="lucide:copy" :style="{ fontSize: '14px' }" />
+              </Button>
+            </div>
+          </div>
+          <!-- Windows -->
+          <div class="connection-card">
+            <div class="connection-label">Windows</div>
+            <div class="connection-steps">
+              <span class="step">1. 文件</span>
+              <IconifyIcon icon="lucide:chevrons-right" class="step-arrow" />
+              <span class="step">2. 地址栏输入</span>
+            </div>
+            <div class="connection-url-bar">
+              <span class="connection-url">{{ windowsUrl }}</span>
+              <Button
+                size="small"
+                class="copy-btn"
+                type="link"
+                @click="emit('copy', windowsUrl)"
+              >
+                <IconifyIcon icon="lucide:copy" :style="{ fontSize: '14px' }" />
+              </Button>
+            </div>
+          </div>
         </div>
-        <div class="url-bar">
-          <input class="url-input" readonly :value="service.url" />
-          <Button
-            size="small"
-            class="copy-btn"
-            type="link"
-            @click="emit('copy', service.url!)"
-          >
-            <IconifyIcon icon="lucide:copy" :style="{ fontSize: '13px' }" />
-          </Button>
-        </div>
-      </div>
-      <!-- 快速信息 -->
-      <div class="info-section quick-info-section">
-        <div class="section-label">
-          <IconifyIcon
-            icon="lucide:info"
-            :style="{ fontSize: '13px', color: 'var(--ict-primary)' }"
-          />
-          配置信息
-        </div>
-        <div class="quick-info-list">
-          <div
-            v-for="item in service.quickInfo"
-            :key="item.label"
-            class="quick-info-item"
-          >
-            <span class="quick-info-label">{{ item.label }}:</span>
-            <span class="quick-info-value">{{ item.value }}</span>
+        <!-- 账号信息 -->
+        <div class="other-connection-title">账号信息</div>
+        <div class="other-connection-card">
+          <div class="other-connection-grid">
+            <div class="other-connection-item">
+              <span class="other-connection-label">用户名</span>
+              <span class="other-connection-value">{{ username }}</span>
+            </div>
+            <div class="other-connection-item">
+              <span class="other-connection-label">密码</span>
+              <span class="other-connection-value">{{ password }}</span>
+              <Button
+                size="small"
+                class="copy-btn"
+                type="link"
+                @click="emit('copy', password)"
+              >
+                <IconifyIcon icon="lucide:copy" :style="{ fontSize: '14px' }" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -141,16 +179,15 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 <style scoped>
 .service-card {
   background: var(--ict-bg-card);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--ict-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .service-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border-color: var(--ict-text-disabled);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--ict-primary);
   transform: translateY(-2px);
 }
 
@@ -176,7 +213,6 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   padding: 14px 20px;
   gap: 12px;
   border-bottom: 1px solid var(--ict-border-light);
-  background: var(--ict-bg-section);
 }
 
 .header-actions {
@@ -194,20 +230,15 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   min-width: 0;
 }
 
-.service-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background 0.3s ease;
-}
-
 .service-icon {
   font-size: var(--ict-headline-small);
   transition: color 0.3s ease;
+}
+
+.service-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .service-meta {
@@ -219,7 +250,7 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 .service-name {
-  font-size: var(--ict-title-small);
+  font-size: var(--ict-title-medium);
   font-weight: 600;
   color: var(--ict-text-emphasis);
   display: flex;
@@ -228,13 +259,9 @@ const statusConfig: Record<string, { color: string; text: string }> = {
   flex-wrap: wrap;
 }
 
-.status-tag {
-  font-size: var(--ict-mark-small);
-  font-weight: 500;
-}
 
 .service-desc {
-  font-size: var(--ict-body-small);
+  font-size: var(--ict-body-medium);
   color: var(--ict-text-secondary);
   line-height: 1.4;
 }
@@ -242,94 +269,124 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 .card-body {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
   padding: 14px 20px;
   flex-wrap: wrap;
 }
 
-.info-section {
-  flex-shrink: 0;
+/* 连接方式区域 */
+.connection-section {
+  width: 100%;
 }
 
-.url-section {
-  width: 320px;
-}
-
-.section-label {
-  font-size: var(--ict-mark-small);
+.connection-title {
+  font-size: var(--ict-title-small);
   font-weight: 600;
+  color: var(--ict-text-emphasis);
+  margin-bottom: 12px;
+}
+
+.connection-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.connection-card {
+  background: var(--ict-bg-page);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.connection-label {
+  font-size: var(--ict-body-medium);
+  color: var(--ict-text-emphasis);
+  margin-bottom: 8px;
+}
+
+.connection-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.step {
+  font-size: var(--ict-body-small);
   color: var(--ict-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
-.url-bar {
+.step-arrow {
+  font-size: 16px;
+  color: var(--ict-primary);
+}
+
+.connection-url-bar {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: var(--ict-success-light);
-  border: 1px solid var(--ict-success-disabled);
+  background: var(--ict-bg-card);
+  border: 1px solid var(--ict-border);
   border-radius: 8px;
-  padding: 6px 10px;
+  padding: 8px 12px;
 }
 
-.url-input {
+.connection-url {
   flex: 1;
   font-family: var(--ict-font-family);
-  font-size: var(--ict-mark-medium);
-  color: var(--ict-success-active);
-  background: transparent;
-  border: none;
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-emphasis);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .copy-btn {
-  color: var(--ict-success);
+  color: var(--ict-text-secondary);
   padding: 2px 6px;
   height: auto;
   flex-shrink: 0;
 }
 
 .copy-btn:hover {
-  color: var(--ict-success-active);
-  background: #d9f7be;
+  color: var(--ict-primary);
+  background: var(--ict-primary-light);
 }
 
-.quick-info-section {
-  flex: 1;
-  min-width: 240px;
+/* 其他连接方式 */
+.other-connection-card {
+  background: var(--ict-bg-page);
+  border-radius: 12px;
+  padding: 16px 20px;
 }
 
-.quick-info-list {
+.other-connection-title {
+  font-size: var(--ict-body-medium);
+  font-weight: 600;
+  color: var(--ict-text-emphasis);
+  margin-bottom: 12px;
+}
+
+.other-connection-grid {
   display: flex;
+  gap: 24px;
   flex-wrap: wrap;
-  gap: 6px;
 }
 
-.quick-info-item {
+.other-connection-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  background: var(--ict-bg-page);
-  border: 1px solid var(--ict-border);
-  border-radius: 6px;
+  gap: 8px;
+}
+
+.other-connection-label {
   font-size: var(--ict-body-small);
-  flex-shrink: 0;
-}
-
-.quick-info-label {
   color: var(--ict-text-secondary);
-  flex-shrink: 0;
 }
 
-.quick-info-value {
+.other-connection-value {
+  font-size: var(--ict-body-small);
   color: var(--ict-text-emphasis);
   font-weight: 500;
   font-family: var(--ict-font-family);
@@ -349,12 +406,12 @@ const statusConfig: Record<string, { color: string; text: string }> = {
 }
 
 @media (max-width: 768px) {
-  .card-body {
-    flex-direction: column;
+  .connection-cards {
+    grid-template-columns: 1fr;
   }
-  .url-section,
-  .quick-info-section {
-    width: 100%;
+  .other-connection-grid {
+    flex-direction: column;
+    gap: 8px;
   }
 }
 </style>

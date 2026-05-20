@@ -35,8 +35,8 @@ const typeMap: Record<string, { color: string; bg: string }> = {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 20px;
-  padding: 0 6px;
+  height: 24px;
+  padding: 0 8px;
   border-radius: 4px;
   font-size: 12px;
   font-weight: 400;

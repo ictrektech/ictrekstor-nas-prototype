@@ -439,8 +439,8 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 | 属性 | 值 | Token |
 |------|-----|-------|
-| 高度 | 20px | — |
-| 水平内边距 | 6px | — |
+| 高度 | 24px | — |
+| 水平内边距 | 0px 8px | — |
 | 圆角 | 4px | `--ict-radius-sm` |
 | 字号 | 12px / 400 | `--ict-body-small` |
 | line-height | 18px | — |

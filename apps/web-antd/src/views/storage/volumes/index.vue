@@ -230,8 +230,6 @@ function handleDeleteVolume(vol: StorageVolume) {
         <VolumeOverview
           :pool-count="pools.length"
           :volume-count="overviewStats.total"
-          :total-cap="overviewStats.totalCap"
-          :total-used="overviewStats.totalUsed"
         />
       </template>
     </PageHeader>
