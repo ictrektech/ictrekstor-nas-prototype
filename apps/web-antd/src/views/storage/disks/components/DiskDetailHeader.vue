@@ -54,7 +54,6 @@ function getTempColor(temp?: number): string {
       <OverviewCard icon="lucide:database" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="容量" :value="disk.size" />
       <OverviewCard v-if="disk.temperature !== undefined" icon="lucide:thermometer" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="温度" :value="disk.temperature + '°C'" :value-color="getTempColor(disk.temperature)" />
       <OverviewCard v-if="disk.usedHours" icon="lucide:clock" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="使用时长" :value="formatHours(disk.usedHours)" />
-      <OverviewCard v-if="disk.partitions" icon="lucide:folder-open" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="分区数" :value="disk.partitions.length" />
     </div>
   </div>
 </template>
