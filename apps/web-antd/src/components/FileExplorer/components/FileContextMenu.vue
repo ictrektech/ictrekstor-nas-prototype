@@ -3,8 +3,8 @@ import { IconifyIcon } from '@vben/icons';
 import { Menu } from 'ant-design-vue';
 import type { FileItem } from '../types';
 
-interface Props { visible: boolean; x: number; y: number; file: FileItem | null; mode?: 'normal' | 'recycle' }
-withDefaults(defineProps<Props>(), { mode: 'normal' });
+interface Props { visible: boolean; x: number; y: number; file: FileItem | null; mode?: 'normal' | 'recycle'; showShare?: boolean }
+withDefaults(defineProps<Props>(), { mode: 'normal', showShare: true });
 const emit = defineEmits<{ 'update:visible': [v: boolean]; action: [action: string, file: FileItem] }>();
 function close() { emit('update:visible', false); }
 function handle(action: string) { if (!props.file) return; emit('action', action, props.file); close(); }
@@ -24,7 +24,7 @@ function handle(action: string) { if (!props.file) return; emit('action', action
             <Menu.Item key="open" @click="handle('open')"><span class="ctx-item"><IconifyIcon icon="lucide:folder-open" style="font-size:13px;" />打开</span></Menu.Item>
             <Menu.Item key="rename" @click="handle('rename')"><span class="ctx-item"><IconifyIcon icon="lucide:pencil" style="font-size:13px;" />重命名</span></Menu.Item>
             <Menu.Item key="download" @click="handle('download')"><span class="ctx-item"><IconifyIcon icon="lucide:download" style="font-size:13px;" />下载</span></Menu.Item>
-            <Menu.Item v-if="file.type === 'folder'" key="share" @click="handle('share')"><span class="ctx-item"><IconifyIcon icon="lucide:share-2" style="font-size:13px;" />分享</span></Menu.Item>
+            <Menu.Item v-if="showShare && file.type === 'folder'" key="share" @click="handle('share')"><span class="ctx-item"><IconifyIcon icon="lucide:share-2" style="font-size:13px;" />分享</span></Menu.Item>
             <Menu.Item key="copy" @click="handle('copy')"><span class="ctx-item"><IconifyIcon icon="lucide:copy" style="font-size:13px;" />复制</span></Menu.Item>
             <Menu.Item key="move" @click="handle('move')"><span class="ctx-item"><IconifyIcon icon="lucide:move" style="font-size:13px;" />移动</span></Menu.Item>
             <Menu.Divider />

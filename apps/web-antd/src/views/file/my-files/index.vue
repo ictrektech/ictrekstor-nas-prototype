@@ -8,8 +8,6 @@ import {
 } from '#/components/FileExplorer';
 import type { FileTreeNode, FileItem } from '#/components/FileExplorer';
 import { findParentKeys, findNodeInTree } from '#/components/FileExplorer';
-import { ShareConfigModal } from '#/components/ShareConfigModal';
-import type { ShareFormData } from '#/components/ShareConfigModal';
 import RenameModal from '#/components/common/RenameModal.vue';
 import FilePageHeader from './components/FilePageHeader.vue';
 import TargetDirModal from './components/TargetDirModal.vue';
@@ -45,22 +43,11 @@ const targetDirSelectedKeys = ref<string[]>([]);
 const targetDirExpandedKeys = ref<string[]>([]);
 const targetDirPendingFiles = ref<MyFileItem[]>([]);
 
-// 共享设置
-const shareModalVisible = ref(false);
-
 // 新建文件夹
 const newFolderModalVisible = ref(false);
 
 // 上传
 const uploadInputRef = ref<HTMLInputElement | null>(null);
-
-// 用户选项
-const userOptions = [
-  { label: 'zhangsan', value: 'zhangsan' },
-  { label: 'lisi', value: 'lisi' },
-  { label: 'wangwu', value: 'wangwu' },
-  { label: 'admin', value: 'admin' },
-];
 
 // 目标目录树数据
 const targetDirTreeData = computed<FileTreeNode[]>(() => buildTargetDirTree(treeData.value));
@@ -192,22 +179,6 @@ function handleBatchDelete(files: MyFileItem[]) {
   const idsToRemove = new Set(files.map((f) => f.id));
   currentFiles.value = currentFiles.value.filter((f) => !idsToRemove.has(f.id));
   selectedFileIds.value = [];
-}
-
-function openShareModal(file: MyFileItem) {
-  editingFile.value = file;
-  shareModalVisible.value = true;
-}
-
-function handleSaveShare(data: ShareFormData) {
-  if (!editingFile.value) return;
-  editingFile.value.isShared = true;
-  const names = data.shareUsers.map((u) => u.user).join('、') || '无';
-  const permissions = data.shareUsers.map((u) => (u.permission === 'readonly' ? '只读' : '读写'));
-  const permText =
-    permissions.length > 0 ? (new Set(permissions).size === 1 ? permissions[0] : permissions.join('、')) : '只读';
-  message.success(`已将「${editingFile.value.name}」分享给 ${names}，权限：${permText}`);
-  shareModalVisible.value = false;
 }
 
 // 复制/移动：目标目录弹窗
@@ -363,6 +334,7 @@ onMounted(() => {
         v-model:view-mode="viewMode"
         v-model:selected-file-ids="selectedFileIds"
         :show-new-folder="!isTrash"
+        :show-share="false"
         :empty-description="isTrash ? '回收站为空' : '暂无文件'"
         @breadcrumb-click="onBreadcrumbClick"
         @refresh="refresh"
@@ -370,7 +342,6 @@ onMounted(() => {
         @rename="openRenameModal"
         @delete-file="handleDeleteFile"
         @batch-delete="handleBatchDelete"
-        @share="openShareModal"
         @copy="handleCopyFile"
         @move="handleMoveFile"
         @batch-copy="handleBatchCopy"
@@ -385,16 +356,6 @@ onMounted(() => {
       v-model:visible="renameModalVisible"
       :name="renameFileName"
       @confirm="handleRename"
-    />
-
-    <!-- 分享弹窗 -->
-    <ShareConfigModal
-      v-model:visible="shareModalVisible"
-      :title="`分享 - ${editingFile?.name || ''}`"
-      :folder-name="editingFile?.name || ''"
-      confirm-text="确认分享"
-      :user-options="userOptions"
-      @ok="handleSaveShare"
     />
 
     <!-- 目标目录选择弹窗 -->

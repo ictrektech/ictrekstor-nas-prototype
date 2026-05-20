@@ -246,6 +246,7 @@ onMounted(() => {
         v-model:view-mode="viewMode"
         v-model:selected-file-ids="selectedFileIds"
         :show-new-folder="false"
+        :show-share="false"
         empty-description="暂无文件"
         @breadcrumb-click="onBreadcrumbClick"
         @refresh="refresh"

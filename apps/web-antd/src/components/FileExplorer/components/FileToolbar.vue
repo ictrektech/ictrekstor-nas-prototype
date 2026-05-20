@@ -15,6 +15,7 @@ interface Props {
   mode?: 'normal' | 'recycle';
   selectedFileIds?: string[];
   files: FileItem[];
+  showShare?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,6 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
   showNewFolder: true,
   mode: 'normal',
   selectedFileIds: () => [],
+  showShare: true,
 });
 
 const emit = defineEmits<{
@@ -67,7 +69,7 @@ const singleSelectedFile = computed(() => {
   return props.files.find((f) => props.selectedFileIds.includes(f.id)) || null;
 });
 
-const canShare = computed(() => singleSelectedFile.value?.type === 'folder');
+const canShare = computed(() => props.showShare && singleSelectedFile.value?.type === 'folder');
 
 // ─── 面包屑前进后退导航 ───
 const forwardStack = ref<BreadcrumbItem[]>([]);

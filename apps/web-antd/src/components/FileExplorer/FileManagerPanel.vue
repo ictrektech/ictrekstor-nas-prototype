@@ -23,6 +23,7 @@ interface Props {
   panelTitle?: string;
   mode?: 'normal' | 'recycle';
   selectedFileIds?: string[];
+  showShare?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -30,6 +31,7 @@ const props = withDefaults(defineProps<Props>(), {
   emptyDescription: '暂无文件', rootKey: 'root', draggable: false,
   dropZone: false, dragSourceKey: 'panel', dropHint: '释放以传输到此处',
   panelTitle: '', mode: 'normal', selectedFileIds: () => [],
+  showShare: true,
 });
 
 const emit = defineEmits<{
@@ -165,7 +167,7 @@ function onDrop(event: DragEvent) {
     @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop" @click="clearSelection">
     <FileToolbar :panel-title="panelTitle" :breadcrumb-path="breadcrumbPath" :search-text="searchText"
       :view-mode="viewMode" :show-new-folder="showNewFolder" :mode="mode" :selected-file-ids="selectedFileIds"
-      :files="sortedFiles" @update:search-text="$emit('update:searchText', $event)"
+      :show-share="showShare" :files="sortedFiles" @update:search-text="$emit('update:searchText', $event)"
       @update:view-mode="$emit('update:viewMode', $event)" @breadcrumb-click="$emit('breadcrumbClick', $event)"
       @refresh="$emit('refresh')" @new-folder="$emit('newFolder')" @upload="$emit('upload')"
       @select-all="selectAll" @clear-selection="clearSelection" @rename="$emit('rename', $event)"
@@ -193,7 +195,7 @@ function onDrop(event: DragEvent) {
     </div>
 
     <FileContextMenu v-model:visible="ctxVisible" :x="ctxPos.x" :y="ctxPos.y" :file="ctxFile" :mode="mode"
-      @action="onCtxAction" />
+      :show-share="showShare" @action="onCtxAction" />
   </div>
 </template>
 

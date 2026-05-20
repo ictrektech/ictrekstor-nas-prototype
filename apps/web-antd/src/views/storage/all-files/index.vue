@@ -340,6 +340,7 @@ onMounted(() => {
         v-model:search-text="searchText"
         v-model:view-mode="viewMode"
         v-model:selected-file-ids="selectedFileIds"
+        :show-share="false"
         @breadcrumb-click="onBreadcrumbClick"
         @refresh="refresh"
         @open-folder="handleOpenFolder"
