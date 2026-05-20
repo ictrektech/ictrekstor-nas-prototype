@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { OutlinedButton } from '#/components/ui-kit';
+import { DangerButton, OutlinedButton } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import { Button, Dropdown, Input, Menu, Radio, Tooltip } from 'ant-design-vue';
 import { computed, ref } from 'vue';
@@ -172,10 +172,7 @@ const handleGoForward = () => {
                 <IconifyIcon icon="lucide:rotate-ccw" style="font-size: var(--ict-body-small);" />
                 批量还原
               </Button>
-              <Button danger @click="emit('batchDelete')">
-                <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-body-small);" />
-                彻底删除
-              </Button>
+              <DangerButton icon="lucide:trash-2" text="彻底删除" @click="emit('batchDelete')" />
             </template>
             <template v-else>
               <Button v-if="isSingleSelection" @click="singleSelectedFile && emit('rename', singleSelectedFile)">

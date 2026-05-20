@@ -254,7 +254,44 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ---
 
-### 3.3 Checkbox 多选框
+### 3.3 危险按钮（Danger Button）
+
+危险按钮用于执行不可逆的危险操作（如彻底删除、清空回收站等），采用线框风格，使用语义危险色作为边框和文字色。
+
+#### 尺寸规格（与线框按钮完全一致）
+
+| 尺寸 | 高度 | gap | padding | icon | 文本 | border-radius |
+|------|------|-----|---------|------|------|---------------|
+| **大（Large）** | 32px | 8px (`--ict-space-2`) | 8px 16px | 16px | 14px / 400 (`--ict-body-medium`) | 8px (`--ict-radius-md`) |
+| **小（Small）** | 24px | 4px (`--ict-space-1`) | 2px 8px | 14px | 12px / 400 (`--ict-body-small`) | 4px (`--ict-radius-sm`) |
+
+#### 状态定义（大 / 小共用）
+
+| 状态 | 背景色 | 文字色 | 边框 | 说明 |
+|------|--------|--------|------|------|
+| 默认 | `--ict-bg-card` | `--ict-danger` | 1px solid `--ict-danger` | 常规展示态 |
+| 悬浮（Hover） | `--ict-bg-card` | `--ict-danger-hover` | 1px solid `--ict-danger-hover` | 鼠标移入 |
+| 点击（Active / Press） | `--ict-bg-card` | `--ict-danger-active` | 1px solid `--ict-danger-active` | 鼠标按下 |
+| 禁用（Disabled） | `--ict-bg-page` | `--ict-danger-disabled` | 1px solid `--ict-danger-disabled` | 不可操作 |
+
+#### 版本定义
+
+| 版本 | 结构 | 适用场景 |
+|------|------|----------|
+| **纯文本** | 仅文字 | 按钮文字已足够表达含义 |
+| **图文** | icon + 文字，水平排列 | 需要图标增强识别度 |
+
+#### 使用规范
+
+1. 危险按钮应仅在需要强调操作风险时使用，同一页面内不宜超过 1 个。
+2. 危险按钮可与主按钮或线框按钮配合使用，但不可与另一个危险按钮并列出现。
+3. 禁用态危险按钮不响应点击，光标为 `not-allowed`。
+4. 图文版按钮 icon 与文本必须垂直居中对齐。
+5. 按钮宽度由内容撑开（`width: auto`），禁止固定宽度导致文字截断。
+
+---
+
+### 3.4 Checkbox 多选框
 
 #### 基础尺寸
 
@@ -295,7 +332,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ---
 
-### 3.4 概览卡片（OverviewCard）
+### 3.5 概览卡片（OverviewCard）
 
 用于页面顶部统计概览，展示关键指标数据。
 
@@ -346,7 +383,7 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ---
 
-### 3.5 开关切换（SwitchToggle）
+### 3.6 开关切换（SwitchToggle）
 
 全局统一的 Switch 开关组件，统一尺寸、配色与交互行为。
 

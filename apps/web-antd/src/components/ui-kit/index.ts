@@ -11,3 +11,4 @@ export { default as InfoChip } from './InfoChip.vue';
 export { default as OutlinedButton } from './OutlinedButton.vue';
 export { default as OverviewCard } from './OverviewCard.vue';
 export { default as SwitchToggle } from './SwitchToggle.vue';
+export { default as DangerButton } from './DangerButton.vue';
