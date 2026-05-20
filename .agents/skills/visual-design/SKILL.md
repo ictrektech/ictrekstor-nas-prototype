@@ -428,3 +428,48 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 2. **尺寸选择**：卡片头部操作区使用默认尺寸（20px 高），表格行内紧凑场景使用 `small`（16px 高）。
 3. **禁用态**：禁用态开关不响应点击，且透明度降至 `0.4`。
 4. **禁止直接使用原生 Switch**：项目内所有 Switch 必须使用 `SwitchToggle` 组件，确保全局视觉一致。
+
+---
+
+### 3.7 全局标签（Tag）
+
+全局统一的 Tag 标签组件，用于展示状态、分类、标识等信息。
+
+#### 尺寸规格
+
+| 属性 | 值 | Token |
+|------|-----|-------|
+| 高度 | 20px | — |
+| 水平内边距 | 6px | — |
+| 圆角 | 4px | `--ict-radius-sm` |
+| 字号 | 12px / 400 | `--ict-body-small` |
+| line-height | 18px | — |
+
+#### 语义配色
+
+| 语义 | 文本色 | 背景色 |
+|------|--------|--------|
+| 默认（default） | `--ict-text-secondary` | `#F7F8FA` |
+| 危险（danger） | `--ict-danger` | `--ict-danger-light` |
+| 警告（warning） | `--ict-warning` | `--ict-warning-light` |
+| 成功（success） | `--ict-success` | `--ict-success-light` |
+| 主色（primary） | `--ict-primary` | `--ict-primary-light` |
+
+#### 结构定义
+
+```vue
+<Tag text="已启用" type="success" />
+<Tag text="删除中" type="danger" />
+```
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `text` | `string` | — | 标签文本 |
+| `type` | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger'` | `'default'` | 标签语义类型 |
+
+#### 使用规范
+
+1. **语义选择**：根据信息语义选择对应类型，禁止随意混用。
+2. **文本精简**：标签文本应尽量简短，不超过 4 个汉字。
+3. **禁止点击**：默认 Tag 为纯展示组件，不响应点击；如需可点击场景，应使用按钮组件替代。
+4. **组合使用**：多个 Tag 横向排列时，项与项之间间距为 `4px`。
