@@ -370,27 +370,25 @@ function handleDeleteVolume(vol: StorageVolume) {
 /* 外层大卡片：存储池包裹 */
 .pool-wrapper-card {
   background: var(--ict-bg-card);
-  border-radius: 12px;
-  border: 1px solid var(--ict-text-disabled);
+  border-radius: 10px;
+  border: 1px solid var(--ict-border);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .pool-wrapper-card:hover {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-  border-color: #b7b7b7;
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--ict-primary);
+  transform: translateY(-2px);
 }
 
 .directory-wrapper {
-  border-color: var(--ict-success-disabled);
-  box-shadow: 0 2px 10px rgba(82, 196, 26, 0.06);
+  border-color: var(--ict-border);
 }
 
 .directory-wrapper:hover {
-  border-color: #73d13d;
-  box-shadow: 0 6px 24px rgba(82, 196, 26, 0.12);
+  border-color: var(--ict-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 /* 目录头部 */
