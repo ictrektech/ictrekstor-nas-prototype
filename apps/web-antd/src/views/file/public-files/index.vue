@@ -184,7 +184,7 @@ const overviewStats = computed(() => {
   return { folders, files: fileCount };
 });
 
-/** 当前选中的公共文件夹所属存储池 */
+/** 当前选中的公共文件夹所属存储空间 */
 const currentStoragePool = computed(() => {
   const key = selectedKeys.value[0];
   if (!key) return null;
@@ -336,12 +336,6 @@ onMounted(() => {
         </div>
       </div>
       <div class="page-header-right">
-        <!-- 存储池状态显示 -->
-        <div v-if="currentStoragePool" class="pool-badge">
-          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
-          <span class="pool-badge-label">所属存储池</span>
-          <span class="pool-badge-value">{{ currentStoragePool }}</span>
-        </div>
         <OverviewCard icon="lucide:folder-open" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="公共文件夹" :value="overviewStats.folders" />
       </div>
     </div>
@@ -360,16 +354,16 @@ onMounted(() => {
         layout="vertical"
         :rules="{
           name: [{ required: true, message: '请输入文件夹名称', trigger: 'blur' }],
-          storagePool: [{ required: true, message: '请选择存储池', trigger: 'change' }],
+          storagePool: [{ required: true, message: '请选择存储空间', trigger: 'change' }],
         }"
       >
         <Form.Item label="文件夹名称" name="name">
           <Input v-model:value="createForm.name" placeholder="如：公司文档" />
         </Form.Item>
-        <Form.Item label="所属存储池" name="storagePool">
+        <Form.Item label="所属存储空间" name="storagePool">
           <Select
             v-model:value="createForm.storagePool"
-            placeholder="请选择存储池"
+            placeholder="请选择存储空间"
             :options="poolOptions"
           />
         </Form.Item>
@@ -388,28 +382,38 @@ onMounted(() => {
       />
 
       <!-- 右侧文件区域 -->
-      <FileManagerPanel
-        :files="currentFiles"
-        :breadcrumb-path="breadcrumbPath"
-        :loading="loading"
-        v-model:search-text="searchText"
-        v-model:view-mode="viewMode"
-        v-model:selected-file-ids="selectedFileIds"
-        :show-new-folder="false"
-        empty-description="暂无文件"
-        @breadcrumb-click="onBreadcrumbClick"
-        @refresh="refresh"
-        @open-folder="handleOpenFolder"
-      >
-        <template #action-cell="{ file }">
-          <div class="custom-actions">
-            <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
-              <IconifyIcon icon="lucide:download" style="font-size: var(--ict-mark-medium);" />
-              下载
-            </Button>
-          </div>
-        </template>
-      </FileManagerPanel>
+      <div class="fm-right-panel">
+        <!-- 存储空间信息条 -->
+        <div v-if="currentStoragePool" class="storage-info-bar">
+          <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
+          <span class="storage-info-label">所属存储空间</span>
+          <span class="storage-info-value">{{ currentStoragePool }}</span>
+        </div>
+
+        <FileManagerPanel
+          class="fm-panel"
+          :files="currentFiles"
+          :breadcrumb-path="breadcrumbPath"
+          :loading="loading"
+          v-model:search-text="searchText"
+          v-model:view-mode="viewMode"
+          v-model:selected-file-ids="selectedFileIds"
+          :show-new-folder="false"
+          empty-description="暂无文件"
+          @breadcrumb-click="onBreadcrumbClick"
+          @refresh="refresh"
+          @open-folder="handleOpenFolder"
+        >
+          <template #action-cell="{ file }">
+            <div class="custom-actions">
+              <Button size="small" type="link" class="action-link" @click="handleDownload(file)">
+                <IconifyIcon icon="lucide:download" style="font-size: var(--ict-mark-medium);" />
+                下载
+              </Button>
+            </div>
+          </template>
+        </FileManagerPanel>
+      </div>
     </div>
   </div>
 </template>
@@ -478,27 +482,38 @@ onMounted(() => {
 }
 
 
-/* 存储池徽章 */
-.pool-badge {
+/* 右侧文件面板 */
+.fm-right-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.fm-panel {
+  flex: 1;
+}
+
+/* 存储空间信息条 */
+.storage-info-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 8px;
+  padding: 14px 20px;
   background: var(--ict-primary-light);
-  border: 1px solid var(--ict-primary-disabled);
-  border-radius: 8px;
+  border-bottom: 1px solid var(--ict-border-light);
+  flex-shrink: 0;
 }
 
-.pool-badge-label {
-  font-size: var(--ict-mark-small);
-  color: var(--ict-primary);
-  font-weight: 500;
+.storage-info-label {
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
 }
 
-.pool-badge-value {
-  font-size: var(--ict-mark-medium);
+.storage-info-value {
+  font-size: var(--ict-body-small);
   font-weight: 600;
-  color: #0958d9;
+  color: var(--ict-primary);
 }
 
 /* 创建按钮 */
