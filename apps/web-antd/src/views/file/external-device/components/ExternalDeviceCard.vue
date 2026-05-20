@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { Button, Tag, Progress } from 'ant-design-vue';
+import { Tag } from '#/components/ui-kit';
+import { Button, Progress } from 'ant-design-vue';
 
 export interface ExternalDevice {
   id: string;
@@ -21,6 +22,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'manage', device: ExternalDevice): void;
   (e: 'eject', device: ExternalDevice): void;
+  (e: 'mount', device: ExternalDevice): void;
 }>();
 
 function getDeviceTypeLabel(type: string): string {
@@ -38,12 +40,8 @@ function getDeviceTypeLabel(type: string): string {
   }
 }
 
-function getStatusColor(status: string): string {
-  return status === 'connected' ? 'success' : 'default';
-}
-
 function getStatusLabel(status: string): string {
-  return status === 'connected' ? '已连接' : '未连接';
+  return status === 'connected' ? '已挂载' : '未挂载';
 }
 
 function getCapacityColor(percent: number): string {
@@ -65,6 +63,10 @@ function onManage() {
 function onEject() {
   emit('eject', props.device);
 }
+
+function onMount() {
+  emit('mount', props.device);
+}
 </script>
 
 <template>
@@ -77,13 +79,7 @@ function onEject() {
       <div class="device-header-info">
         <div class="device-name-row">
           <span class="device-name">{{ device.name }}</span>
-          <Tag :color="getStatusColor(device.status)" size="small">
-            <span
-              class="status-dot"
-              :style="{ background: device.status === 'connected' ? 'var(--ict-success)' : 'var(--ict-text-disabled)' }"
-            />
-            {{ getStatusLabel(device.status) }}
-          </Tag>
+          <Tag :text="getStatusLabel(device.status)" :type="device.status === 'connected' ? 'success' : 'default'" />
         </div>
         <div class="device-subtitle">
           {{ getDeviceTypeLabel(device.type) }} · {{ device.fileSystem }}
@@ -97,7 +93,7 @@ function onEject() {
         :percent="device.usedPercent"
         :stroke-color="getCapacityColor(device.usedPercent)"
         :show-info="false"
-        :stroke-width="6"
+        :stroke-width="8"
         size="small"
       />
       <div class="capacity-summary">
@@ -110,28 +106,35 @@ function onEject() {
       </div>
     </div>
     <div v-else class="info-capacity-disconnected">
-      <span class="disconnected-hint">设备未连接</span>
+      <span class="disconnected-hint">设备未挂载</span>
     </div>
 
     <!-- 操作按钮 -->
     <div class="device-actions">
-      <Button
-        type="primary"
-        size="small"
-        class="action-btn-primary"
-        :disabled="device.status !== 'connected'"
-        @click="onManage"
-      >
-        浏览文件
-      </Button>
-      <Button
-        size="small"
-        class="action-btn-secondary"
-        :disabled="device.status !== 'connected'"
-        @click="onEject"
-      >
-        安全弹出
-      </Button>
+      <template v-if="device.status === 'connected'">
+        <Button
+          type="primary"
+          class="action-btn-primary"
+          @click="onManage"
+        >
+          浏览文件
+        </Button>
+        <Button
+          class="action-btn-secondary"
+          @click="onEject"
+        >
+          安全弹出
+        </Button>
+      </template>
+      <template v-else>
+        <Button
+          type="primary"
+          class="action-btn-primary action-btn-full"
+          @click="onMount"
+        >
+          挂载
+        </Button>
+      </template>
     </div>
   </div>
 </template>
@@ -183,7 +186,8 @@ function onEject() {
 }
 
 .device-name {
-  font-size: var(--ict-title-small);
+  flex: auto;
+  font-size: var(--ict-title-medium);
   font-weight: 600;
   color: var(--ict-text-emphasis);
   white-space: nowrap;
@@ -191,16 +195,8 @@ function onEject() {
   text-overflow: ellipsis;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 4px;
-}
-
 .device-subtitle {
-  font-size: var(--ict-body-small);
+  font-size: var(--ict-body-medium);
   color: var(--ict-text-secondary);
 }
 
@@ -208,7 +204,15 @@ function onEject() {
 .info-capacity {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+}
+.info-capacity :deep(.ant-progress),
+.info-capacity :deep(.ant-progress-outer),
+.info-capacity :deep(.ant-progress-inner) {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
 }
 
 .capacity-summary {
@@ -257,11 +261,29 @@ function onEject() {
 
 .action-btn-primary {
   flex: 1;
-  border-radius: 6px;
+  height: 32px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-btn-secondary {
   flex: 1;
-  border-radius: 6px;
+  height: 32px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn-full {
+  flex: 1;
 }
 </style>

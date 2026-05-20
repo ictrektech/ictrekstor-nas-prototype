@@ -71,6 +71,14 @@ function ejectDevice(device: ExternalDevice) {
   if (device.status !== 'connected') return;
   // STUB: 安全弹出功能待实现
 }
+
+function mountDevice(device: ExternalDevice) {
+  // STUB: 挂载功能待实现
+  const idx = devices.value.findIndex((d) => d.id === device.id);
+  if (idx !== -1) {
+    devices.value[idx].status = 'connected';
+  }
+}
 </script>
 
 <template>
@@ -85,8 +93,8 @@ function ejectDevice(device: ExternalDevice) {
       </div>
       <div class="page-header-right">
         <OverviewCard icon="lucide:hard-drive" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="设备总数" :value="overviewStats.total" />
-        <OverviewCard icon="lucide:plug" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="已连接" :value="overviewStats.connected" />
-        <OverviewCard icon="lucide:unplug" icon-color="var(--ict-text-disabled)" icon-bg="var(--ict-bg-page)" label="未连接" :value="overviewStats.disconnected" />
+        <OverviewCard icon="lucide:plug" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="已挂载" :value="overviewStats.connected" />
+        <OverviewCard icon="lucide:unplug" icon-color="var(--ict-text-disabled)" icon-bg="var(--ict-bg-page)" label="未挂载" :value="overviewStats.disconnected" />
       </div>
     </div>
 
@@ -103,6 +111,7 @@ function ejectDevice(device: ExternalDevice) {
           :device="device"
           @manage="openDeviceFiles"
           @eject="ejectDevice"
+          @mount="mountDevice"
         />
       </Card>
     </div>
