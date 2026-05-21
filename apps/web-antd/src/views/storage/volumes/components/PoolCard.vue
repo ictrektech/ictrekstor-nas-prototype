@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { Button, Dropdown, Progress, Tag } from 'ant-design-vue';
+import { Button, Dropdown, Progress } from 'ant-design-vue';
 import { computed } from 'vue';
+import { Tag } from '#/components/ui-kit';
 
 import {
   getCapacityColor,
-  getPoolStatusDotColor,
   getUsagePercent,
 } from '../types';
 import type { StoragePool } from '../types';
@@ -23,7 +23,6 @@ const emit = defineEmits<{
   deletePool: [pool: StoragePool];
 }>();
 
-const poolStatusColor = computed(() => getPoolStatusDotColor(props.pool.status));
 const poolUsage = computed(() =>
   getUsagePercent(props.pool.usedCapacity, props.pool.totalCapacity),
 );
@@ -40,57 +39,48 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
       <div class="pool-header-body">
         <div class="ph-row ph-row-name">
           <span class="pool-name">{{ pool.name }}</span>
-          <Tag :color="pool.status === '正常' ? 'success' : 'error'" size="small">
-            <span class="status-dot" :style="{ background: poolStatusColor }" />
-            {{ pool.status }}
-          </Tag>
+          <Tag :type="pool.status === '正常' ? 'success' : 'danger'" :text="pool.status" />
         </div>
         <div class="ph-row ph-row-meta">
-          <span class="meta-chip">
-            <IconifyIcon icon="lucide:layers" style="font-size: var(--ict-mark-small);" />
-            {{ pool.raidType }}
-          </span>
-          <span class="meta-chip">
-            <IconifyIcon icon="lucide:hard-drive" style="font-size: var(--ict-mark-small);" />
-            {{ pool.diskCount }} 块硬盘
-          </span>
-          <span class="meta-chip">
-            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-mark-small);" />
-            {{ volumeCount || 0 }} 个存储空间
-          </span>
+          <span class="meta-item">{{ pool.raidType }}</span>
+          <span class="meta-sep">|</span>
+          <span class="meta-item">{{ pool.diskCount }} 块硬盘</span>
+          <span class="meta-sep">|</span>
+          <Tag :text="`${volumeCount || 0} 个存储空间`" type="default" />
+          <template v-if="pool.disks && pool.disks.length">
+            <span class="meta-sep">|</span>
+            <span class="meta-label">硬盘</span>
+            <span
+              v-for="disk in pool.disks"
+              :key="disk.deviceName"
+              class="disk-tag"
+              @click.stop="emit('clickDisk', disk.deviceName)"
+            >
+              {{ disk.deviceName }}
+            </span>
+          </template>
         </div>
-        <div v-if="pool.disks && pool.disks.length" class="ph-row ph-row-disks">
-          <span
-            v-for="disk in pool.disks"
-            :key="disk.deviceName"
-            class="disk-tag"
-            @click.stop="emit('clickDisk', disk.deviceName)"
-          >
-            {{ disk.deviceName }}
+        <div class="ph-row ph-row-capacity">
+          <span class="cap-used">{{ pool.usedCapacity }}</span>
+          <span class="cap-div">/</span>
+          <span class="cap-total">{{ pool.totalCapacity }}</span>
+          <Progress
+            :percent="poolUsage"
+            :stroke-color="poolCapColor"
+            :show-info="false"
+            :stroke-width="6"
+            size="small"
+            class="pool-cap-progress"
+          />
+          <span class="cap-percent" :style="{ color: poolCapColor }">
+            {{ poolUsage }}%
           </span>
         </div>
       </div>
     </div>
 
-    <!-- 右侧容量与操作面板 -->
+    <!-- 右侧操作面板 -->
     <div class="pool-header-panel">
-      <div class="ph-panel-capacity">
-        <span class="cap-used">{{ pool.usedCapacity }}</span>
-        <span class="cap-div">/</span>
-        <span class="cap-total">{{ pool.totalCapacity }}</span>
-        <span class="cap-percent" :style="{ color: poolCapColor }">
-          {{ poolUsage }}%
-        </span>
-      </div>
-      <div class="ph-panel-progress">
-        <Progress
-          :percent="poolUsage"
-          :stroke-color="poolCapColor"
-          :show-info="false"
-          :stroke-width="5"
-          size="small"
-        />
-      </div>
       <div class="ph-panel-actions">
         <Button size="small" class="detail-btn" @click.stop="emit('detail', pool.id)">
           <IconifyIcon icon="lucide:file-text" style="font-size: var(--ict-body-small);" />
@@ -115,7 +105,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
               <div class="menu-divider" />
               <div class="menu-item danger" @click.stop="emit('deletePool', pool)">
                 <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium); color: var(--ict-danger);" />
-                <span>删除</span>
+                <span style="color: var(--ict-danger);">删除</span>
               </div>
             </div>
           </template>
@@ -131,7 +121,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%);
+  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-primary-light) 100%);
   border-bottom: 1px solid #e6e6e6;
   transition: all 0.2s ease;
   gap: 24px;
@@ -188,34 +178,40 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   margin-right: 4px;
 }
 
-.ph-row-meta { gap: 6px; }
-
-.meta-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--ict-body-small);
+.ph-row-meta {
+  gap: 6px;
+  font-size: var(--ict-body-medium);
   color: var(--ict-text-secondary);
-  background: rgba(255, 255, 255, 0.7);
-  padding: 3px 10px;
-  border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.ph-row-disks { gap: 6px; }
+.meta-item {
+  white-space: nowrap;
+}
+
+.meta-sep {
+  color: var(--ict-border);
+  font-weight: 300;
+}
+
+.meta-label {
+  color: var(--ict-text-secondary);
+  white-space: nowrap;
+}
 
 .disk-tag {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  font-size: var(--ict-body-small);
+  font-size: var(--ict-body-medium);
   color: var(--ict-primary);
   background: rgba(22, 119, 255, 0.08);
-  padding: 3px 10px;
-  border-radius: 4px;
+  padding: 2px 10px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(22, 119, 255, 0.15);
+  line-height: 1.5;
 }
 
 .disk-tag:hover {
@@ -233,12 +229,28 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   flex-shrink: 0;
 }
 
-.ph-panel-capacity {
+.ph-row-capacity {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-size: var(--ict-body-medium);
-  white-space: nowrap;
+  flex-wrap: nowrap;
+}
+
+.pool-cap-progress {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+}
+
+.pool-cap-progress :deep(.ant-progress),
+.pool-cap-progress :deep(.ant-progress-outer),
+.pool-cap-progress :deep(.ant-progress-inner) {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
 }
 
 .cap-used {
@@ -257,15 +269,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
 .cap-percent {
   font-weight: 700;
   font-family: var(--ict-font-family);
-  margin-left: 6px;
-}
-
-.ph-panel-progress {
-  width: 140px;
-}
-
-.ph-panel-progress :deep(.ant-progress) {
-  margin-bottom: 0;
+  margin-left: auto;
 }
 
 .ph-panel-actions {

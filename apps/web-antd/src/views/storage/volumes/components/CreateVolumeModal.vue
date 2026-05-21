@@ -69,11 +69,11 @@ function handleCancel() {
   <Modal
     v-model:visible="props.visible"
     title="创建存储空间"
-    width="560"
+    width="560px"
     :confirm-loading="loading"
     @ok="handleOk"
     @cancel="handleCancel"
-    class="create-volume-modal"
+    class="create-volume-modal aa"
   >
     <template #title>
       <IconifyIcon icon="lucide:plus-circle" style="font-size: var(--ict-title-large); color: var(--ict-primary);" />

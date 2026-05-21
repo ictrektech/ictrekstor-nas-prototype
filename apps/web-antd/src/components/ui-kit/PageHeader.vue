@@ -30,7 +30,7 @@ export default { name: 'PageHeader' };
     :class="{ 'page-header-bordered': showBorder }"
   >
     <div class="page-header-left">
-      <PageIconBox :icon="icon" :color="iconColor" />
+      <!-- <PageIconBox :icon="icon" :color="iconColor" /> -->
       <div class="page-header-meta">
         <h1 class="page-title">{{ title }}</h1>
         <p v-if="description" class="page-desc">{{ description }}</p>
@@ -74,7 +74,7 @@ export default { name: 'PageHeader' };
 }
 
 .page-title {
-  font-size: var(--ict-text-xl);
+  font-size: var(--ict-title-medium);
   font-weight: 600;
   color: var(--ict-text-emphasis);
   margin: 0;

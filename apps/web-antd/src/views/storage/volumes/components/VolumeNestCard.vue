@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { IconifyIcon } from '@vben/icons';
-import { Button, Dropdown, Progress, Tag } from 'ant-design-vue';
+import { Button, Dropdown, Progress } from 'ant-design-vue';
 import { computed } from 'vue';
+import { Tag } from '#/components/ui-kit';
 
 import {
   getCapacityColor,
@@ -33,51 +34,39 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
       <div class="nest-icon-box">
         <IconifyIcon
           :icon="volume.sourceType === 'directory' ? 'lucide:folder' : 'lucide:box'"
-          style="font-size: var(--ict-title-medium);"
+          style="font-size: var(--ict-title-large);"
           :style="{ color: volume.sourceType === 'directory' ? 'var(--ict-success)' : 'var(--ict-primary)' }"
         />
       </div>
       <div class="nest-title-info">
         <div class="nest-name-row">
           <span class="nest-name">{{ volume.name }}</span>
-          <Tag :color="statusColor" size="small">
-            <span
-              class="status-dot"
-              :style="{ background: volume.status === '正常' ? 'var(--ict-success)' : 'var(--ict-text-secondary)' }"
-            />
-            {{ volume.status }}
-          </Tag>
+          <Tag :type="statusColor" :text="volume.status" />
         </div>
+        <span class="fs-tag">
+          {{ volume.filesystem }}
+        </span>
       </div>
     </div>
     <div class="nest-card-body">
       <div class="nest-capacity">
-        <div class="nest-capacity-top">
-          <span class="nest-capacity-text">
-            <span class="nest-used">{{ volume.usedCapacity }}</span>
-            <span class="nest-divider">/</span>
-            <span class="nest-total">{{ volume.totalCapacity }}</span>
-          </span>
-          <span
-            class="nest-percent"
-            :style="{ color: capColor }"
-          >
-            {{ percent }}%
-          </span>
-        </div>
         <Progress
           :percent="percent"
           :stroke-color="capColor"
           :show-info="false"
-          :stroke-width="5"
+          :stroke-width="8"
           size="small"
         />
+        <div class="capacity-summary">
+          <span class="cap-used">{{ volume.usedCapacity }}</span>
+          <span class="cap-div">/</span>
+          <span class="cap-total">{{ volume.totalCapacity }}</span>
+          <span class="cap-percent" :style="{ color: capColor }">
+            {{ percent }}%
+          </span>
+        </div>
       </div>
       <div class="nest-card-footer">
-        <span class="fs-tag">
-          <IconifyIcon :icon="fsIcon" style="font-size: var(--ict-mark-small); color: var(--ict-text-secondary);" />
-          {{ volume.filesystem }}
-        </span>
         <div class="nest-actions">
           <Button
             size="small"
@@ -102,7 +91,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
                 <div class="menu-divider" />
                 <div class="menu-item danger" @click="emit('deleteVolume', volume)">
                   <IconifyIcon icon="lucide:trash-2" style="font-size: var(--ict-mark-medium); color: var(--ict-danger);" />
-                  <span>删除</span>
+                  <span style="color: var(--ict-danger);">删除</span>
                 </div>
               </div>
             </template>
@@ -119,28 +108,30 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   border-radius: 10px;
   border: 1px solid var(--ict-border);
   overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .volume-nest-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   border-color: var(--ict-primary);
 }
 
 .nest-card-header {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--ict-border-light);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .nest-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--ict-primary-light);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -150,7 +141,9 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 .nest-title-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .nest-name-row {
@@ -160,24 +153,18 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 }
 
 .nest-name {
-  font-size: var(--ict-mark-medium);
-  font-weight: 700;
+  font-size: var(--ict-title-medium);
+  font-weight: 600;
   color: var(--ict-text-emphasis);
-}
-
-.status-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nest-card-body {
-  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 /* 容量 */
@@ -187,56 +174,54 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   gap: 4px;
 }
 
-.nest-capacity-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.nest-capacity :deep(.ant-progress),
+.nest-capacity :deep(.ant-progress-outer),
+.nest-capacity :deep(.ant-progress-inner) {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 0;
 }
 
-.nest-capacity-text {
+.capacity-summary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
+}
+
+.cap-used {
+  font-weight: 600;
   color: var(--ict-text-emphasis);
 }
 
-.nest-used {
-  font-weight: 700;
-  font-family: var(--ict-font-family);
-}
-
-.nest-divider {
+.cap-div {
   color: var(--ict-text-disabled);
-  margin: 0 2px;
 }
 
-.nest-total {
+.cap-total {
   color: var(--ict-text-secondary);
-  font-family: var(--ict-font-family);
 }
 
-.nest-percent {
-  font-size: var(--ict-body-small);
+.cap-percent {
+  margin-left: auto;
+  font-size: var(--ict-mark-medium);
   font-weight: 700;
   font-family: var(--ict-font-family);
 }
 
 /* 卡片底部操作区 */
 .nest-card-footer {
-  display: flex;
+  flex: auto;;
   align-items: center;
   justify-content: space-between;
-  padding-top: 8px;
+  padding-top: 12px;
   border-top: 1px solid var(--ict-border-light);
 }
 
 .fs-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: var(--ict-mark-small);
-  color: var(--ict-text-secondary);
-  background: var(--ict-bg-page);
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: var(--ict-body-medium);
 }
 
 .nest-actions {
@@ -246,7 +231,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 }
 
 .user-btn {
-  display: inline-flex;
+  flex:auto;
   align-items: center;
   gap: 4px;
   font-size: var(--ict-body-small);
@@ -254,7 +239,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
 }
 
 .vol-action-btn {
-  display: inline-flex;
+  flex:auto;
   align-items: center;
   gap: 4px;
   font-size: var(--ict-body-small);

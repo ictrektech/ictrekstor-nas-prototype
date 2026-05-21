@@ -110,7 +110,7 @@ function getHealthColor(status?: string): string {
   <Modal
     v-model:visible="props.visible"
     title="创建存储池"
-    width="600"
+    width="600px"
     :confirm-loading="loading"
     @ok="handleOk"
     @cancel="handleCancel"

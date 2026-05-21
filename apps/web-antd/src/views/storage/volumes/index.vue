@@ -14,7 +14,7 @@ import PoolCard from './components/PoolCard.vue';
 import RenameVolumeModal from './components/RenameVolumeModal.vue';
 import VolumeNestCard from './components/VolumeNestCard.vue';
 import VolumeOverview from './components/VolumeOverview.vue';
-import { PageHeader } from '#/components/ui-kit';
+import { PageHeader, Tag } from '#/components/ui-kit';
 import type { PoolCreateForm, StoragePool, StorageVolume, VolumeCreateForm } from './types';
 
 const router = useRouter();
@@ -205,10 +205,10 @@ function handleDeleteVolume(vol: StorageVolume) {
 </script>
 
 <template>
+<div style="background-color:var(--ict-bg-card);width:100%;height:100%">
   <div class="volume-manager">
     <!-- ═══════ 页面顶部概览 —— UI KIT PageHeader ═══════ -->
     <PageHeader
-      icon="lucide:box"
       title="存储空间管理"
       description="管理基于存储池或目录的存储空间分配与使用"
     >
@@ -255,9 +255,8 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 存储空间表头 -->
         <div class="volumes-section-header">
           <div class="volumes-section-title">
-            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
             <span>存储空间</span>
-            <span class="volumes-count">{{ getVolumesByPool(pool.id).length }}</span>
+            <Tag :text="String(getVolumesByPool(pool.id).length)" type="default" />
           </div>
         </div>
 
@@ -299,9 +298,8 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 存储空间表头 -->
         <div class="volumes-section-header">
           <div class="volumes-section-title">
-            <IconifyIcon icon="lucide:box" style="font-size: var(--ict-body-medium); color: var(--ict-primary);" />
             <span>存储空间</span>
-            <span class="volumes-count">{{ directoryVolumes.length }}</span>
+            <Tag :text="String(directoryVolumes.length)" type="default" />
           </div>
         </div>
 
@@ -352,12 +350,14 @@ function handleDeleteVolume(vol: StorageVolume) {
     :volume="renameVolume"
     @submit="handleRenameSubmit"
   />
+  </div>
 </template>
 
 <style scoped>
 .volume-manager {
   padding: 0 20px 16px;
   width: 100%;
+  background: #ffffff;
 }
 
 /* 存储空间列表 */
@@ -376,19 +376,8 @@ function handleDeleteVolume(vol: StorageVolume) {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.pool-wrapper-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: var(--ict-primary);
-  transform: translateY(-2px);
-}
-
 .directory-wrapper {
   border-color: var(--ict-border);
-}
-
-.directory-wrapper:hover {
-  border-color: var(--ict-primary);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 /* 目录头部 */
@@ -397,7 +386,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(135deg, var(--ict-success-light) 0%, #d9f7be 100%);
+  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-success-light) 100%);
   border-bottom: 1px solid #e6e6e6;
   transition: all 0.2s ease;
   gap: 24px;
@@ -405,7 +394,7 @@ function handleDeleteVolume(vol: StorageVolume) {
 }
 
 .directory-header:hover {
-  background: linear-gradient(135deg, var(--ict-success-light) 0%, #d9f7be 100%);
+  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-success-light) 100%);
 }
 
 /* 存储空间表头 */
@@ -414,7 +403,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: var(--ict-bg-page);
+  background: #ffffff;
   border-bottom: 1px solid var(--ict-border);
 }
 
@@ -455,7 +444,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 12px;
-  background: var(--ict-bg-section);
+  background: #ffffff;
 }
 
 .pool-empty {
