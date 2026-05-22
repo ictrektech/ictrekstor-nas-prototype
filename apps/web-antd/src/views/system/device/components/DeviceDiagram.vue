@@ -1,601 +1,160 @@
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { computed, ref } from 'vue';
+import { Popover } from 'ant-design-vue';
 import type { DiskInfo } from '#/api/storage';
 
-const props = defineProps<{
-  disks: DiskInfo[];
-  selectedDiskName?: string;
-  mode: 'front' | 'rear';
-}>();
+/**
+ * 网口指示灯配置（背面板）。
+ * 每个端口上方有 1 或多个小矩形 LED：
+ *   - 'normal' → 绿（var(--ict-success)）
+ *   - 'error'  → 红（var(--ict-danger)）
+ *   - 'off'    → 灰（var(--ict-text-disabled)）
+ */
+export type RearLedStatus = 'normal' | 'error' | 'off';
+export interface RearPortLed {
+  /** LED 中心横坐标百分比 */
+  left: string;
+  /** LED 顶部纵坐标百分比 */
+  top: string;
+  status: RearLedStatus;
+}
+
+const props = withDefaults(
+  defineProps<{
+    disks: DiskInfo[];
+    selectedDisk?: string;
+    mode: 'front' | 'rear';
+    /** 背面板网口指示灯列表 */
+    rearLeds?: RearPortLed[];
+  }>(),
+  {
+    rearLeds: () => [
+      // 1G 网口：左绿 + 右红
+      { left: '26.61%', top: '79.38%', status: 'normal' },
+      { left: '36.15%', top: '79.38%', status: 'error' },
+      // 10G 网口：左红 + 右绿
+      { left: '48.43%', top: '79.38%', status: 'error' },
+      { left: '57.96%', top: '79.38%', status: 'normal' },
+      // 100G 端口：4 个绿色
+      { left: '72.59%', top: '79.38%', status: 'normal' },
+      { left: '78.40%', top: '79.38%', status: 'normal' },
+      { left: '84.20%', top: '79.38%', status: 'normal' },
+      { left: '90%', top: '79.38%', status: 'normal' },
+    ],
+  },
+);
 
 const emit = defineEmits<{
-  (e: 'selectDisk', disk: DiskInfo | null): void;
-  (e: 'locateDisk', deviceName: string): void;
+  (e: 'select', disk: DiskInfo | null): void;
+  (e: 'locate', deviceName: string): void;
 }>();
 
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-
-// Canvas 尺寸
-const CANVAS_WIDTH = 380;
-const CANVAS_HEIGHT = 520;
-
-// 设备布局参数
-const DEVICE = {
-  x: 40,
-  y: 20,
-  width: 300,
-  height: 480,
-  cornerRadius: 16,
-  bodyColor: 'var(--ict-bg-page)',
-  borderColor: 'var(--ict-text-disabled)',
-  shadowColor: 'rgba(0,0,0,0.08)',
-};
-
-// 前面板参数
-const FRONT_PANEL = {
-  x: DEVICE.x + 12,
-  y: DEVICE.y + 20,
-  width: 56,
-  height: 340,
-  cornerRadius: 8,
-  color: 'var(--ict-text-emphasis)',
-};
-
-// 6个磁盘槽位参数（前面板）
-const BAY = {
-  startX: DEVICE.x + 80,
-  startY: DEVICE.y + 24,
-  width: 200,
-  height: 52,
-  gap: 8,
-  cornerRadius: 8,
-  borderColor: 'var(--ict-text-disabled)',
-  filledColor: 'var(--ict-primary)',
-  filledBgColor: 'var(--ict-primary-light)',
-  emptyBgColor: 'var(--ict-bg-section)',
-  highlightColor: 'var(--ict-warning)',
-};
-
-// 底部接口区域（前面板）
-const FRONT_BOTTOM = {
-  x: DEVICE.x + 12,
-  y: DEVICE.y + 406,
-  width: 276,
-  height: 54,
-  cornerRadius: 8,
-  bgColor: 'var(--ict-border-light)',
-};
-
-// 后面板参数
-const REAR_PANEL = {
-  fanX: DEVICE.x + 20,
-  fanY: DEVICE.y + 24,
-  fanSize: 120,
-};
-
-interface BayInfo {
-  index: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  disk?: DiskInfo;
-}
-
-const bays = computed<BayInfo[]>(() => {
-  const result: BayInfo[] = [];
-  for (let i = 0; i < 6; i++) {
-    const bayX = BAY.startX;
-    const bayY = BAY.startY + i * (BAY.height + BAY.gap);
-    const disk = props.disks[i] || undefined;
-    result.push({
-      index: i,
-      x: bayX,
-      y: bayY,
-      width: BAY.width,
-      height: BAY.height,
-      disk,
-    });
-  }
-  return result;
-});
-
-// Tooltip 状态
-const tooltip = ref({
-  visible: false,
-  x: 0,
-  y: 0,
-  disk: null as DiskInfo | null,
-  bayIndex: -1,
-});
-
-// 内部高亮状态（支持直接高亮而不依赖 prop 异步更新）
+// 内部高亮（鼠标点击插槽 / 外部 highlightBay 调用时设置）
 const highlightedDisk = ref('');
 
-function drawRoundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.arcTo(x + width, y, x + width, y + radius, radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
-  ctx.lineTo(x + radius, y + height);
-  ctx.arcTo(x, y + height, x, y + height - radius, radius);
-  ctx.lineTo(x, y + radius);
-  ctx.arcTo(x, y, x + radius, y, radius);
-  ctx.closePath();
+const imageSrc = computed(() =>
+  props.mode === 'front'
+    ? '/icons/E1001-front.png'
+    : '/icons/E1001%20back.png',
+);
+
+const altText = computed(() =>
+  props.mode === 'front' ? 'E1001 前面板' : 'E1001 后面板',
+);
+
+/**
+ * 前面板硬盘槽位配置（基于 E1001 前面板设计图百分比定位）。
+ * 3 个槽位水平并排，每个槽位下方有一个 LED 圆点指示硬盘状态：
+ *   - 运行中 → 蓝色（var(--ict-primary)）
+ *   - 休眠   → 橙色（var(--ict-warning)）
+ *   - 无硬盘 → 灰色（var(--ict-text-disabled)）
+ */
+const BAY_COUNT_FRONT = 3;
+
+interface BayHotspot {
+  index: number;
+  disk?: DiskInfo;
+  /** 槽位矩形百分比定位（相对图片显示区域） */
+  top: string;
+  left: string;
+  width: string;
+  height: string;
+  /** LED 圆点垂直位置（百分比） */
+  ledTop: string;
 }
 
-function drawFan(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, rotation: number) {
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(rotation);
+// 槽位横向布局（百分比）—— 基于设计图 224×388 精确测量
+// 槽位 1: left 20/224 ≈ 8.92%, width 40.5/224 ≈ 18.1%
+// 槽位 2: left 110/224 ≈ 49.12%, width 40.5/224 ≈ 18.1%（居中）
+// 槽位 3: left 158/224 ≈ 70.53%,   width 40.5/224 ≈ 18.1%
+const BAY_LAYOUT = [
+  { left: '8.92%', width: '18.1%' }, // 槽位 1
+  { left: '49.12%', width: '18.1%' }, // 槽位 2
+  { left: '70.53%', width: '18.1%' }, // 槽位 3
+];
 
-  // 风扇外框
-  ctx.beginPath();
-  ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
-  ctx.fillStyle = 'var(--ict-border)';
-  ctx.fill();
-  ctx.strokeStyle = 'var(--ict-text-disabled)';
-  ctx.lineWidth = 2;
-  ctx.stroke();
+// 槽位与 LED 的纵向位置（百分比，基于设计图 224×388）
+// 槽位 top 36/388 ≈ 9.3%, height 245/388 ≈ 63.14%
+// LED top 286/388 ≈ 73.7%
+const BAY_TOP = '9.3%';
+const BAY_HEIGHT = '63.14%';
+const LED_TOP = '73.7%';
 
-  // 风扇中心
-  ctx.beginPath();
-  ctx.arc(0, 0, size / 10, 0, Math.PI * 2);
-  ctx.fillStyle = 'var(--ict-text-disabled)';
-  ctx.fill();
-
-  // 风扇叶片
-  const bladeCount = 7;
-  for (let i = 0; i < bladeCount; i++) {
-    const angle = (i / bladeCount) * Math.PI * 2;
-    ctx.save();
-    ctx.rotate(angle);
-    ctx.beginPath();
-    ctx.ellipse(0, -size / 3.5, size / 10, size / 3, 0, 0, Math.PI * 2);
-    ctx.fillStyle = '#c4c4c4';
-    ctx.fill();
-    ctx.restore();
-  }
-
-  ctx.restore();
-}
-
-function drawPort(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  label: string,
-  color: string,
-  ledColor?: string,
-) {
-  drawRoundRect(ctx, x, y, width, height, 4);
-  ctx.fillStyle = 'var(--ict-border)';
-  ctx.fill();
-  ctx.strokeStyle = 'var(--ict-text-disabled)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // 内部金属触点
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  for (let i = 0; i < 4; i++) {
-    ctx.fillRect(x + 4 + i * 4, y + 4, 2, height - 8);
-  }
-
-  // 标签
-  ctx.font = '9px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.textAlign = 'center';
-  ctx.fillText(label, x + width / 2, y + height + 14);
-
-  // LED指示灯
-  if (ledColor) {
-    ctx.beginPath();
-    ctx.arc(x + width - 4, y - 6, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = ledColor;
-    ctx.fill();
-  }
-}
-
-function drawFrontPanel(ctx: CanvasRenderingContext2D) {
-  // 绘制设备外框阴影
-  ctx.save();
-  ctx.shadowColor = DEVICE.shadowColor;
-  ctx.shadowBlur = 20;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 8;
-  drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.fillStyle = 'var(--ict-bg-card)';
-  ctx.fill();
-  ctx.restore();
-
-  // 绘制设备边框
-  drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.strokeStyle = DEVICE.borderColor;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // 绘制设备内部背景
-  drawRoundRect(ctx, DEVICE.x + 1, DEVICE.y + 1, DEVICE.width - 2, DEVICE.height - 2, DEVICE.cornerRadius - 1);
-  ctx.fillStyle = DEVICE.bodyColor;
-  ctx.fill();
-
-  // 绘制左侧深色面板
-  drawRoundRect(ctx, FRONT_PANEL.x, FRONT_PANEL.y, FRONT_PANEL.width, FRONT_PANEL.height, FRONT_PANEL.cornerRadius);
-  ctx.fillStyle = FRONT_PANEL.color;
-  ctx.fill();
-
-  // 品牌文字（竖排）
-  ctx.save();
-  ctx.translate(FRONT_PANEL.x + FRONT_PANEL.width / 2, FRONT_PANEL.y + FRONT_PANEL.height / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.font = 'bold 16px sans-serif';
-  ctx.fillStyle = 'var(--ict-bg-card)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('VIVIBIT', 0, 0);
-  ctx.restore();
-
-  // 显示屏
-  const screenY = FRONT_PANEL.y + FRONT_PANEL.height + 12;
-  drawRoundRect(ctx, FRONT_PANEL.x + 4, screenY, FRONT_PANEL.width - 8, 28, 4);
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fill();
-  ctx.strokeStyle = '#444';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(FRONT_PANEL.x + 16, screenY + 14, 3, 0, Math.PI * 2);
-  ctx.fillStyle = 'var(--ict-success)';
-  ctx.fill();
-  ctx.font = '9px monospace';
-  ctx.fillStyle = 'var(--ict-success)';
-  ctx.textAlign = 'left';
-  ctx.fillText('RUN', FRONT_PANEL.x + 24, screenY + 17);
-
-  // 绘制6个磁盘槽位
-  bays.value.forEach((bay) => {
-    const isSelected = (props.selectedDiskName && bay.disk?.deviceName === props.selectedDiskName) || bay.disk?.deviceName === highlightedDisk.value;
-    const isFilled = !!bay.disk;
-
-    drawRoundRect(ctx, bay.x, bay.y, bay.width, bay.height, BAY.cornerRadius);
-    if (isSelected) {
-      ctx.fillStyle = 'var(--ict-warning-light)';
-      ctx.fill();
-      ctx.strokeStyle = BAY.highlightColor;
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-    } else if (isFilled) {
-      ctx.fillStyle = BAY.filledBgColor;
-      ctx.fill();
-      ctx.strokeStyle = BAY.filledColor;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    } else {
-      ctx.fillStyle = BAY.emptyBgColor;
-      ctx.fill();
-      ctx.strokeStyle = BAY.borderColor;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([4, 3]);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    if (isFilled && bay.disk) {
-      // 磁盘图标
-      const iconX = bay.x + 14;
-      const iconY = bay.y + bay.height / 2;
-      const iconSize = 20;
-      drawRoundRect(ctx, iconX - iconSize / 2, iconY - iconSize / 2 + 2, iconSize, iconSize - 4, 3);
-      ctx.fillStyle = isSelected ? BAY.highlightColor : BAY.filledColor;
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(iconX + 5, iconY + 4, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'var(--ict-bg-card)';
-      ctx.fill();
-
-      // 磁盘名称
-      ctx.font = 'bold 13px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-text-emphasis)';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(bay.disk.deviceName, bay.x + 34, bay.y + 18);
-
-      // 磁盘容量
-      ctx.font = '11px "SF Mono", "Fira Code", monospace';
-      ctx.fillStyle = isSelected ? '#d46b08' : 'var(--ict-primary)';
-      ctx.fillText(bay.disk.size || '', bay.x + 34, bay.y + 38);
-
-      // 状态点
-      const dotColor = bay.disk.status === '运行中' ? 'var(--ict-success)' : bay.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)';
-      ctx.beginPath();
-      ctx.arc(bay.x + bay.width - 16, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
-      ctx.fillStyle = dotColor;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(bay.x + bay.width - 16, bay.y + bay.height / 2, 5, 0, Math.PI * 2);
-      ctx.strokeStyle = 'var(--ict-bg-card)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    } else {
-      ctx.font = '12px sans-serif';
-      ctx.fillStyle = 'var(--ict-text-disabled)';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(`槽位 ${bay.index + 1}`, bay.x + bay.width / 2, bay.y + bay.height / 2);
-    }
-  });
-
-  // 底部接口区域
-  drawRoundRect(ctx, FRONT_BOTTOM.x, FRONT_BOTTOM.y, FRONT_BOTTOM.width, FRONT_BOTTOM.height, FRONT_BOTTOM.cornerRadius);
-  ctx.fillStyle = FRONT_BOTTOM.bgColor;
-  ctx.fill();
-  ctx.strokeStyle = 'var(--ict-text-disabled)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // 底部接口
-  const portY = FRONT_BOTTOM.y + FRONT_BOTTOM.height / 2;
-  const portColors = ['var(--ict-primary)', 'var(--ict-primary)', 'var(--ict-success)', 'var(--ict-warning)'];
-  const portLabels = ['LAN', 'LAN', 'USB', 'PWR'];
-  for (let i = 0; i < 4; i++) {
-    const portX = FRONT_BOTTOM.x + 30 + i * 66;
-    drawRoundRect(ctx, portX - 18, portY - 10, 36, 20, 4);
-    ctx.fillStyle = 'var(--ict-border)';
-    ctx.fill();
-    ctx.strokeStyle = 'var(--ict-text-disabled)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.font = '9px sans-serif';
-    ctx.fillStyle = 'var(--ict-text-secondary)';
-    ctx.textAlign = 'center';
-    ctx.fillText(portLabels[i], portX, portY + 18);
-    ctx.beginPath();
-    ctx.arc(portX + 12, portY - 14, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = portColors[i];
-    ctx.fill();
-  }
-}
-
-function drawRearPanel(ctx: CanvasRenderingContext2D) {
-  // 绘制设备外框阴影
-  ctx.save();
-  ctx.shadowColor = DEVICE.shadowColor;
-  ctx.shadowBlur = 20;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 8;
-  drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.fillStyle = 'var(--ict-bg-card)';
-  ctx.fill();
-  ctx.restore();
-
-  // 绘制设备边框
-  drawRoundRect(ctx, DEVICE.x, DEVICE.y, DEVICE.width, DEVICE.height, DEVICE.cornerRadius);
-  ctx.strokeStyle = DEVICE.borderColor;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  // 绘制设备内部背景
-  drawRoundRect(ctx, DEVICE.x + 1, DEVICE.y + 1, DEVICE.width - 2, DEVICE.height - 2, DEVICE.cornerRadius - 1);
-  ctx.fillStyle = 'var(--ict-bg-section)';
-  ctx.fill();
-
-  // 顶部标题区
-  ctx.fillStyle = 'var(--ict-border-light)';
-  drawRoundRect(ctx, DEVICE.x + 8, DEVICE.y + 8, DEVICE.width - 16, 32, 6);
-  ctx.fill();
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('VIVIBIT NAS - 后面板', DEVICE.x + DEVICE.width / 2, DEVICE.y + 24);
-
-  // 散热风扇区域（两个大风扇）
-  const fan1X = DEVICE.x + 80;
-  const fan1Y = DEVICE.y + 70;
-  const fan2X = DEVICE.x + 220;
-  const fan2Y = DEVICE.y + 70;
-  drawFan(ctx, fan1X, fan1Y, 90, 0);
-  drawFan(ctx, fan2X, fan2Y, 90, Math.PI / 7);
-
-  // 风扇标签
-  ctx.font = '10px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.textAlign = 'center';
-  ctx.fillText('系统风扇 ×2', DEVICE.x + DEVICE.width / 2, fan1Y + 65);
-
-  // 接口区域背景
-  const ioAreaY = DEVICE.y + 170;
-  drawRoundRect(ctx, DEVICE.x + 16, ioAreaY, DEVICE.width - 32, 280, 8);
-  ctx.fillStyle = 'var(--ict-bg-page)';
-  ctx.fill();
-  ctx.strokeStyle = 'var(--ict-border)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  // 区域标题
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.textAlign = 'left';
-  ctx.fillText('网络接口', DEVICE.x + 28, ioAreaY + 20);
-
-  // 网口（2个千兆网口）
-  drawPort(ctx, DEVICE.x + 28, ioAreaY + 30, 44, 32, 'LAN1', 'var(--ict-primary)', 'var(--ict-success)');
-  drawPort(ctx, DEVICE.x + 86, ioAreaY + 30, 44, 32, 'LAN2', 'var(--ict-primary)', 'var(--ict-success)');
-
-  // USB接口
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.fillText('USB 接口', DEVICE.x + 28, ioAreaY + 90);
-
-  for (let i = 0; i < 3; i++) {
-    const usbX = DEVICE.x + 28 + i * 50;
-    drawPort(ctx, usbX, ioAreaY + 100, 36, 24, `USB${i + 1}`, 'var(--ict-warning)');
-  }
-
-  // HDMI接口
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.fillText('视频输出', DEVICE.x + 28, ioAreaY + 155);
-  drawPort(ctx, DEVICE.x + 28, ioAreaY + 165, 40, 28, 'HDMI', '#eb2f96');
-
-  // 电源接口
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.fillText('电源', DEVICE.x + 180, ioAreaY + 155);
-  drawRoundRect(ctx, DEVICE.x + 180, ioAreaY + 165, 50, 32, 4);
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.fill();
-  ctx.font = '9px sans-serif';
-  ctx.fillStyle = 'var(--ict-bg-card)';
-  ctx.textAlign = 'center';
-  ctx.fillText('DC IN', DEVICE.x + 205, ioAreaY + 184);
-
-  // 接地螺丝
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillStyle = 'var(--ict-text-secondary)';
-  ctx.textAlign = 'left';
-  ctx.fillText('扩展', DEVICE.x + 28, ioAreaY + 220);
-
-  // PCIe扩展槽
-  for (let i = 0; i < 2; i++) {
-    const slotX = DEVICE.x + 28 + i * 130;
-    drawRoundRect(ctx, slotX, ioAreaY + 230, 110, 24, 3);
-    ctx.fillStyle = 'var(--ict-border)';
-    ctx.fill();
-    ctx.strokeStyle = 'var(--ict-text-disabled)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.font = '9px sans-serif';
-    ctx.fillStyle = 'var(--ict-text-secondary)';
-    ctx.textAlign = 'center';
-    ctx.fillText(`PCIe x4 插槽 ${i + 1}`, slotX + 55, ioAreaY + 245);
-  }
-}
-
-function draw() {
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  if (props.mode === 'front') {
-    drawFrontPanel(ctx);
-  } else {
-    drawRearPanel(ctx);
-  }
-}
-
-function handleClick(event: MouseEvent) {
-  if (props.mode !== 'front') {
-    tooltip.value.visible = false;
-    return;
-  }
-
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const x = (event.clientX - rect.left) * scaleX;
-  const y = (event.clientY - rect.top) * scaleY;
-
-  let clickedBay: BayInfo | null = null;
-  for (const bay of bays.value) {
-    if (
-      x >= bay.x &&
-      x <= bay.x + bay.width &&
-      y >= bay.y &&
-      y <= bay.y + bay.height
-    ) {
-      clickedBay = bay;
-      break;
-    }
-  }
-
-  if (clickedBay) {
-    if (clickedBay.disk) {
-      emit('selectDisk', clickedBay.disk);
-      tooltip.value = {
-        visible: true,
-        x: event.clientX - rect.left + 16,
-        y: event.clientY - rect.top,
-        disk: clickedBay.disk,
-        bayIndex: clickedBay.index,
-      };
-    } else {
-      emit('selectDisk', null);
-      tooltip.value.visible = false;
-    }
-  } else {
-    tooltip.value.visible = false;
-  }
-
-  draw();
-}
-
-function handleMouseMove(event: MouseEvent) {
-  if (props.mode !== 'front') {
-    const canvas = canvasRef.value;
-    if (canvas) canvas.style.cursor = 'default';
-    return;
-  }
-
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const x = (event.clientX - rect.left) * scaleX;
-  const y = (event.clientY - rect.top) * scaleY;
-
-  let hoveringBay = false;
-  for (const bay of bays.value) {
-    if (
-      x >= bay.x &&
-      x <= bay.x + bay.width &&
-      y >= bay.y &&
-      y <= bay.y + bay.height
-    ) {
-      hoveringBay = true;
-      break;
-    }
-  }
-
-  canvas.style.cursor = hoveringBay ? 'pointer' : 'default';
-}
-
-function hideTooltip() {
-  tooltip.value.visible = false;
-}
-
-watch(() => props.disks, draw, { deep: true });
-watch(() => props.selectedDiskName, () => { highlightedDisk.value = props.selectedDiskName || ''; draw(); });
-watch(() => props.mode, draw);
-
-onMounted(() => {
-  draw();
+const bays = computed<BayHotspot[]>(() => {
+  return BAY_LAYOUT.map((layout, i) => ({
+    index: i,
+    disk: props.disks[i],
+    top: BAY_TOP,
+    left: layout.left,
+    width: layout.width,
+    height: BAY_HEIGHT,
+    ledTop: LED_TOP,
+  }));
 });
+
+/** LED 颜色映射：根据硬盘状态返回语义色（与槽位 hover/选中状态色一致） */
+function getLedColor(disk?: DiskInfo): string {
+  if (!disk) return 'var(--ict-text-disabled)'; // 灰：无硬盘
+  switch (disk.status) {
+    case '休眠':
+      return 'var(--ict-warning)'; // 橙：休眠（warning）
+    case '运行中':
+    default:
+      return 'var(--ict-success)'; // 绿：运行中（success）
+  }
+}
+
+/** 槽位语义色配置：根据硬盘状态返回 hover/选中态需要的主色与浅色 */
+function getBayStateColors(disk?: DiskInfo): {
+  main: string;
+  light: string;
+} {
+  if (!disk) {
+    // 空槽位仍使用品牌主色（无状态语义）
+    return { main: 'var(--ict-primary)', light: 'var(--ict-primary-light)' };
+  }
+  switch (disk.status) {
+    case '休眠':
+      return { main: 'var(--ict-warning)', light: 'var(--ict-warning-light)' };
+    case '运行中':
+    default:
+      return { main: 'var(--ict-success)', light: 'var(--ict-success-light)' };
+  }
+}
+
+
+function handleBayClick(bay: BayHotspot) {
+  if (bay.disk) {
+    highlightedDisk.value = bay.disk.deviceName;
+    emit('select', bay.disk);
+  } else {
+    emit('select', null);
+  }
+}
 
 function highlightBay(deviceName: string) {
   highlightedDisk.value = deviceName;
-  emit('locateDisk', deviceName);
-  draw();
+  emit('locate', deviceName);
 }
 
 defineExpose({ highlightBay });
@@ -603,144 +162,260 @@ defineExpose({ highlightBay });
 
 <template>
   <div class="device-diagram-container">
-    <canvas
-      ref="canvasRef"
-      :width="CANVAS_WIDTH"
-      :height="CANVAS_HEIGHT"
-      class="device-canvas"
-      @click="handleClick"
-      @mousemove="handleMouseMove"
-      @mouseleave="hideTooltip"
-    />
+    <div class="device-image-wrap">
+      <img :src="imageSrc" :alt="altText" class="device-image" draggable="false" />
 
-    <!-- Tooltip（仅前面板模式下显示） -->
-    <div
-      v-if="tooltip.visible && tooltip.disk && mode === 'front'"
-      class="bay-tooltip"
-      :style="{
-        left: `${tooltip.x}px`,
-        top: `${tooltip.y}px`,
-      }"
-    >
-      <div class="tooltip-header">
-        <span class="tooltip-title">{{ tooltip.disk.deviceName }}</span>
-      </div>
-      <div class="tooltip-body">
-        <div class="tooltip-row">
-          <span class="tooltip-label">槽位</span>
-          <span class="tooltip-value">#{{ tooltip.bayIndex + 1 }}</span>
-        </div>
-        <div class="tooltip-row">
-          <span class="tooltip-label">型号</span>
-          <span class="tooltip-value">{{ tooltip.disk.model || '--' }}</span>
-        </div>
-        <div class="tooltip-row">
-          <span class="tooltip-label">容量</span>
-          <span class="tooltip-value">{{ tooltip.disk.size || '--' }}</span>
-        </div>
-        <div class="tooltip-row">
-          <span class="tooltip-label">状态</span>
-          <span
-            class="tooltip-status"
-            :style="{
-              color: tooltip.disk.status === '运行中' ? 'var(--ict-success)' : tooltip.disk.status === '休眠' ? 'var(--ict-warning)' : 'var(--ict-text-disabled)',
+      <!-- 仅前面板显示可点击的硬盘插槽热区 + LED 指示灯 -->
+      <template v-if="mode === 'front'">
+        <!-- 白色遮罩：盖住原图中默认的单凹槽痕迹，使 3 个槽位独立可见 -->
+        <div class="bay-bg-mask" />
+
+        <!-- 槽位（可点击长矩形，点击弹出硬盘状态 Popover） -->
+        <Popover
+          v-for="bay in bays"
+          :key="`popover-${bay.index}`"
+          :trigger="bay.disk ? 'click' : ''"
+          :visible="bay.disk && selectedDisk === bay.disk.deviceName && highlightedDisk === bay.disk.deviceName"
+          placement="right"
+          @visible-change="(val: boolean) => val || (highlightedDisk = '')"
+        >
+          <template #title>
+            <span class="popover-title">
+              {{ bay.disk?.deviceName || `槽位 ${bay.index + 1}` }}
+            </span>
+          </template>
+          <template #content v-if="bay.disk">
+            <div class="popover-content">
+              <div class="popover-row">
+                <span class="popover-label">槽位</span>
+                <span class="popover-value">#{{ bay.index + 1 }}</span>
+              </div>
+              <div class="popover-row">
+                <span class="popover-label">型号</span>
+                <span class="popover-value">{{ bay.disk.model || '--' }}</span>
+              </div>
+              <div class="popover-row">
+                <span class="popover-label">容量</span>
+                <span class="popover-value">{{ bay.disk.size || '--' }}</span>
+              </div>
+              <div class="popover-row">
+                <span class="popover-label">状态</span>
+                <span
+                  class="popover-value popover-status"
+                  :style="{
+                    color:
+                      bay.disk.status === '运行中'
+                        ? 'var(--ict-success)'
+                        : bay.disk.status === '休眠'
+                          ? 'var(--ict-warning)'
+                          : 'var(--ict-text-disabled)',
+                  }"
+                >
+                  {{ bay.disk.status || '--' }}
+                </span>
+              </div>
+            </div>
+          </template>
+
+          <!-- 槽位按钮（作为 Popover 的 ref 插槽）
+               通过 CSS 变量 --bay-main / --bay-light 将状态语义色注入到 hover 和选中态 -->
+          <button
+            type="button"
+            class="bay-hotspot"
+            :class="{
+              'bay-hotspot--selected':
+                bay.disk &&
+                (selectedDisk === bay.disk.deviceName ||
+                  highlightedDisk === bay.disk.deviceName),
             }"
+            :style="{
+              top: bay.top,
+              left: bay.left,
+              width: bay.width,
+              height: bay.height,
+              '--bay-main': getBayStateColors(bay.disk).main,
+              '--bay-light': getBayStateColors(bay.disk).light,
+            }"
+            @click="handleBayClick(bay)"
           >
-            {{ tooltip.disk.status || '--' }}
-          </span>
-        </div>
-      </div>
+            <span class="bay-hotspot__index">{{ bay.index + 1 }}</span>
+          </button>
+        </Popover>
+
+        <!-- LED 状态指示灯（圆点） -->
+        <span
+          v-for="bay in bays"
+          :key="`led-${bay.index}`"
+          class="bay-led"
+          :style="{
+            top: bay.ledTop,
+            left: bay.left,
+            width: bay.width,
+            '--led-color': getLedColor(bay.disk),
+          }"
+          :title="bay.disk ? `${bay.disk.deviceName} · ${bay.disk.status || ''}` : '无硬盘'"
+        />
+      </template>
+
+      <!-- 仅背面板显示网口指示灯（小矩形 LED） -->
+      <template v-if="mode === 'rear'">
+        <span
+          v-for="(led, i) in rearLeds"
+          :key="`rear-led-${i}`"
+          class="rear-led"
+          :class="`rear-led--${led.status}`"
+          :style="{ top: led.top, left: led.left }"
+        />
+      </template>
     </div>
   </div>
 </template>
 
 <style scoped>
 .device-diagram-container {
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 8px;
 }
 
-.device-canvas {
-  width: 380px;
-  height: 520px;
-  image-rendering: crisp-edges;
+.device-image-wrap {
+  position: relative;
+  width: 220px;
+  /* 与图片原始比例一致 220:404 */
+  aspect-ratio: 220 / 404;
 }
 
-.bay-tooltip {
+.device-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 硬盘槽位热区：默认浅灰边框，hover/选中态按硬盘状态语义着色
+   --bay-main / --bay-light 由 inline style 注入：
+     运行中 → success 绿 / success-light 浅绿
+     休眠   → warning 橙 / warning-light 浅橙
+     空槽位 → primary 蓝 / primary-light 浅蓝 */
+.bay-hotspot {
   position: absolute;
-  background: var(--ict-bg-card);
-  border: 1px solid var(--ict-border);
-  border-radius: 10px;
-  padding: 12px 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 100;
-  min-width: 200px;
-  pointer-events: none;
-  animation: tooltip-in 0.2s ease;
-}
-
-@keyframes tooltip-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.tooltip-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--ict-border-light);
+  justify-content: center;
+  padding: 0;
+  background: #F6F6F6;
+  border: 2px solid var(--ict-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
-.tooltip-title {
-  font-size: var(--ict-body-medium);
-  font-weight: 700;
+.bay-hotspot:hover {
+  background: var(--bay-light);
+  border-color: var(--bay-main);
+}
+
+/* 选中态：语义浅色底 + 语义色实线边框 */
+.bay-hotspot--selected,
+.bay-hotspot--selected:hover {
+  background: var(--bay-light);
+  border-color: var(--bay-main);
+  border-width: 2px;
+}
+
+.bay-hotspot__index {
+  font-size: var(--ict-title-medium);
+  font-weight: 500;
+  color: var(--ict-text-disabled);
+  pointer-events: none;
+}
+
+.bay-hotspot--selected .bay-hotspot__index {
+  color: var(--bay-main);
+}
+
+/* LED 圆点：位于槽位下方，颜色映射硬盘状态。
+   span 元素本身作为"对齐范围"（与所属槽位等宽），实际圆点由 ::before 居中绘制。 */
+.bay-led {
+  position: absolute;
+  pointer-events: none;
+  text-align: center;
+  line-height: 0;
+}
+
+.bay-led::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--led-color);
+  box-shadow: 0 0 4px var(--led-color);
+}
+
+/* Popover 内容样式 */
+.popover-title {
+  font-size: var(--ict-title-small);
+  font-weight: 600;
   color: var(--ict-text-emphasis);
-  font-family: var(--ict-font-family);
 }
 
-.tooltip-body {
+.popover-content {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  min-width: 180px;
+  padding: 4px 0;
 }
 
-.tooltip-row {
+.popover-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
+  font-size: var(--ict-body-medium);
 }
 
-.tooltip-label {
-  font-size: var(--ict-body-small);
+.popover-label {
   color: var(--ict-text-secondary);
-  flex-shrink: 0;
 }
 
-.tooltip-value {
-  font-size: var(--ict-body-small);
-  color: var(--ict-text-emphasis);
+.popover-value {
+  color: var(--ict-text-primary);
   font-weight: 500;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 130px;
 }
 
-.tooltip-status {
-  font-size: var(--ict-body-small);
+.popover-status {
   font-weight: 600;
+}
+
+/* 背面板网口指示灯（小矩形 LED）：位于网口/100G 端口上方
+   - normal → 绿（var(--ict-success)）
+   - error  → 红（var(--ict-danger)）
+   - off    → 灰（var(--ict-text-disabled)） */
+.rear-led {
+  position: absolute;
+  width: 6px;
+  height: 3px;
+  /* 中心对齐 left 百分比 */
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.rear-led--normal {
+  background: var(--ict-success);
+}
+
+.rear-led--error {
+  background: var(--ict-danger);
+}
+
+.rear-led--off {
+  background: var(--ict-text-disabled);
 }
 </style>

@@ -13,3 +13,4 @@ export { default as OverviewCard } from './OverviewCard.vue';
 export { default as SwitchToggle } from './SwitchToggle.vue';
 export { default as DangerButton } from './DangerButton.vue';
 export { default as Tag } from './Tag.vue';
+export { default as Badge } from './Badge.vue';

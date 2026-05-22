@@ -56,10 +56,17 @@ export default { name: 'SectionCard' };
 
 <style scoped>
 .section-card {
+  /* 统一卡片间距：与其他页面级大卡片对齐（16px） */
   margin-bottom: var(--ict-space-4);
-  border-radius: var(--ict-radius-xl);
+  /* 统一卡片圆角：页面级大卡片 14px */
+  border-radius: 14px;
   box-shadow: var(--ict-shadow-1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 覆盖 antd Card 默认圆角（确保边框、阴影都符合 14px） */
+.section-card :deep(.ant-card) {
+  border-radius: 14px;
 }
 
 .section-card:hover {

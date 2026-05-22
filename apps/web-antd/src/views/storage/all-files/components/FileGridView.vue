@@ -37,10 +37,7 @@ function getFileIcon(file: StorageSpaceFile): string {
     >
       <div class="file-grid-icon">{{ getFileIcon(file) }}</div>
       <div class="file-grid-name">{{ file.name }}</div>
-      <div class="file-grid-meta">
-        <span v-if="file.type === 'file'">{{ file.size }}</span>
-        <span v-else>文件夹</span>
-      </div>
+      <div class="file-grid-meta">{{ file.size || '--' }}</div>
       <div class="file-grid-actions">
         <Button size="small" type="link" @click="emit('rename', file)">重命名</Button>
         <Popconfirm

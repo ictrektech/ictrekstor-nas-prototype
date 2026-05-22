@@ -50,7 +50,7 @@ export default { name: 'PageHeader' };
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--ict-space-3) var(--ict-space-5);
+  padding: var(--ict-space-5) var(--ict-space-5);
   background: var(--ict-bg-card);
   gap: var(--ict-space-4);
   flex-shrink: 0;

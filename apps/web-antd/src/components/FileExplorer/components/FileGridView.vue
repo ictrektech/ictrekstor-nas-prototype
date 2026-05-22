@@ -75,7 +75,7 @@ function onHeaderCheck() {
         </div>
       </div>
       <div class="grid-name" :title="file.name">{{ file.name }}</div>
-      <div class="grid-meta"><span v-if="file.type === 'file'">{{ file.size }}</span><span v-else>文件夹</span></div>
+      <div class="grid-meta">{{ file.size || '--' }}</div>
       <div v-if="mode === 'recycle'" class="grid-meta grid-path">{{ file.originalPath || '--' }}</div>
       <div v-if="mode === 'recycle'" class="grid-meta grid-path">{{ file.deletedTime || '--' }}</div>
     </div>

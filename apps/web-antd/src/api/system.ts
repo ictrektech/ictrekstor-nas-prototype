@@ -5,6 +5,10 @@
 
 export interface NetworkConfig {
   name: string;
+  /** 展示名（如"网口1"） */
+  displayName?: string;
+  /** IP 获取方式：DHCP / 静态 */
+  ipMode?: string;
   ipv4Address: string;
   subnetMask: string;
   gateway: string;
@@ -20,7 +24,10 @@ export interface NetworkConfig {
   linkSpeed: string;
   /** 双工模式：全双工/半双工 */
   duplex: string;
+  /** 近一段时间的实时速率历史（用于卡片趋势图，单位 KB/s） */
+  trafficHistory?: number[];
 }
+
 
 /** 网卡历史带宽数据点 */
 export interface NetworkBandwidthPoint {
@@ -79,21 +86,54 @@ function genBandwidthHistory(): NetworkBandwidthPoint[] {
   return points;
 }
 
+/** 生成卡片趋势图所需的随机平滑序列（24 个点） */
+function genTrafficHistory(seed: number, peak = 5000): number[] {
+  const arr: number[] = [];
+  let last = peak * 0.4;
+  for (let i = 0; i < 24; i++) {
+    // 用 seed + i 生成稳定的伪随机扰动，避免每次刷新都跳变
+    const noise = Math.sin((seed + i) * 1.7) * 0.5 + 0.5;
+    last = last * 0.6 + (noise * peak * 0.8 + peak * 0.1) * 0.4;
+    arr.push(Math.round(last));
+  }
+  return arr;
+}
+
 export async function getNetworksApi(): Promise<NetworkConfig[]> {
   return [
     {
-      name: 'eth0',
-      ipv4Address: '192.168.1.212',
+      name: 'ens18',
+      displayName: '网口1',
+      ipMode: 'DHCP',
+      ipv4Address: '192.168.1.127',
       subnetMask: '255.255.255.0',
-      gateway: '192.168.1.1',
-      dns: '8.8.8.8',
+      gateway: '192.168.1.254',
+      dns: '192.168.1.1',
       macAddress: 'bc:24:11:94:12:f0',
       mtu: 1500,
       connectionStatus: '已连接',
-      downloadSpeed: 4520,
-      uploadSpeed: 1280,
+      downloadSpeed: 887,
+      uploadSpeed: 261120, // 255 Mb/s ≈ 261120 KB/s
       linkSpeed: '1000Mb/s',
       duplex: '全双工',
+      trafficHistory: genTrafficHistory(1, 6000),
+    },
+    {
+      name: 'ens19',
+      displayName: '网口2',
+      ipMode: 'DHCP',
+      ipv4Address: '192.168.1.127',
+      subnetMask: '255.255.255.0',
+      gateway: '192.168.1.254',
+      dns: '192.168.1.1',
+      macAddress: 'bc:24:11:94:12:f1',
+      mtu: 1500,
+      connectionStatus: '未连接',
+      downloadSpeed: 887,
+      uploadSpeed: 261120,
+      linkSpeed: '1000Mb/s',
+      duplex: '全双工',
+      trafficHistory: genTrafficHistory(7, 5500),
     },
   ];
 }

@@ -41,12 +41,8 @@ defineExpose({
       <span class="diagram-hint">点击插槽可查看对应硬盘信息</span>
     </div>
     <div class="diagram-panels">
-      <!-- 前面板 -->
+      <!-- 正面示意图 -->
       <div class="diagram-panel">
-        <div class="diagram-panel-label">
-          <IconifyIcon icon="lucide:square" style="font-size: var(--ict-body-small); color: var(--ict-text-secondary);" />
-          前面板
-        </div>
         <DeviceDiagram
           ref="frontRef"
           :disks="disks"
@@ -55,13 +51,10 @@ defineExpose({
           @select="handleSelect"
           @locate="handleLocate"
         />
+        <div class="diagram-panel-label">正面示意图</div>
       </div>
-      <!-- 后面板 -->
+      <!-- 背面示意图 -->
       <div class="diagram-panel">
-        <div class="diagram-panel-label">
-          <IconifyIcon icon="lucide:square" style="font-size: var(--ict-body-small); color: var(--ict-text-secondary);" />
-          后面板
-        </div>
         <DeviceDiagram
           ref="rearRef"
           :disks="disks"
@@ -70,6 +63,7 @@ defineExpose({
           @select="handleSelect"
           @locate="handleLocate"
         />
+        <div class="diagram-panel-label">背面示意图</div>
       </div>
     </div>
   </Card>
@@ -80,5 +74,18 @@ defineExpose({
 .diagram-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--ict-border-light); background: var(--ict-bg-section); }
 .diagram-card-title { display: flex; align-items: center; gap: 10px; font-size: var(--ict-title-small); font-weight: 600; color: var(--ict-text-emphasis); }
 .diagram-hint { font-size: var(--ict-body-small); color: var(--ict-text-disabled); }
-.diagram-panels { display: flex; align-items: stretch; justify-content: center; gap: 0; }
+.diagram-panels {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 48px;
+  padding: 24px 20px 32px;
+  background: var(--ict-bg-card);
+}
+.diagram-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.diagram-panel-label {
+  font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
+  font-weight: 500;
+}
 </style>
