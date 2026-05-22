@@ -31,31 +31,56 @@ const capacityPercent = computed(() => {
   return Math.round((used / total) * 100);
 });
 
+// ECharts Canvas 不支持 CSS var()，必须用十六进制色值，与设计令牌保持一致
+const COLOR = {
+  primary: '#006be6',
+  success: '#00b42a',
+  warning: '#faad14',
+};
+
+/** 构造带 hover 强调 + 渐变填充的 line series（与 MonitorCharts.vue 风格统一） */
+function lineSeries(name: string, data: number[], color: string, withArea = false) {
+  const s: any = {
+    name,
+    type: 'line',
+    data,
+    smooth: true,
+    showSymbol: true,
+    symbol: 'circle',
+    symbolSize: 6,
+    lineStyle: { width: 2, color },
+    itemStyle: { color, borderWidth: 2, borderColor: '#fff' },
+    emphasis: {
+      scale: true,
+      lineStyle: { width: 3 },
+      itemStyle: { borderWidth: 2, shadowBlur: 4, shadowColor: color },
+    },
+  };
+  if (withArea) {
+    s.areaStyle = {
+      color: {
+        type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+        colorStops: [
+          { offset: 0, color: color + '4d' }, // ~30%
+          { offset: 1, color: color + '0a' },
+        ],
+      },
+    };
+  }
+  return s;
+}
+
 const capacityChartOption = computed(() => {
   const dates = props.poolDetail.capacityHistory.map((h) => h.date);
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['已用容量', '可用容量'], bottom: 0 },
+    legend: { data: ['已用容量', '可用容量'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: dates, boundaryGap: false },
-    yAxis: { type: 'value', name: 'GB' },
+    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
+    yAxis: { type: 'value', name: 'GB', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
     series: [
-      {
-        name: '已用容量',
-        type: 'line',
-        data: props.poolDetail.capacityHistory.map((h) => h.used),
-        smooth: true,
-        areaStyle: { opacity: 0.3 },
-        itemStyle: { color: 'var(--ict-primary)' },
-      },
-      {
-        name: '可用容量',
-        type: 'line',
-        data: props.poolDetail.capacityHistory.map((h) => h.available),
-        smooth: true,
-        areaStyle: { opacity: 0.3 },
-        itemStyle: { color: 'var(--ict-success)' },
-      },
+      lineSeries('已用容量', props.poolDetail.capacityHistory.map((h) => h.used), COLOR.primary, true),
+      lineSeries('可用容量', props.poolDetail.capacityHistory.map((h) => h.available), COLOR.success, true),
     ],
   };
 });
@@ -64,13 +89,13 @@ const iopsChartOption = computed(() => {
   const times = props.poolDetail.ioStats.map((s) => s.time);
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['读 IOPS', '写 IOPS'], bottom: 0 },
+    legend: { data: ['读 IOPS', '写 IOPS'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: times },
-    yAxis: { type: 'value', name: 'IOPS' },
+    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
+    yAxis: { type: 'value', name: 'IOPS', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
     series: [
-      { name: '读 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readIops), smooth: true, itemStyle: { color: 'var(--ict-primary)' } },
-      { name: '写 IOPS', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeIops), smooth: true, itemStyle: { color: 'var(--ict-success)' } },
+      lineSeries('读 IOPS', props.poolDetail.ioStats.map((s) => s.readIops), COLOR.primary),
+      lineSeries('写 IOPS', props.poolDetail.ioStats.map((s) => s.writeIops), COLOR.success),
     ],
   };
 });
@@ -79,13 +104,13 @@ const bandwidthChartOption = computed(() => {
   const times = props.poolDetail.ioStats.map((s) => s.time);
   return {
     tooltip: { trigger: 'axis' },
-    legend: { data: ['读带宽', '写带宽'], bottom: 0 },
+    legend: { data: ['读带宽', '写带宽'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: times },
-    yAxis: { type: 'value', name: 'MB/s' },
+    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
+    yAxis: { type: 'value', name: 'MB/s', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
     series: [
-      { name: '读带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.readBandwidth), smooth: true, itemStyle: { color: 'var(--ict-primary)' } },
-      { name: '写带宽', type: 'line', data: props.poolDetail.ioStats.map((s) => s.writeBandwidth), smooth: true, itemStyle: { color: 'var(--ict-warning)' } },
+      lineSeries('读带宽', props.poolDetail.ioStats.map((s) => s.readBandwidth), COLOR.primary),
+      lineSeries('写带宽', props.poolDetail.ioStats.map((s) => s.writeBandwidth), COLOR.warning),
     ],
   };
 });

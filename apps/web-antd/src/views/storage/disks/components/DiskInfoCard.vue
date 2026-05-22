@@ -46,14 +46,22 @@ function formatHours(hours?: number): string {
   border-radius: 10px;
 }
 
+/* label（表头）：右对齐 + 辅助文本色 + 主要文本字号（14px） */
 .device-info :deep(.ant-descriptions-item-label) {
-  font-size: var(--ict-body-small);
+  font-size: var(--ict-body-medium);
   color: var(--ict-text-secondary);
+  justify-content: right;
+  text-align: right;
+  /* 通过固定宽度 + 右对齐，让冒号在每列中保持竖直对齐 */
   width: 80px;
+  /* 取消 antd 默认 label 的 padding-end 偏移，避免冒号与值之间出现额外缝隙 */
+  padding-inline-end: var(--ict-space-2) !important;
 }
 
+/* content（内容）：主要文本色 + 主要文本字号（14px） */
 .device-info :deep(.ant-descriptions-item-content) {
-  font-size: var(--ict-mark-medium);
-  font-weight: 500;
+  font-size: var(--ict-body-medium);
+  color: var(--ict-text-primary);
+  font-weight: 400;
 }
 </style>

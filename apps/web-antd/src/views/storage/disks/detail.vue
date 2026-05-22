@@ -34,11 +34,11 @@ onMounted(loadDisk);
 </script>
 
 <template>
-  <div class="disk-detail" v-if="disk">
-    <!-- 页面顶部概览 -->
-    <DiskDetailHeader :disk="disk" @back="goBack" />
+      <!-- 页面顶部概览（与"我的文件"结构一致：头部在最外层，独立于详情内容） -->
+      <DiskDetailHeader v-if="disk" :disk="disk" back-label="磁盘管理" @back="goBack" />
 
-    <!-- 主体内容 -->
+  <!-- 主体内容 -->
+  <div class="disk-detail" v-if="disk">
     <div class="detail-body">
       <!-- 设备信息卡片 -->
       <DiskInfoCard :disk="disk" />

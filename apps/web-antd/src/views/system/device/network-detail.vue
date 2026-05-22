@@ -84,11 +84,44 @@ const bandwidthOption = computed(() => {
   const downloads = net.value.history.map((h) => +(h.download / 1024).toFixed(2)); // KB/s → MB/s
   const uploads = net.value.history.map((h) => +(h.upload / 1024).toFixed(2));
 
+  // ECharts Canvas 不支持 CSS var()，必须用十六进制色值，与设计令牌保持一致
+  const COLOR = { primary: '#006be6', success: '#00b42a' };
+  const AXIS_COLORS = { text: '#64748b', line: '#e2e8f0' };
+
+  /** 构造带 hover 强调 + 渐变填充的 line series */
+  function lineSeries(name: string, data: number[], color: string) {
+    return {
+      name,
+      type: 'line',
+      data,
+      smooth: true,
+      showSymbol: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 2, color },
+      itemStyle: { color, borderWidth: 2, borderColor: '#fff' },
+      emphasis: {
+        scale: true,
+        lineStyle: { width: 3 },
+        itemStyle: { borderWidth: 2, shadowBlur: 4, shadowColor: color },
+      },
+      areaStyle: {
+        color: {
+          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: color + '4d' }, // ~30%
+            { offset: 1, color: color + '0a' },
+          ],
+        },
+      },
+    };
+  }
+
   return {
     title: {
       text: '24小时带宽趋势',
       left: 'center',
-      textStyle: { fontSize: 13, fontWeight: 'normal', color: 'var(--ict-text-emphasis)' },
+      textStyle: { fontSize: 13, fontWeight: 'normal', color: '#1e293b' },
     },
     tooltip: {
       trigger: 'axis',
@@ -103,42 +136,25 @@ const bandwidthOption = computed(() => {
         return html;
       },
     },
-    legend: { bottom: 4, textStyle: { fontSize: 11 } },
+    legend: { bottom: 4, textStyle: { fontSize: 11, color: AXIS_COLORS.text } },
     grid: { left: 55, right: 20, top: 40, bottom: 55 },
     xAxis: {
       type: 'category',
       data: times,
-      axisLabel: { fontSize: 10, color: 'var(--ict-text-secondary)' },
-      axisLine: { lineStyle: { color: 'var(--ict-border)' } },
+      axisLabel: { fontSize: 10, color: AXIS_COLORS.text },
+      axisLine: { lineStyle: { color: AXIS_COLORS.line } },
+      splitLine: { show: false },
     },
     yAxis: {
       type: 'value',
       name: 'MB/s',
-      nameTextStyle: { fontSize: 10, color: 'var(--ict-text-secondary)' },
-      axisLabel: { fontSize: 10, color: 'var(--ict-text-secondary)' },
-      splitLine: { lineStyle: { color: 'var(--ict-border-light)' } },
+      nameTextStyle: { fontSize: 10, color: AXIS_COLORS.text },
+      axisLabel: { fontSize: 10, color: AXIS_COLORS.text },
+      splitLine: { lineStyle: { color: AXIS_COLORS.line, type: 'dashed' } },
     },
     series: [
-      {
-        name: '下载',
-        type: 'line',
-        data: downloads,
-        smooth: true,
-        areaStyle: { opacity: 0.12 },
-        itemStyle: { color: 'var(--ict-primary)' },
-        lineStyle: { width: 2 },
-        symbol: 'none',
-      },
-      {
-        name: '上传',
-        type: 'line',
-        data: uploads,
-        smooth: true,
-        areaStyle: { opacity: 0.12 },
-        itemStyle: { color: 'var(--ict-success)' },
-        lineStyle: { width: 2 },
-        symbol: 'none',
-      },
+      lineSeries('下载', downloads, COLOR.primary),
+      lineSeries('上传', uploads, COLOR.success),
     ],
   };
 });
@@ -147,30 +163,33 @@ onMounted(loadNetwork);
 </script>
 
 <template>
-  <div class="network-detail" v-if="net">
-    <!-- ═══════ 页面顶部概览 ═══════ -->
-    <div class="page-header">
-      <div class="page-header-left">
-        <Button size="small" class="back-btn" @click="goBack">
-          <IconifyIcon icon="lucide:arrow-left" style="font-size: var(--ict-mark-medium);" />
+  <!-- ═══════ 页面顶部概览（与"我的文件"结构一致：头部在最外层，独立于详情内容） ═══════ -->
+  <div class="page-header" v-if="net">
+      <div class="page-header-inner">
+        <div class="title-row">
+          <div
+            class="page-icon-box"
+            :style="{
+              background: `${getStatusColor(net.connectionStatus)}15`,
+              border: `1px solid ${getStatusColor(net.connectionStatus)}30`,
+            }"
+          >
+            <IconifyIcon
+              icon="lucide:network"
+              style="font-size: var(--ict-title-large);"
+              :style="{ color: getStatusColor(net.connectionStatus) }"
+            />
+          </div>
+          <div class="page-title-area">
+            <h1 class="page-title">{{ net.name }}</h1>
+            <p class="page-desc">{{ net.macAddress }} · {{ net.connectionStatus }}</p>
+          </div>
+        </div>
+        <!-- 返回按钮（图标 + 文本，放在描述下方单独一行） -->
+        <Button size="small" type="text" class="back-btn" @click="goBack">
+          <IconifyIcon icon="lucide:arrow-left" class="back-icon" />
+          返回
         </Button>
-        <div
-          class="page-icon-box"
-          :style="{
-            background: `${getStatusColor(net.connectionStatus)}15`,
-            border: `1px solid ${getStatusColor(net.connectionStatus)}30`,
-          }"
-        >
-          <IconifyIcon
-            icon="lucide:network"
-            style="font-size: var(--ict-title-large);"
-            :style="{ color: getStatusColor(net.connectionStatus) }"
-          />
-        </div>
-        <div class="page-title-area">
-          <h1 class="page-title">{{ net.name }}</h1>
-          <p class="page-desc">{{ net.macAddress }} · {{ net.connectionStatus }}</p>
-        </div>
       </div>
       <div class="page-header-right">
         <OverviewCard icon="lucide:arrow-down" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="下载速度" :value="formatSpeed(net.downloadSpeed)" value-color="var(--ict-primary)" />
@@ -180,7 +199,8 @@ onMounted(loadNetwork);
       </div>
     </div>
 
-    <!-- ═══════ 主体内容 ═══════ -->
+  <!-- ═══════ 主体内容 ═══════ -->
+  <div class="network-detail" v-if="net">
     <div class="detail-body">
       <!-- 基本信息卡片 -->
       <Card class="info-card" :bordered="true" :body-style="{ padding: '20px' }">
@@ -276,19 +296,26 @@ onMounted(loadNetwork);
   width: 100%;
 }
 
-/* ===== 页面顶部概览 ===== */
+/* ===== 页面顶部概览（与"我的文件"页面 FilePageHeader.vue 样式对齐） ===== */
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 16px 20px;
   background: var(--ict-bg-card);
+  border-bottom: 1px solid var(--ict-border-light);
   gap: 16px;
   flex-shrink: 0;
   flex-wrap: wrap;
 }
 
-.page-header-left {
+.page-header-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title-row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -296,10 +323,17 @@ onMounted(loadNetwork);
 
 .back-btn {
   font-size: var(--ict-body-small);
+  color: var(--ict-text-secondary);
+  padding: 2px 6px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-radius: 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
+
+.back-icon {
+  font-size: 14px;
 }
 
 .page-icon-box {
