@@ -155,38 +155,105 @@ font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Ari
 
 ### 3.1 PageHeader（页面头部）
 
-**用途**：统一所有页面的顶部标题区域。
+**用途**：统一所有页面（含列表页、详情页）的顶部头部区域。
+
+**强制使用范围**：所有列表页和详情页的顶部头部必须使用此组件，禁止页面再自行编写 `.page-header` / 标题 + 副标题 + 返回按钮的 DOM。
 
 #### 结构
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ [IconBox]  页面标题                    [右侧概览/操作区]    │
-│            页面描述                                         │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│ 页面标题                                  [右侧概览卡片 / 操作区] │
+│ 副标题（model · 状态 / mac · 状态 等）                            │
+│ [← 返回XXX]   ← 可选：仅当传入 backLabel 时渲染                  │
+└──────────────────────────────────────────────────────────────────┘
 ```
+
+#### 设计原则
+
+**左侧（信息区）**：垂直堆叠
+1. **标题（title）**：主标题，使用 `title-large` (20px / 700)
+2. **副标题（subtitle）**：可选，标题下一行小字，使用 `body-small` (12px / 400)
+3. **返回按钮（backLabel）**：可选，独立一行；遵循 **small 线框 + 图标 + 文本** 规范，文本格式固定为 `返回{backLabel}`（如 "返回磁盘管理"、"返回设备管理"）
+
+**右侧（extra 插槽）**：横向排列概览卡片（`OverviewCard`）或操作按钮
 
 #### Props 接口
 ```ts
 interface PageHeaderProps {
-  /** 页面图标（Iconify 图标名） */
-  icon: string;
-  /** 图标颜色（默认 primary #006BE6） */
-  iconColor?: string;
-  /** 页面主标题 */
+  /** 页面主标题（必填） */
   title: string;
-  /** 页面描述 */
-  description?: string;
+  /** 副标题/描述（标题下方一行小字） */
+  subtitle?: string;
+  /**
+   * 返回按钮文本中的"上一级目录名"。
+   * 设置后会在副标题下方渲染【← 返回{backLabel}】small 线框按钮。
+   * 例如：传入 "磁盘管理" → 显示 "返回磁盘管理"
+   */
+  backLabel?: string;
   /** 是否显示底部边框（默认 true） */
   showBorder?: boolean;
+  /** @deprecated 旧 prop，等同于 subtitle，向后兼容保留 */
+  description?: string;
+  /** @deprecated 旧 prop（icon / iconColor），已不再渲染图标 */
+  icon?: string;
+  iconColor?: string;
+}
+
+interface PageHeaderEmits {
+  /** 点击返回按钮触发 */
+  (e: 'back'): void;
+}
+
+interface PageHeaderSlots {
+  /** 右侧概览卡片或操作区，推荐放置 OverviewCard */
+  extra?: () => any;
+  /** @deprecated 兼容旧用法的操作按钮槽，在左侧副标题下方渲染 */
+  actions?: () => any;
 }
 ```
 
 #### 样式规范
 - 容器：`display: flex; align-items: center; justify-content: space-between;`
-- 背景：`var(--bg-card)`（白色）
-- padding：`space-3 space-5`（12px 20px）
-- 底部边框：`1px solid var(--border-light)`（当 showBorder=true）
-- 负边距：`margin: 0 -20px space-4`（与页面容器 padding 对齐）
+- 背景：`var(--ict-bg-card)`（白色）
+- padding：`space-4 space-5`（16px 20px）
+- 底部边框：`1px solid var(--ict-border-light)`（当 showBorder=true）
+- 左侧垂直堆叠：`flex-direction: column; gap: 2px;`
+- 返回按钮上方间距：`margin-top: space-2`（8px）
+- 响应式：≤768px 时切为纵向布局
+
+#### 使用示例
+
+**列表页（无返回按钮，仅右侧操作）**：
+```vue
+<PageHeader title="存储空间管理" subtitle="管理基于存储池或目录的存储空间分配与使用">
+  <template #extra>
+    <Button type="primary" size="small">新建存储池</Button>
+  </template>
+</PageHeader>
+```
+
+**详情页（含返回按钮 + 概览卡片）**：
+```vue
+<PageHeader
+  :title="disk.deviceName"
+  :subtitle="`${disk.model} · ${disk.usageStatus}`"
+  back-label="磁盘管理"
+  @back="goBack"
+>
+  <template #extra>
+    <OverviewCard icon="lucide:database" label="容量" :value="disk.size" />
+    <OverviewCard icon="lucide:thermometer" label="温度" :value="disk.temperature + '°C'" />
+  </template>
+</PageHeader>
+```
+
+#### 使用规范
+
+1. **页面唯一性**：一个页面有且仅有一个 `PageHeader`，必须放在路由组件的最顶层（在主内容容器之外）。
+2. **禁止自行实现头部**：禁止页面使用 `.page-header` / `.page-title` 这样的本地 CSS 类重新实现头部样式，必须复用 `PageHeader` 组件。
+3. **副标题信息密度**：副标题应为一行简短文本，包含识别信息（如 `model · 状态`、`mac · 连接状态`），不应超过 50 个字符。
+4. **返回按钮文案**：`backLabel` 必须填入上一级页面在侧边栏菜单中的实际名称（如 "磁盘管理"、"设备管理"、"存储空间管理"），保持用户认知一致。
+5. **概览卡片摆放**：右侧概览卡片不超过 4 个，超过应考虑改为页面正文区的网格布局。
 
 ---
 

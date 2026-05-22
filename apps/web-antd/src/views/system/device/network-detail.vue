@@ -4,10 +4,9 @@ import { useRoute, useRouter } from 'vue-router';
 import {
   Card,
   Tag,
-  Button,
   Descriptions,
 } from 'ant-design-vue';
-import { OverviewCard } from '#/components/ui-kit';
+import { PageHeader, OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
@@ -163,41 +162,47 @@ onMounted(loadNetwork);
 </script>
 
 <template>
-  <!-- ═══════ 页面顶部概览（与"我的文件"结构一致：头部在最外层，独立于详情内容） ═══════ -->
-  <div class="page-header" v-if="net">
-      <div class="page-header-inner">
-        <div class="title-row">
-          <div
-            class="page-icon-box"
-            :style="{
-              background: `${getStatusColor(net.connectionStatus)}15`,
-              border: `1px solid ${getStatusColor(net.connectionStatus)}30`,
-            }"
-          >
-            <IconifyIcon
-              icon="lucide:network"
-              style="font-size: var(--ict-title-large);"
-              :style="{ color: getStatusColor(net.connectionStatus) }"
-            />
-          </div>
-          <div class="page-title-area">
-            <h1 class="page-title">{{ net.name }}</h1>
-            <p class="page-desc">{{ net.macAddress }} · {{ net.connectionStatus }}</p>
-          </div>
-        </div>
-        <!-- 返回按钮（图标 + 文本，放在描述下方单独一行） -->
-        <Button size="small" type="text" class="back-btn" @click="goBack">
-          <IconifyIcon icon="lucide:arrow-left" class="back-icon" />
-          返回
-        </Button>
-      </div>
-      <div class="page-header-right">
-        <OverviewCard icon="lucide:arrow-down" icon-color="var(--ict-primary)" icon-bg="var(--ict-primary-light)" label="下载速度" :value="formatSpeed(net.downloadSpeed)" value-color="var(--ict-primary)" />
-        <OverviewCard icon="lucide:arrow-up" icon-color="var(--ict-success)" icon-bg="var(--ict-success-light)" label="上传速度" :value="formatSpeed(net.uploadSpeed)" value-color="var(--ict-success)" />
-        <OverviewCard icon="lucide:zap" icon-color="var(--ict-warning)" icon-bg="var(--ict-warning-light)" label="协商速率" :value="net.linkSpeed" />
-        <OverviewCard icon="lucide:git-compare" icon-color="var(--ict-info)" icon-bg="var(--ict-info-light)" label="双工模式" :value="net.duplex" />
-      </div>
-    </div>
+  <!-- 页面头部：标题 + 副标题 + 返回按钮 + 右侧概览卡片 -->
+  <PageHeader
+    v-if="net"
+    :title="net.name"
+    :subtitle="`${net.macAddress} · ${net.connectionStatus}`"
+    back-label="设备管理"
+    @back="goBack"
+  >
+    <template #extra>
+      <OverviewCard
+        icon="lucide:arrow-down"
+        icon-color="var(--ict-primary)"
+        icon-bg="var(--ict-primary-light)"
+        label="下载速度"
+        :value="formatSpeed(net.downloadSpeed)"
+        value-color="var(--ict-primary)"
+      />
+      <OverviewCard
+        icon="lucide:arrow-up"
+        icon-color="var(--ict-success)"
+        icon-bg="var(--ict-success-light)"
+        label="上传速度"
+        :value="formatSpeed(net.uploadSpeed)"
+        value-color="var(--ict-success)"
+      />
+      <OverviewCard
+        icon="lucide:zap"
+        icon-color="var(--ict-warning)"
+        icon-bg="var(--ict-warning-light)"
+        label="协商速率"
+        :value="net.linkSpeed"
+      />
+      <OverviewCard
+        icon="lucide:git-compare"
+        icon-color="var(--ict-info)"
+        icon-bg="var(--ict-info-light)"
+        label="双工模式"
+        :value="net.duplex"
+      />
+    </template>
+  </PageHeader>
 
   <!-- ═══════ 主体内容 ═══════ -->
   <div class="network-detail" v-if="net">
@@ -296,78 +301,6 @@ onMounted(loadNetwork);
   width: 100%;
 }
 
-/* ===== 页面顶部概览（与"我的文件"页面 FilePageHeader.vue 样式对齐） ===== */
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  background: var(--ict-bg-card);
-  border-bottom: 1px solid var(--ict-border-light);
-  gap: 16px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-}
-
-.page-header-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.back-btn {
-  font-size: var(--ict-body-small);
-  color: var(--ict-text-secondary);
-  padding: 2px 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 4px;
-  align-self: flex-start;
-}
-
-.back-icon {
-  font-size: 14px;
-}
-
-.page-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.page-title {
-  font-size: var(--ict-title-medium);
-  font-weight: 600;
-  color: var(--ict-text-emphasis);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.page-desc {
-  font-size: var(--ict-body-small);
-  color: var(--ict-text-secondary);
-  margin: 2px 0 0;
-}
-
-.page-header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-
 /* ===== 主体 ===== */
 .detail-body {
   display: flex;
@@ -455,11 +388,6 @@ onMounted(loadNetwork);
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }

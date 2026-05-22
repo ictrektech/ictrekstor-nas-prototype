@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getDisksApi, type DiskInfo } from '#/api/storage';
-import DiskDetailHeader from './components/DiskDetailHeader.vue';
+import { PageHeader, OverviewCard } from '#/components/ui-kit';
 import DiskInfoCard from './components/DiskInfoCard.vue';
 import SmartHealthPanel from './components/SmartHealthPanel.vue';
 import MonitorCharts from './components/MonitorCharts.vue';
@@ -30,12 +30,61 @@ function goBack() {
   router.push('/storage/disks');
 }
 
+/** 使用时长格式化（小时 → 友好单位） */
+function formatHours(hours?: number): string {
+  if (!hours) return '--';
+  const days = Math.floor(hours / 24);
+  if (days > 365) return `${(days / 365).toFixed(1)}年`;
+  return `${days}天`;
+}
+
+/** 温度色阶 */
+function getTempColor(temp?: number): string {
+  if (!temp) return 'var(--ict-text-secondary)';
+  if (temp < 40) return 'var(--ict-success)';
+  if (temp < 50) return 'var(--ict-warning)';
+  return 'var(--ict-danger)';
+}
+
 onMounted(loadDisk);
 </script>
 
 <template>
-      <!-- 页面顶部概览（与"我的文件"结构一致：头部在最外层，独立于详情内容） -->
-      <DiskDetailHeader v-if="disk" :disk="disk" back-label="磁盘管理" @back="goBack" />
+  <!-- 页面头部：标题 + 副标题 + 返回按钮 + 右侧概览卡片 -->
+  <PageHeader
+    v-if="disk"
+    :title="disk.deviceName"
+    :subtitle="`${disk.model} · ${disk.usageStatus || disk.status}`"
+    back-label="磁盘管理"
+    @back="goBack"
+  >
+    <template #extra>
+      <OverviewCard
+        icon="lucide:database"
+        icon-color="var(--ict-primary)"
+        icon-bg="var(--ict-primary-light)"
+        label="容量"
+        :value="disk.size"
+      />
+      <OverviewCard
+        v-if="disk.temperature !== undefined"
+        icon="lucide:thermometer"
+        icon-color="var(--ict-warning)"
+        icon-bg="var(--ict-warning-light)"
+        label="温度"
+        :value="disk.temperature + '°C'"
+        :value-color="getTempColor(disk.temperature)"
+      />
+      <OverviewCard
+        v-if="disk.usedHours"
+        icon="lucide:clock"
+        icon-color="var(--ict-success)"
+        icon-bg="var(--ict-success-light)"
+        label="使用时长"
+        :value="formatHours(disk.usedHours)"
+      />
+    </template>
+  </PageHeader>
 
   <!-- 主体内容 -->
   <div class="disk-detail" v-if="disk">
@@ -68,7 +117,7 @@ onMounted(loadDisk);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 @media (max-width: 768px) {
