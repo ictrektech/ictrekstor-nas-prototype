@@ -88,6 +88,8 @@ export default { name: 'PageHeader' };
   gap: var(--ict-space-4);
   flex-shrink: 0;
   flex-wrap: wrap;
+  /* 负 margin 抵消父容器（main）的水平 padding，实现通栏撑满 */
+
 }
 
 .page-header-bordered {
@@ -128,6 +130,19 @@ export default { name: 'PageHeader' };
 
 .back-icon {
   font-size: 14px;
+}
+
+/* 旧 actions 插槽按钮间距 */
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--ict-space-2);
+}
+
+/* 清除 Ant Design 按钮默认相邻间距，确保只由 gap 控制 */
+.page-header-actions :deep(.ant-btn + .ant-btn) {
+  margin-left: 0;
 }
 
 /* 右侧：概览卡片横向排列 */
