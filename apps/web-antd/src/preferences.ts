@@ -10,4 +10,7 @@ export const overridesPreferences = defineOverridesPreferences({
   app: {
     name: 'VIVIBIT',
   },
+  logo: {
+    source: '/icons/logo-vivibit.png',
+  },
 });

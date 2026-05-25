@@ -143,6 +143,20 @@ watch(
 
 <template>
   <BasicLayout @clear-preferences-and-logout="handleLogout" @clickLogo="router.push('/')">
+    <!-- 完全自定义 Logo 区域，使用横版图片 -->
+    <template #logo>
+      <a
+        href="javascript:void 0"
+        class="flex h-full items-center gap-2 overflow-hidden px-3 text-lg leading-normal transition-all duration-500"
+        @click="router.push('/')"
+      >
+        <img
+          src="/icons/logo-vivibit.png"
+          alt="VIVIBIT"
+          class="w-auto object-contain"
+        />
+      </a>
+    </template>
     <template #user-dropdown>
       <UserDropdown
         :avatar
