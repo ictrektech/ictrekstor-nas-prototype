@@ -168,17 +168,35 @@ function handleRename(newName: string) {
 }
 
 function handleDeleteFile(file: MyFileItem) {
-  message.success(`"${file.name}" 已删除`);
-  currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
-  selectedFileIds.value = selectedFileIds.value.filter((id) => id !== file.id);
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除 "${file.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`"${file.name}" 已删除`);
+      currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+      selectedFileIds.value = selectedFileIds.value.filter((id) => id !== file.id);
+    },
+  });
 }
 
 function handleBatchDelete(files: MyFileItem[]) {
   const names = files.map((f) => f.name).join('、');
-  message.success(`已删除 ${files.length} 个文件：${names}`);
-  const idsToRemove = new Set(files.map((f) => f.id));
-  currentFiles.value = currentFiles.value.filter((f) => !idsToRemove.has(f.id));
-  selectedFileIds.value = [];
+  Modal.confirm({
+    title: '确认批量删除',
+    content: `确定要删除以下 ${files.length} 个文件吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`已删除 ${files.length} 个文件：${names}`);
+      const idsToRemove = new Set(files.map((f) => f.id));
+      currentFiles.value = currentFiles.value.filter((f) => !idsToRemove.has(f.id));
+      selectedFileIds.value = [];
+    },
+  });
 }
 
 // 复制/移动：目标目录弹窗
