@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { Button, Card, Input, message } from 'ant-design-vue';
+import { Button, Card, Input, message, Modal } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
 import { ShareConfigModal } from '#/components/ShareConfigModal';
 import type { ShareFormData } from '#/components/ShareConfigModal';
@@ -171,8 +171,17 @@ function handleCopyLink(url: string) {
 
 /* ═══════ 删除 ═══════ */
 function handleDeleteDir(dir: SharedDir) {
-  shareDirs.value = shareDirs.value.filter((d) => d.id !== dir.id);
-  message.success(`"${dir.name}" 已删除`);
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除共享 "${dir.name}" 吗？删除后该共享将失效，此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      shareDirs.value = shareDirs.value.filter((d) => d.id !== dir.id);
+      message.success(`"${dir.name}" 已删除`);
+    },
+  });
 }
 </script>
 

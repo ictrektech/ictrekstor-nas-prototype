@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import {
   FileTreePanel,
   FileManagerPanel,
@@ -67,8 +67,17 @@ function handleRestore(file: FileItem) {
 }
 
 function handleDelete(file: FileItem) {
-  message.success(`"${file.name}" 已彻底删除`);
-  currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+  Modal.confirm({
+    title: '确认彻底删除',
+    content: `确定要彻底删除 "${file.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`"${file.name}" 已彻底删除`);
+      currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+    },
+  });
 }
 
 function refresh() {

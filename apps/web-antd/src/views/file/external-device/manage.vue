@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 import {
   FileTreePanel,
   FileManagerPanel,
@@ -248,13 +248,31 @@ function handleRename(newName: string) {
 
 // 删除
 function handleDeleteFile(file: FileItem) {
-  message.success(`"${file.name}" 已删除`);
-  files.value = files.value.filter((f) => f.id !== file.id);
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除 "${file.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`"${file.name}" 已删除`);
+      files.value = files.value.filter((f) => f.id !== file.id);
+    },
+  });
 }
 
 function handleDeleteLocalFile(file: FileItem) {
-  message.success(`"${file.name}" 已删除`);
-  localFilesList.value = localFilesList.value.filter((f) => f.id !== file.id);
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除 "${file.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`"${file.name}" 已删除`);
+      localFilesList.value = localFilesList.value.filter((f) => f.id !== file.id);
+    },
+  });
 }
 
 // 刷新

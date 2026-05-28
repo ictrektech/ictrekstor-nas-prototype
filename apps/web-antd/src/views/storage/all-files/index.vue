@@ -233,8 +233,17 @@ function handleRename() {
 }
 
 function handleDeleteFile(file: FileItem) {
-  message.success(`"${file.name}" 已删除`);
-  currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+  Modal.confirm({
+    title: '确认删除',
+    content: `确定要删除 "${file.name}" 吗？此操作不可恢复。`,
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => {
+      message.success(`"${file.name}" 已删除`);
+      currentFiles.value = currentFiles.value.filter((f) => f.id !== file.id);
+    },
+  });
 }
 
 function refresh() {
