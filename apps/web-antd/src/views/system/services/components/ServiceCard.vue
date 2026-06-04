@@ -3,7 +3,7 @@ import { IconifyIcon } from '@vben/icons';
 import { useUserStore } from '@vben/stores';
 import { SwitchToggle, Tag } from '#/components/ui-kit';
 import { Button } from 'ant-design-vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import type { ServiceData } from '../types';
 
 const userStore = useUserStore();
@@ -54,6 +54,11 @@ const hostname = computed(() => {
 const username = computed(() => userStore.userInfo?.username || 'admin');
 /** 密码（MOCK：SMB 连接密码与系统密码一致） */
 const password = computed(() => 'admin123');
+/** 密码默认隐藏，用户手动点击眼睛图标后展示 */
+const showPassword = ref(false);
+const displayedPassword = computed(() =>
+  showPassword.value ? password.value : '••••••••',
+);
 </script>
 
 <template>
@@ -154,10 +159,24 @@ const password = computed(() => 'admin123');
             </div>
             <div class="other-connection-item">
               <span class="other-connection-label">密码</span>
-              <span class="other-connection-value">{{ password }}</span>
+              <span class="other-connection-value password-value">
+                {{ displayedPassword }}
+              </span>
               <Button
                 size="small"
-                class="copy-btn"
+                class="icon-action-btn"
+                type="link"
+                :aria-label="showPassword ? '隐藏密码' : '显示密码'"
+                @click="showPassword = !showPassword"
+              >
+                <IconifyIcon
+                  :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'"
+                  :style="{ fontSize: '14px' }"
+                />
+              </Button>
+              <Button
+                size="small"
+                class="icon-action-btn"
                 type="link"
                 @click="emit('copy', password)"
               >
@@ -354,6 +373,21 @@ const password = computed(() => 'admin123');
   background: var(--ict-primary-light);
 }
 
+.icon-action-btn {
+  color: var(--ict-text-secondary);
+  padding: 2px 6px;
+  height: auto;
+  flex-shrink: 0;
+  border-radius: var(--ict-radius-sm);
+  transition: all 0.2s ease;
+}
+
+.icon-action-btn:hover,
+.icon-action-btn:focus-visible {
+  color: var(--ict-primary);
+  background: var(--ict-primary-light);
+}
+
 /* 其他连接方式 */
 .other-connection-card {
   background: var(--ict-bg-page);
@@ -390,6 +424,11 @@ const password = computed(() => 'admin123');
   color: var(--ict-text-emphasis);
   font-weight: 500;
   font-family: var(--ict-font-family);
+}
+
+.password-value {
+  min-width: 56px;
+  letter-spacing: 1px;
 }
 
 .card-body-disabled {
