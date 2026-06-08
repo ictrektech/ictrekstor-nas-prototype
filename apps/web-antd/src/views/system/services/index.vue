@@ -163,7 +163,7 @@ function openGuideModal(s: ServiceData) {
 .service-settings-page {
   padding-bottom: 32px;
   min-height: 100vh;
-  background: var(--ict-bg-card);
+  background: var(--ict-bg-page);
 }
 
 .page-header {

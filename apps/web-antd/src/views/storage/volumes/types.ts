@@ -35,9 +35,9 @@ export function getUsagePercent(used: string, total: string): number {
 }
 
 export function getCapacityColor(percent: number): string {
-  if (percent >= 90) return '#ff4d4f';
-  if (percent >= 70) return '#faad14';
-  return '#1677ff';
+  if (percent >= 90) return 'hsl(var(--destructive))';
+  if (percent >= 70) return 'hsl(var(--warning))';
+  return 'hsl(var(--primary))';
 }
 
 export function getStatusColor(status: string): string {
@@ -52,5 +52,5 @@ export function getFsIcon(fs: string): string {
 }
 
 export function getPoolStatusDotColor(status: string): string {
-  return status === '正常' ? '#52c41a' : '#ff4d4f';
+  return status === '正常' ? 'hsl(var(--success))' : 'hsl(var(--destructive))';
 }

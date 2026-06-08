@@ -34,7 +34,7 @@ withDefaults(defineProps<Props>(), {
   gap: 8px;
   padding: 12px 16px;
   background: var(--ict-bg-card);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--ict-border-light);
   min-width: 100px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);

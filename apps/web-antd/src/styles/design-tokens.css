@@ -104,6 +104,53 @@
   --ict-link-small: 12px;
 }
 
+html.dark {
+  --ict-primary: hsl(var(--primary));
+  --ict-primary-light: hsl(var(--primary) / 0.14);
+  --ict-primary-hover: hsl(var(--primary) / 0.86);
+  --ict-primary-active: hsl(var(--primary) / 0.72);
+  --ict-primary-disabled: hsl(var(--primary) / 0.32);
+  --ict-primary-bg: hsl(var(--primary) / 0.1);
+
+  --ict-success: hsl(var(--success));
+  --ict-success-light: hsl(var(--success) / 0.14);
+  --ict-success-hover: hsl(var(--success) / 0.86);
+  --ict-success-active: hsl(var(--success) / 0.72);
+  --ict-success-disabled: hsl(var(--success) / 0.32);
+  --ict-success-bg: hsl(var(--success) / 0.1);
+
+  --ict-warning: hsl(var(--warning));
+  --ict-warning-light: hsl(var(--warning) / 0.14);
+  --ict-warning-hover: hsl(var(--warning) / 0.86);
+  --ict-warning-active: hsl(var(--warning) / 0.72);
+  --ict-warning-disabled: hsl(var(--warning) / 0.32);
+  --ict-warning-bg: hsl(var(--warning) / 0.1);
+
+  --ict-danger: hsl(var(--destructive));
+  --ict-danger-light: hsl(var(--destructive) / 0.14);
+  --ict-danger-hover: hsl(var(--destructive) / 0.86);
+  --ict-danger-active: hsl(var(--destructive) / 0.72);
+  --ict-danger-disabled: hsl(var(--destructive) / 0.32);
+  --ict-danger-bg: hsl(var(--destructive) / 0.1);
+
+  --ict-info: #a78bfa;
+  --ict-info-light: rgb(167 139 250 / 14%);
+
+  --ict-text-emphasis: hsl(var(--foreground));
+  --ict-text-primary: hsl(var(--foreground) / 0.86);
+  --ict-text-secondary: hsl(var(--muted-foreground));
+  --ict-text-disabled: hsl(var(--muted-foreground) / 0.58);
+  --ict-text-tertiary: #6b7280;
+
+  --ict-border: hsl(var(--border));
+  --ict-deliver: hsl(var(--border));
+  --ict-border-light: hsl(var(--border) / 0.72);
+
+  --ict-bg-page: hsl(var(--background-deep));
+  --ict-bg-card: hsl(var(--card));
+  --ict-bg-section: hsl(var(--accent));
+}
+
 /* ═══════════════════════════════════════
    3. 全局组件覆盖 — 主按钮
    ═══════════════════════════════════════ */
@@ -241,7 +288,7 @@
    ═══════════════════════════════════════ */
 .ant-dropdown-menu-item-danger:hover,
 .ant-dropdown-menu-item-danger.ant-dropdown-menu-item-active {
-  background-color: #F3F3F3 !important;
+  background-color: var(--ict-bg-section) !important;
 }
 
 /* 小线框按钮（24px） */

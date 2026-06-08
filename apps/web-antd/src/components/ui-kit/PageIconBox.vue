@@ -26,7 +26,7 @@ const boxStyle = computed(() => ({
   width: `${props.boxSize}px`,
   height: `${props.boxSize}px`,
   borderRadius: `${props.radius}px`,
-  background: `${props.color}18`,
+  background: `color-mix(in srgb, ${props.color} 12%, transparent)`,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

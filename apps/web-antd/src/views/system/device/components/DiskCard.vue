@@ -112,21 +112,6 @@ const poolNamesText = computed(() => {
       </div>
     </div>
 
-    <!-- 容量进度条：展示已用/总容量 -->
-    <div class="info-capacity">
-      <Progress
-        :percent="usagePercent"
-        :stroke-color="capacityColor"
-        :show-info="false"
-        :stroke-width="8"
-        size="small"
-      />
-      <div class="capacity-summary">
-        <span class="cap-used">{{ usedSizeText }} / {{ disk.size }}</span>
-        <span class="cap-percent">{{ usagePercent }}%</span>
-      </div>
-    </div>
-
     <!-- 内容：属性信息（类型 + 序列号/型号） -->
     <div class="nest-card-body">
       <div class="disk-attrs-row">

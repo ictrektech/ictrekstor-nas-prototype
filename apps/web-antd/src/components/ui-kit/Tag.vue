@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
+
 interface Props {
   text?: string;
   type?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
@@ -8,22 +10,29 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'default',
 });
 
-const typeMap: Record<string, { color: string; bg: string }> = {
-  default:  { color: 'var(--ict-text-secondary)', bg: '#F7F8FA' },
+type TagType = NonNullable<Props['type']>;
+
+const typeMap: Record<TagType, { color: string; bg: string }> = {
+  default:  { color: 'var(--ict-text-secondary)', bg: 'var(--ict-bg-section)' },
   primary:  { color: 'var(--ict-primary)',        bg: 'var(--ict-primary-light)' },
   success:  { color: 'var(--ict-success)',        bg: 'var(--ict-success-light)' },
   warning:  { color: 'var(--ict-warning)',        bg: 'var(--ict-warning-light)' },
   danger:   { color: 'var(--ict-danger)',         bg: 'var(--ict-danger-light)' },
 };
+
+const tagStyle = computed(() => {
+  const style = typeMap[props.type];
+  return {
+    color: style.color,
+    backgroundColor: style.bg,
+  };
+});
 </script>
 
 <template>
   <span
     class="ict-tag"
-    :style="{
-      color: typeMap[type].color,
-      backgroundColor: typeMap[type].bg,
-    }"
+    :style="tagStyle"
   >
     <span v-if="text" class="ict-tag__text">{{ text }}</span>
     <slot />

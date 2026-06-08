@@ -284,7 +284,7 @@ function handleDeleteVolume(vol: StorageVolume) {
         <!-- 目录头部信息 -->
         <div class="pool-header directory-header">
           <div class="pool-header-main">
-            <div class="pool-icon-box" style="background: var(--ict-success-light);">
+            <div class="pool-icon-box" >
               <IconifyIcon icon="lucide:folder-open" style="font-size: var(--ict-headline-small); color: var(--ict-success);" />
             </div>
             <div class="pool-header-body">
@@ -357,7 +357,7 @@ function handleDeleteVolume(vol: StorageVolume) {
 .volume-manager {
   padding: 0 20px 16px;
   width: 100%;
-  background: #ffffff;
+  background: hsl(var(--background));
 }
 
 /* 存储空间列表 */
@@ -386,15 +386,15 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-success-light) 100%);
-  border-bottom: 1px solid #e6e6e6;
+  background: linear-gradient(0deg, hsl(var(--card)) 0%, var(--ict-success-light) 100%);
+  border-bottom: 1px solid hsl(var(--border));
   transition: all 0.2s ease;
   gap: 24px;
   cursor: default;
 }
 
 .directory-header:hover {
-  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-success-light) 100%);
+  background: linear-gradient(0deg, hsl(var(--card)) 0%, var(--ict-success-light) 100%);
 }
 
 /* 存储空间表头 */
@@ -403,7 +403,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 18px;
-  background: #ffffff;
+  background: hsl(var(--card));
   border-bottom: 1px solid var(--ict-border);
 }
 
@@ -444,7 +444,7 @@ function handleDeleteVolume(vol: StorageVolume) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 12px;
-  background: #ffffff;
+  background: hsl(var(--card));
 }
 
 .pool-empty {

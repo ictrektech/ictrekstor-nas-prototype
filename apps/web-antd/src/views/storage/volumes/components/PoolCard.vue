@@ -121,8 +121,8 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   align-items: stretch;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(0deg, #FFFFFF 0%, var(--ict-primary-light) 100%);
-  border-bottom: 1px solid #e6e6e6;
+  background: linear-gradient(0deg, hsl(var(--card)) 0%, var(--ict-primary-light) 100%);
+  border-bottom: 1px solid hsl(var(--border));
   transition: all 0.2s ease;
   gap: 24px;
 }
@@ -167,7 +167,7 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
 .pool-name {
   font-size: var(--ict-title-medium);
   font-weight: 700;
-  color: #1a1a1a;
+  color: hsl(var(--foreground));
 }
 
 .status-dot {
@@ -205,18 +205,18 @@ const poolCapColor = computed(() => getCapacityColor(poolUsage.value));
   gap: 4px;
   font-size: var(--ict-body-medium);
   color: var(--ict-primary);
-  background: rgba(22, 119, 255, 0.08);
+  background: hsl(var(--primary) / 0.08);
   padding: 2px 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 1px solid rgba(22, 119, 255, 0.15);
+  border: 1px solid hsl(var(--primary) / 0.15);
   line-height: 1.5;
 }
 
 .disk-tag:hover {
-  background: rgba(22, 119, 255, 0.15);
-  border-color: rgba(22, 119, 255, 0.3);
+  background: hsl(var(--primary) / 0.15);
+  border-color: hsl(var(--primary) / 0.3);
 }
 
 .pool-header-panel {

@@ -285,7 +285,7 @@ const handleGoForward = () => {
   align-items: center;
   white-space: nowrap;
   background: var(--ict-bg-card);
-  border: 1px solid #e9ecef;
+  border: 1px solid hsl(var(--input));
   border-radius: 8px;
   padding: 0 14px;
   gap: 2px;

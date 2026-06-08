@@ -131,7 +131,7 @@ const statusColor = computed(() => getStatusColor(props.volume.status));
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #f8f9fa;
+  background: hsl(var(--accent));
   display: flex;
   align-items: center;
   justify-content: center;

@@ -6,6 +6,8 @@ import { Button } from 'ant-design-vue';
 import { computed, ref } from 'vue';
 import type { ServiceData } from '../types';
 
+type TagType = 'default' | 'primary' | 'success' | 'warning' | 'danger';
+
 const userStore = useUserStore();
 
 const props = defineProps<{
@@ -24,7 +26,7 @@ function onToggle(checked: boolean) {
 }
 
 /** 状态标签配置 */
-const statusConfig: Record<string, { type: string; text: string }> = {
+const statusConfig: Record<ServiceData['status'], { type: TagType; text: string }> = {
   running: { type: 'success', text: '运行中' },
   stopped: { type: 'default', text: '已停止' },
   error: { type: 'danger', text: '异常' },
@@ -40,15 +42,6 @@ const ipAddress = computed(() => {
 
 const macUrl = computed(() => `smb://${ipAddress.value}`);
 const windowsUrl = computed(() => `\\\\${ipAddress.value}`);
-
-const port = computed(() => {
-  const item = props.service.quickInfo?.find((q) => q.label === '端口');
-  return item?.value || '445';
-});
-
-const hostname = computed(() => {
-  return (props.service.config as any)?.serverName || 'NAS';
-});
 
 /** 当前登录用户名（用于 SMB 连接） */
 const username = computed(() => userStore.userInfo?.username || 'admin');
@@ -71,11 +64,7 @@ const displayedPassword = computed(() =>
       <div class="header-left">
         <div
           class="service-icon-wrap"
-          :style="{
-            background: service.enabled
-              ? `${service.iconColor}18`
-              : 'var(--ict-border-light)',
-          }"
+          
         >
           <img
             src="/icons/smb.png"
@@ -198,7 +187,7 @@ const displayedPassword = computed(() =>
 <style scoped>
 .service-card {
   background: var(--ict-bg-card);
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid var(--ict-border);
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -313,6 +302,7 @@ const displayedPassword = computed(() =>
 
 .connection-card {
   background: var(--ict-bg-page);
+  border: 1px solid var(--ict-border-light);
   border-radius: 12px;
   padding: 16px 20px;
 }
@@ -391,6 +381,7 @@ const displayedPassword = computed(() =>
 /* 其他连接方式 */
 .other-connection-card {
   background: var(--ict-bg-page);
+  border: 1px solid var(--ict-border-light);
   border-radius: 12px;
   padding: 16px 20px;
 }
