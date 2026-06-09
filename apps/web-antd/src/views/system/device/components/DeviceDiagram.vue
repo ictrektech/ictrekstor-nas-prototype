@@ -307,7 +307,7 @@ defineExpose({ highlightBay });
   justify-content: center;
   padding: 0;
   background: #F6F6F6;
-  border: 2px solid var(--ict-border);
+  border: 2px solid #E9ECEF;
   border-radius: 4px;
   cursor: pointer;
   transition:
