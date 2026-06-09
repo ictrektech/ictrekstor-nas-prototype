@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
+import { usePreferences } from '@vben/preferences';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -24,6 +25,9 @@ use([
 const props = defineProps<{
   poolDetail: StoragePoolDetail;
 }>();
+
+const { isDark } = usePreferences();
+const chartAxisLineColor = computed(() => isDark.value ? 'rgba(255,255,255,0.1)' : '#e2e8f0');
 
 const capacityPercent = computed(() => {
   const used = parseFloat(props.poolDetail.usedCapacity);
@@ -76,8 +80,8 @@ const capacityChartOption = computed(() => {
     tooltip: { trigger: 'axis' },
     legend: { data: ['已用容量', '可用容量'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', name: 'GB', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
+    xAxis: { type: 'category', data: dates, boundaryGap: false, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: chartAxisLineColor.value } } },
+    yAxis: { type: 'value', name: 'GB', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: chartAxisLineColor.value, type: 'dashed' } } },
     series: [
       lineSeries('已用容量', props.poolDetail.capacityHistory.map((h) => h.used), COLOR.primary, true),
       lineSeries('可用容量', props.poolDetail.capacityHistory.map((h) => h.available), COLOR.success, true),
@@ -91,8 +95,8 @@ const iopsChartOption = computed(() => {
     tooltip: { trigger: 'axis' },
     legend: { data: ['读 IOPS', '写 IOPS'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', name: 'IOPS', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
+    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: chartAxisLineColor.value } } },
+    yAxis: { type: 'value', name: 'IOPS', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: chartAxisLineColor.value, type: 'dashed' } } },
     series: [
       lineSeries('读 IOPS', props.poolDetail.ioStats.map((s) => s.readIops), COLOR.primary),
       lineSeries('写 IOPS', props.poolDetail.ioStats.map((s) => s.writeIops), COLOR.success),
@@ -106,8 +110,8 @@ const bandwidthChartOption = computed(() => {
     tooltip: { trigger: 'axis' },
     legend: { data: ['读带宽', '写带宽'], bottom: 0, textStyle: { color: '#64748b' } },
     grid: { left: '3%', right: '4%', bottom: '10%', top: '10%', containLabel: true },
-    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: '#e2e8f0' } } },
-    yAxis: { type: 'value', name: 'MB/s', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } } },
+    xAxis: { type: 'category', data: times, axisLabel: { color: '#64748b' }, axisLine: { lineStyle: { color: chartAxisLineColor.value } } },
+    yAxis: { type: 'value', name: 'MB/s', nameTextStyle: { color: '#64748b' }, axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: chartAxisLineColor.value, type: 'dashed' } } },
     series: [
       lineSeries('读带宽', props.poolDetail.ioStats.map((s) => s.readBandwidth), COLOR.primary),
       lineSeries('写带宽', props.poolDetail.ioStats.map((s) => s.writeBandwidth), COLOR.warning),

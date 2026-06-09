@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { Card } from 'ant-design-vue';
 import { IconifyIcon } from '@vben/icons';
+import { usePreferences } from '@vben/preferences';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -20,6 +21,8 @@ const props = defineProps<{
   specs: { label: string; value: string }[];
   colorTheme: string;
 }>();
+
+const { isDark } = usePreferences();
 
 const xLabels = ['-60分', '-45分', '-30分', '-15分', '现在'];
 
@@ -54,7 +57,7 @@ const chartOption = computed(() => ({
     min: 0,
     max: 100,
     interval: 20,
-    splitLine: { lineStyle: { color: '#F0F0F0' } },
+    splitLine: { lineStyle: { color: isDark.value ? 'rgba(255,255,255,0.1)' : '#F0F0F0' } },
     axisLine: { show: false },
     axisTick: { show: false },
     axisLabel: { fontSize: 12, fontWeight: 400, color: '#64748b', margin: 14, formatter: '{value}%' },

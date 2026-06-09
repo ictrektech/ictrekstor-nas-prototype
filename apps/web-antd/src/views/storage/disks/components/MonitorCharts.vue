@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { Card } from 'ant-design-vue';
+import { usePreferences } from '@vben/preferences';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -30,6 +31,9 @@ function genHourlyData(base: number, variance: number): number[] {
     return Math.max(0, +(base * hourFactor + (Math.random() - 0.5) * variance).toFixed(2));
   });
 }
+
+const { isDark } = usePreferences();
+const chartAxisLineColor = computed(() => isDark.value ? 'rgba(255,255,255,0.1)' : '#e2e8f0');
 
 const hours = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
 
@@ -68,7 +72,7 @@ function lineOption(title: string, yName: string, series: any[]) {
       type: 'category',
       data: hours,
       axisLabel: { fontSize: 10, color: '#64748b' },
-      axisLine: { lineStyle: { color: '#e2e8f0' } },
+      axisLine: { lineStyle: { color: chartAxisLineColor.value } },
       splitLine: { show: false },
     },
     yAxis: {
@@ -77,7 +81,7 @@ function lineOption(title: string, yName: string, series: any[]) {
       nameTextStyle: { fontSize: 10, color: '#64748b' },
       axisLabel: { fontSize: 10, color: '#64748b' },
       axisLine: { show: false },
-      splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } },
+      splitLine: { lineStyle: { color: chartAxisLineColor.value, type: 'dashed' } },
     },
     series,
   };

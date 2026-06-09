@@ -8,6 +8,7 @@ import {
 } from 'ant-design-vue';
 import { PageHeader, OverviewCard } from '#/components/ui-kit';
 import { IconifyIcon } from '@vben/icons';
+import { usePreferences } from '@vben/preferences';
 import VChart from 'vue-echarts';
 import { use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
@@ -32,6 +33,8 @@ use([
 const route = useRoute();
 const router = useRouter();
 const interfaceName = route.params.name as string;
+const { isDark } = usePreferences();
+const chartAxisLineColor = computed(() => isDark.value ? 'rgba(255,255,255,0.1)' : '#e2e8f0');
 
 const net = ref<NetworkDetail | null>(null);
 const loading = ref(false);
@@ -85,7 +88,7 @@ const bandwidthOption = computed(() => {
 
   // ECharts Canvas 不支持 CSS var()，必须用十六进制色值，与设计令牌保持一致
   const COLOR = { primary: '#006be6', success: '#00b42a' };
-  const AXIS_COLORS = { text: '#64748b', line: '#e2e8f0' };
+  const AXIS_COLORS = { text: '#64748b', line: chartAxisLineColor.value };
 
   /** 构造带 hover 强调 + 渐变填充的 line series */
   function lineSeries(name: string, data: number[], color: string) {
