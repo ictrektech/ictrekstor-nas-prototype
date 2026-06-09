@@ -12,5 +12,6 @@ export const overridesPreferences = defineOverridesPreferences({
   },
   logo: {
     source: '/icons/logo-vivibit.png',
+    sourceDark: '/icons/logo-vivibit-white.png',
   },
 });

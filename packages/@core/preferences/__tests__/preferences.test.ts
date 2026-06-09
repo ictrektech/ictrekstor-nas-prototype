@@ -22,6 +22,7 @@ describe('preferences', () => {
     })),
   );
   beforeEach(() => {
+    window.localStorage.clear();
     preferenceManager = new PreferenceManager();
   });
 
@@ -53,6 +54,34 @@ describe('preferences', () => {
     };
 
     expect(preferenceManager.getPreferences()).toEqual(expected);
+  });
+
+  it('keeps overrides above cached preferences when initializing', async () => {
+    const cachedPreferences = {
+      ...defaultPreferences,
+      logo: {
+        ...defaultPreferences.logo,
+        source: 'cached-logo.webp',
+      },
+    };
+
+    window.localStorage.setItem(
+      'testNamespace-preferences',
+      JSON.stringify({ value: cachedPreferences }),
+    );
+
+    await preferenceManager.initPreferences({
+      namespace: 'testNamespace',
+      overrides: {
+        logo: {
+          source: '/icons/logo-vivibit.png',
+        },
+      },
+    });
+
+    expect(preferenceManager.getPreferences().logo.source).toBe(
+      '/icons/logo-vivibit.png',
+    );
   });
 
   it('updates theme mode correctly', () => {

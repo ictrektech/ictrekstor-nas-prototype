@@ -11,7 +11,7 @@ import {
   Notification,
   UserDropdown,
 } from '@vben/layouts';
-import { preferences } from '@vben/preferences';
+import { preferences, usePreferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { useAuthStore } from '#/store';
@@ -79,9 +79,16 @@ const userStore = useUserStore();
 const authStore = useAuthStore();
 const accessStore = useAccessStore();
 const { destroyWatermark, updateWatermark } = useWatermark();
+const { isDark } = usePreferences();
 const showDot = computed(() =>
   notifications.value.some((item) => !item.isRead),
 );
+
+const logoSource = computed(() => {
+  return isDark.value && preferences.logo.sourceDark
+    ? preferences.logo.sourceDark
+    : preferences.logo.source;
+});
 
 const menus = computed(() => [
   {
@@ -151,7 +158,7 @@ watch(
         @click="router.push('/')"
       >
         <img
-          src="/icons/logo-vivibit.png"
+          :src="logoSource"
           alt="VIVIBIT"
           class="w-auto object-contain"
         />
