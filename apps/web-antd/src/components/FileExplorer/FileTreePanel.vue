@@ -245,10 +245,6 @@ watch(
       <!-- 面板头部 -->
       <div class="panel-header">
         <span class="panel-title">
-          <IconifyIcon
-            icon="lucide:folder-tree"
-            style="font-size: var(--ict-body-medium); color: var(--ict-primary);"
-          />
           文件目录
         </span>
         <div class="panel-actions">

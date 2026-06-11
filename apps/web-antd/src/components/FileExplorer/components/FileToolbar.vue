@@ -300,22 +300,22 @@ const handleGoForward = () => {
 }
 .breadcrumb-separator {
   font-size: var(--ict-mark-small);
-  color: #d1d5db;
+  color: var(--ict-text-disabled);
   flex-shrink: 0;
 }
 .breadcrumb-link {
-  color: #6b7280;
+  color: var(--ict-text-secondary);
   cursor: pointer;
   transition: color 0.2s ease;
   white-space: nowrap;
   font-size: var(--ict-body-small);
 }
 .breadcrumb-link:hover {
-  color: #374151;
+  color: var(--ict-text-primary);
   text-decoration: none;
 }
 .breadcrumb-current {
-  color: #1f2937;
+  color: var(--ict-text-emphasis);
   font-weight: 500;
   white-space: nowrap;
   font-size: var(--ict-body-small);

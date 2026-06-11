@@ -471,7 +471,8 @@ onMounted(() => {
 
 .page-title-actions {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
   margin-top: 4px;
 }
